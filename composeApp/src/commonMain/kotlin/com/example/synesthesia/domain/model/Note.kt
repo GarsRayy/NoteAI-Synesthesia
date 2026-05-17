@@ -9,6 +9,8 @@ data class Note(
     val content: String,
     val category: NoteCategory = NoteCategory.GENERAL,
     val color: NoteColor = NoteColor.DEFAULT,
+    val emotion: String? = null,
+    val artToken: String? = null,
     val isPinned: Boolean = false,
     val createdAt: Instant = Clock.System.now(),
     val updatedAt: Instant = Clock.System.now()

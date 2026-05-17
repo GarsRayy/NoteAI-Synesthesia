@@ -62,6 +62,8 @@ class NoteRepositoryImpl(private val database: NoteDatabase) : NoteRepository {
             content = values.content,
             category = values.category,
             color = values.color,
+            emotion = values.emotion,
+            art_token = values.artToken,
             is_pinned = values.isPinned,
             created_at = values.createdAt,
             updated_at = values.updatedAt
@@ -77,6 +79,8 @@ class NoteRepositoryImpl(private val database: NoteDatabase) : NoteRepository {
             content = values.content,
             category = values.category,
             color = values.color,
+            emotion = values.emotion,
+            art_token = values.artToken,
             is_pinned = values.isPinned,
             updated_at = Clock.System.now().toEpochMilliseconds()
         )

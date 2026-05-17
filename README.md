@@ -14,6 +14,7 @@
 
 ## ✨ Fitur Aplikasi
 
+
 ### 🟢 Fitur Minimum (Core)
 - [x] **Aurora Glass Interface**: UI modern dengan efek Glassmorphism dan background Aurora dinamis.
 - [x] **Midnight Space Theme**: Tema gelap yang dioptimalkan untuk kontras dan kenyamanan visual.

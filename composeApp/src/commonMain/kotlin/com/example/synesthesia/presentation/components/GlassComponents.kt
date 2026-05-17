@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -34,16 +36,31 @@ fun GlassCardPreview() {
     }
 }
 
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
+
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
     blurRadius: Dp = 16.dp,
     cornerRadius: Dp = 24.dp,
     borderOpacity: Float = 0.15f,
+    glowColor: Color? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = modifier
+            .drawBehind {
+                if (glowColor != null) {
+                    drawCircle(
+                        color = glowColor.copy(alpha = 0.15f),
+                        radius = size.maxDimension / 2,
+                        center = center,
+                        style = Stroke(width = 40.dp.toPx())
+                    )
+                }
+            }
             .clip(RoundedCornerShape(cornerRadius))
             .background(Color.White.copy(alpha = 0.08f))
             .border(
@@ -58,6 +75,34 @@ fun GlassCard(
             )
             .blur(blurRadius),
         content = content
+    )
+}
+
+@Composable
+fun GlassShimmer(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 24.dp
+) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.05f,
+        targetValue = 0.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(Color.White.copy(alpha = alpha))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(cornerRadius)
+            )
+            .blur(16.dp)
     )
 }
 

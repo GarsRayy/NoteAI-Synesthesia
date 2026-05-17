@@ -1,40 +1,50 @@
 package com.example.synesthesia.presentation.screens.addnote
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.*
-import androidx.compose.ui.graphics.Color
-import com.example.synesthesia.presentation.components.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.domain.model.NoteCategory
-import com.example.synesthesia.presentation.components.ColorPickerRow
-import com.example.synesthesia.presentation.components.LoadingIndicator
+import com.example.synesthesia.presentation.components.*
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNoteScreen(
     noteId: Long?,
+    aiResult: String? = null,
+    onResultConsumed: () -> Unit = {},
     onNavigateBack: () -> Unit,
     onNavigateToAI: (String) -> Unit,
     viewModel: AddNoteViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    
+    LaunchedEffect(aiResult) {
+        if (aiResult != null) {
+            viewModel.applyAISuggestion(aiResult)
+            onResultConsumed()
+        }
+    }
     
     LaunchedEffect(noteId) {
         noteId?.let { viewModel.loadNote(it) }
@@ -104,42 +114,79 @@ fun AddNoteScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            TextField(
-                                value = uiState.title,
-                                onValueChange = viewModel::onTitleChange,
-                                placeholder = { Text("Judul", color = Color.White.copy(alpha = 0.5f)) },
-                                singleLine = true,
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
-                                ),
-                                textStyle = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            TextField(
-                                value = uiState.content,
-                                onValueChange = viewModel::onContentChange,
-                                placeholder = { Text("Tulis catatan di sini...", color = Color.White.copy(alpha = 0.4f)) },
-                                minLines = 10,
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White.copy(alpha = 0.8f)
-                                ),
-                                textStyle = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.fillMaxWidth()
+                            if (uiState.isAnalyzing) {
+                                GlassShimmer(
+                                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                                    cornerRadius = 16.dp
+                                )
+                            } else {
+                                TextField(
+                                    value = uiState.title,
+                                    onValueChange = viewModel::onTitleChange,
+                                    placeholder = { Text("Judul", color = Color.White.copy(alpha = 0.5f)) },
+                                    singleLine = true,
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        disabledContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    ),
+                                    textStyle = MaterialTheme.typography.headlineSmall,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                TextField(
+                                    value = uiState.content,
+                                    onValueChange = viewModel::onContentChange,
+                                    placeholder = { Text("Tulis catatan di sini...", color = Color.White.copy(alpha = 0.4f)) },
+                                    minLines = 10,
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        disabledContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White.copy(alpha = 0.8f)
+                                    ),
+                                    textStyle = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { viewModel.detectEmotion() },
+                        enabled = uiState.content.isNotBlank() && !uiState.isAnalyzing,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White.copy(alpha = 0.1f),
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp).padding(end = 8.dp)
+                        )
+                        Text(if (uiState.isAnalyzing) "Menganalisis..." else "AI Detector Emosi")
+                    }
+
+                    AnimatedVisibility(visible = uiState.emotion != null) {
+                        Column {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "Terdeteksi: ${uiState.emotion}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = uiState.artToken?.let { Color(it.removePrefix("#").toLong(16) or 0xFF000000) } ?: Color.White
                             )
                         }
                     }

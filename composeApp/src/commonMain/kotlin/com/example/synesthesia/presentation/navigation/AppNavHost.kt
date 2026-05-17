@@ -7,10 +7,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.presentation.screens.addnote.AddNoteScreen
 import com.example.synesthesia.presentation.screens.ai.AIAssistantScreen
 import com.example.synesthesia.presentation.screens.detail.NoteDetailScreen
 import com.example.synesthesia.presentation.screens.home.HomeScreen
+import androidx.compose.runtime.getValue
 
 @Composable
 fun AppNavHost(
@@ -34,8 +36,12 @@ fun AppNavHost(
         
         composable<Route.AddNote> { backStackEntry ->
             val route: Route.AddNote = backStackEntry.toRoute()
+            val aiResult by backStackEntry.savedStateHandle.getStateFlow<String?>("ai_result", null).collectAsStateWithLifecycle()
+
             AddNoteScreen(
                 noteId = route.noteId,
+                aiResult = aiResult,
+                onResultConsumed = { backStackEntry.savedStateHandle.remove<String>("ai_result") },
                 onNavigateBack = { navigationActions.navigateBack() },
                 onNavigateToAI = { text ->
                     navigationActions.navigateToAIAssistant(
@@ -62,7 +68,9 @@ fun AppNavHost(
                 noteId = route.noteId,
                 initialText = route.initialText,
                 onNavigateBack = { navigationActions.navigateBack() },
-                onApplyResult = null
+                onApplyResult = { text ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set("ai_result", text)
+                }
             )
         }
     }

@@ -1,13 +1,6 @@
 package com.example.synesthesia.presentation.screens.detail
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,31 +10,17 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.synesthesia.core.util.formatToDisplay
-import com.example.synesthesia.presentation.components.CategoryBadge
-import com.example.synesthesia.presentation.components.EmptyState
-import com.example.synesthesia.presentation.components.LoadingIndicator
+import com.example.synesthesia.presentation.components.*
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,146 +33,123 @@ fun NoteDetailScreen(
     viewModel: NoteDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    var showDeleteDialog by remember { mutableStateOf(false) }
     
     LaunchedEffect(noteId) {
         viewModel.loadNote(noteId)
     }
-    
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is NoteDetailEvent.NoteDeleted -> onNavigateBack()
-                is NoteDetailEvent.Error -> snackbarHostState.showSnackbar(event.message)
-            }
-        }
-    }
-    
-    if (showDeleteDialog) {
-        DeleteConfirmationDialog(
-            onConfirm = {
-                showDeleteDialog = false
-                viewModel.deleteNote()
-            },
-            onDismiss = { showDeleteDialog = false }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Generative Art Layer
+        val emotion = (uiState as? NoteDetailUiState.Success)?.note?.emotion
+        EmotionArtCanvas(
+            emotion = emotion,
+            modifier = Modifier.fillMaxSize()
         )
-    }
-    
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Detail Catatan") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White,
+                        actionIconContentColor = Color.White
+                    ),
+                    title = {},
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        }
+                    },
+                    actions = {
+                        if (uiState is NoteDetailUiState.Success) {
+                            val note = (uiState as NoteDetailUiState.Success).note
+                            IconButton(onClick = { viewModel.togglePin() }) {
+                                Icon(
+                                    imageVector = if (note.isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                                    contentDescription = "Pin"
+                                )
+                            }
+                            IconButton(onClick = { 
+                                viewModel.getShareContent()?.let { onShare(it) }
+                            }) {
+                                Icon(Icons.Default.Share, contentDescription = "Share")
+                            }
+                        }
                     }
-                },
-                actions = {
-                    val currentState = uiState
-                    if (currentState is NoteDetailUiState.Success) {
-                        IconButton(onClick = { viewModel.togglePin() }) {
-                            Icon(
-                                imageVector = if (currentState.note.isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                                contentDescription = if (currentState.note.isPinned) "Lepas Pin" else "Pin"
-                            )
-                        }
-                        
-                        IconButton(onClick = { 
-                            viewModel.getShareContent()?.let { onShare(it) }
-                        }) {
-                            Icon(Icons.Default.Share, contentDescription = "Bagikan")
-                        }
-                        
-                        IconButton(onClick = { onNavigateToEdit(noteId) }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit")
-                        }
-                        
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                Icons.Default.Delete, 
-                                contentDescription = "Hapus",
-                                tint = MaterialTheme.colorScheme.error
-                            )
+                )
+            },
+            bottomBar = {
+                if (uiState is NoteDetailUiState.Success) {
+                    val noteId = (uiState as NoteDetailUiState.Success).note.id
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        GlassCard(
+                            cornerRadius = 32.dp,
+                            modifier = Modifier.wrapContentSize()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                IconButton(onClick = { onNavigateToEdit(noteId) }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                }
+                                IconButton(onClick = { viewModel.deleteNote() }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = Color.White.copy(alpha = 0.7f))
+                                }
+                            }
                         }
                     }
                 }
-            )
-        }
-    ) { paddingValues ->
-        when (val state = uiState) {
-            is NoteDetailUiState.Loading -> {
-                LoadingIndicator()
             }
-            
-            is NoteDetailUiState.Success -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    if (state.note.title.isNotBlank()) {
+        ) { paddingValues ->
+            when (val state = uiState) {
+                is NoteDetailUiState.Loading -> {
+                    LoadingIndicator()
+                }
+                is NoteDetailUiState.Success -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 24.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        
                         Text(
-                            text = state.note.title,
+                            text = state.note.title.ifBlank { "Tanpa Judul" },
                             style = MaterialTheme.typography.headlineMedium,
+                            color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
+                        
                         Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                        
                         CategoryBadge(category = state.note.category.displayName)
                         
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
                         Text(
-                            text = state.note.updatedAt.formatToDisplay(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = state.note.content,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.White.copy(alpha = 0.9f),
+                            lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.5
                         )
+                        
+                        Spacer(modifier = Modifier.height(100.dp))
                     }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Text(
-                        text = state.note.content,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
                 }
-            }
-            
-            is NoteDetailUiState.NotFound -> {
-                EmptyState(
-                    title = "Catatan Tidak Ditemukan",
-                    message = "Catatan mungkin sudah dihapus"
-                )
+                is NoteDetailUiState.NotFound -> {
+                    EmptyState(title = "Tidak Ditemukan", message = "Catatan ini mungkin sudah dihapus.")
+                }
             }
         }
     }
-}
-
-@Composable
-private fun DeleteConfirmationDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Hapus Catatan") },
-        text = { Text("Apakah Anda yakin ingin menghapus catatan ini? Tindakan ini tidak dapat dibatalkan.") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Hapus", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Batal")
-            }
-        }
-    )
 }

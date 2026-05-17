@@ -7,6 +7,7 @@ import com.example.synesthesia.domain.model.NoteCategory
 import com.example.synesthesia.domain.model.NoteColor
 import com.example.synesthesia.domain.repository.NoteRepository
 import com.example.synesthesia.domain.usecase.SaveNoteUseCase
+import com.example.synesthesia.data.remote.api.GeminiService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,7 +21,8 @@ import kotlinx.datetime.Instant
 
 class AddNoteViewModel(
     private val repository: NoteRepository,
-    private val saveNoteUseCase: SaveNoteUseCase
+    private val saveNoteUseCase: SaveNoteUseCase,
+    private val geminiService: GeminiService
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddNoteUiState())
@@ -44,6 +46,8 @@ class AddNoteViewModel(
                             content = note.content,
                             category = note.category,
                             color = note.color,
+                            emotion = note.emotion,
+                            artToken = note.artToken,
                             isLoading = false,
                             isEditMode = true,
                             createdAt = note.createdAt
@@ -72,6 +76,28 @@ class AddNoteViewModel(
         _uiState.update { it.copy(color = color) }
     }
     
+    fun detectEmotion() {
+        val content = _uiState.value.content
+        if (content.isBlank()) return
+
+        _uiState.update { it.copy(isAnalyzing = true) }
+
+        viewModelScope.launch {
+            geminiService.analyzeEmotion(content)
+                .onSuccess { response ->
+                    _uiState.update { it.copy(
+                        isAnalyzing = false,
+                        emotion = response.emotion,
+                        artToken = response.artToken
+                    ) }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isAnalyzing = false) }
+                    _events.emit(AddNoteEvent.Error("Gagal deteksi emosi: ${error.message}"))
+                }
+        }
+    }
+    
     fun saveNote() {
         val state = _uiState.value
         
@@ -89,6 +115,8 @@ class AddNoteViewModel(
                 content = state.content.trim(),
                 category = state.category,
                 color = state.color,
+                emotion = state.emotion,
+                artToken = state.artToken,
                 createdAt = if (currentNoteId == null) Clock.System.now() else state.createdAt,
                 updatedAt = Clock.System.now()
             )
@@ -118,8 +146,11 @@ data class AddNoteUiState(
     val content: String = "",
     val category: NoteCategory = NoteCategory.GENERAL,
     val color: NoteColor = NoteColor.DEFAULT,
+    val emotion: String? = null,
+    val artToken: String? = null,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
+    val isAnalyzing: Boolean = false,
     val isEditMode: Boolean = false,
     val titleError: String? = null,
     val createdAt: Instant = Clock.System.now()
@@ -128,7 +159,7 @@ data class AddNoteUiState(
         get() = title.isNotBlank() || content.isNotBlank()
     
     val canSave: Boolean
-        get() = isValid && !isSaving
+        get() = isValid && !isSaving && !isAnalyzing
 }
 
 sealed interface AddNoteEvent {

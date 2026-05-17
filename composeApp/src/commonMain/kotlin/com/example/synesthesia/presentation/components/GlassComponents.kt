@@ -36,10 +36,6 @@ fun GlassCardPreview() {
     }
 }
 
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.drawscope.Stroke
-
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,

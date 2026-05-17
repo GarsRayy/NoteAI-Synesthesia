@@ -8,6 +8,7 @@ import com.example.synesthesia.data.remote.dto.GeminiResponse
 import com.example.synesthesia.data.remote.dto.GenerationConfig
 import com.example.synesthesia.data.remote.dto.getErrorMessage
 import com.example.synesthesia.data.remote.dto.getTextContent
+import com.example.synesthesia.data.remote.dto.EmotionAnalysisResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.parameter
@@ -71,6 +72,45 @@ class GeminiService(private val client: HttpClient) {
         
         response.getTextContent() ?: throw Exception("Respons kosong dari AI")
     }
+
+    suspend fun analyzeEmotion(journalText: String): Result<EmotionAnalysisResponse> = runCatching {
+        val contents = listOf(
+            GeminiContent(
+                parts = listOf(GeminiPart(text = SystemPrompts.EMOTION_ANALYZER)),
+                role = "user"
+            ),
+            GeminiContent(
+                parts = listOf(GeminiPart(text = "Tentu, berikan teks jurnalnya dan saya akan membalas HANYA dengan format JSON yang diminta.")),
+                role = "model"
+            ),
+            GeminiContent(
+                parts = listOf(GeminiPart(text = journalText)),
+                role = "user"
+            )
+        )
+
+        val request = GeminiRequest(
+            contents = contents,
+            generationConfig = GenerationConfig(
+                temperature = 0.4,
+                maxOutputTokens = 800,
+                responseMimeType = "application/json"
+            )
+        )
+
+        val response: GeminiResponse = client.post("$BASE_URL/models/$MODEL:generateContent") {
+            contentType(ContentType.Application.Json)
+            parameter("key", ApiConfig.geminiApiKey)
+            setBody(request)
+        }.body()
+
+        response.getErrorMessage()?.let { throw Exception(it) }
+
+        val jsonString = response.getTextContent() ?: throw Exception("Respons kosong dari AI")
+
+        val jsonParser = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        jsonParser.decodeFromString<EmotionAnalysisResponse>(jsonString)
+    }
 }
 
 // ====================
@@ -129,5 +169,16 @@ object SystemPrompts {
         - Pertahankan makna dan nuansa asli
         - Gunakan bahasa yang natural, bukan literal
         - Berikan HANYA hasil terjemahan, tanpa penjelasan
+    """.trimIndent()
+
+    val EMOTION_ANALYZER = """
+        Kamu adalah AI penganalisis emosi untuk aplikasi jurnal "Synesthesia". 
+        Analisis teks jurnal pengguna berikut dan berikan respons HANYA dalam format JSON persis dengan struktur ini tanpa tambahan teks markdown atau backticks:
+        {
+            "sentiment": "Positif/Negatif/Netral",
+            "emotion": "Satu kata emosi utama (misal: Joy, Melancholy, Anger, Calm, dll)",
+            "emotionScore": Int (1-100),
+            "artToken": "Kode warna Hexadecimal yang merepresentasikan emosi tersebut (misal: #FF0000)"
+        }
     """.trimIndent()
 }

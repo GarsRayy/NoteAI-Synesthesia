@@ -41,15 +41,7 @@ private val OnSurfaceLight = Color(0xFF1C1B1F)
 private val SurfaceVariantLight = Color(0xFFE7E0EC)
 private val OnSurfaceVariantLight = Color(0xFF49454F)
 
-private val BackgroundDark = Color(0xFF1C1B1F)
-private val OnBackgroundDark = Color(0xFFE6E1E5)
-private val SurfaceDark = Color(0xFF1C1B1F)
-private val OnSurfaceDark = Color(0xFFE6E1E5)
-private val SurfaceVariantDark = Color(0xFF49454F)
-private val OnSurfaceVariantDark = Color(0xFFCAC4D0)
-
 private val OutlineLight = Color(0xFF79747E)
-private val OutlineDark = Color(0xFF938F99)
 
 // ==================== TYPOGRAPHY ====================
 

@@ -70,8 +70,8 @@ fun HomeScreen(
                 TopAppBar(
                     colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = Color.White,
-                        actionIconContentColor = Color.White
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
                     ),
                     title = { 
                         if (showSearch) {
@@ -125,8 +125,8 @@ fun HomeScreen(
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = onNavigateToAddNote,
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Tambah Catatan")
                 }
@@ -177,7 +177,7 @@ fun HomeScreen(
                                     Icons.Outlined.NoteAlt,
                                     contentDescription = null,
                                     modifier = Modifier.size(64.dp),
-                                    tint = Color.White.copy(alpha = 0.6f)
+                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                                 )
                             }
                         )
@@ -204,14 +204,14 @@ private fun SearchField(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text("Cari catatan...", color = Color.White.copy(alpha = 0.5f)) },
+        placeholder = { Text("Cari catatan...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)) },
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedBorderColor = Color.White.copy(alpha = 0.6f),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-            cursorColor = Color.White
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            cursorColor = MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.fillMaxWidth(),
         trailingIcon = {
@@ -273,12 +273,12 @@ private fun CategoryFilterRow(
                 onClick = { onCategorySelected(null) },
                 label = { Text("Semua") },
                 colors = FilterChipDefaults.filterChipColors(
-                    labelColor = Color.White.copy(alpha = 0.6f),
-                    selectedLabelColor = Color.Black,
-                    selectedContainerColor = Color.White
+                    labelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedContainerColor = MaterialTheme.colorScheme.primary
                 ),
                 border = FilterChipDefaults.filterChipBorder(
-                    borderColor = Color.White.copy(alpha = 0.2f),
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                     selectedBorderColor = Color.Transparent,
                     enabled = true,
                     selected = selectedCategory == null
@@ -297,12 +297,12 @@ private fun CategoryFilterRow(
                 },
                 label = { Text(category.displayName) },
                 colors = FilterChipDefaults.filterChipColors(
-                    labelColor = Color.White.copy(alpha = 0.6f),
-                    selectedLabelColor = Color.Black,
-                    selectedContainerColor = Color.White
+                    labelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedContainerColor = MaterialTheme.colorScheme.primary
                 ),
                 border = FilterChipDefaults.filterChipBorder(
-                    borderColor = Color.White.copy(alpha = 0.2f),
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                     selectedBorderColor = Color.Transparent,
                     enabled = true,
                     selected = isSelected

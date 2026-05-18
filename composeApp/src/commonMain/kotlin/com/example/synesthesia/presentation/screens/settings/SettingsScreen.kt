@@ -37,8 +37,8 @@ fun SettingsScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White
+                        titleContentColor = if (isDarkMode) Color.White else MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = if (isDarkMode) Color.White else MaterialTheme.colorScheme.onBackground
                     )
                 )
             }
@@ -53,7 +53,7 @@ fun SettingsScreen(
                 // Theme Toggle
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
+                        containerColor = if (isDarkMode) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -68,13 +68,13 @@ fun SettingsScreen(
                             Icon(
                                 imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
                                 contentDescription = null,
-                                tint = Color.White
+                                tint = if (isDarkMode) Color.White else MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 text = "Dark Mode",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color.White
+                                color = if (isDarkMode) Color.White else MaterialTheme.colorScheme.onSurface
                             )
                         }
                         Switch(

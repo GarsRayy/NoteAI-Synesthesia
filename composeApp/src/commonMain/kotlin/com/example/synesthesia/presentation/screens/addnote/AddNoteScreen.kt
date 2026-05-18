@@ -127,7 +127,7 @@ fun AddNoteScreen(
                                     placeholder = { 
                                         Text(
                                             "Judul", 
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                         ) 
                                     },
                                     singleLine = true,
@@ -152,7 +152,7 @@ fun AddNoteScreen(
                                     placeholder = { 
                                         Text(
                                             "Tulis catatan di sini...", 
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                         ) 
                                     },
                                     minLines = 10,
@@ -163,7 +163,7 @@ fun AddNoteScreen(
                                         focusedIndicatorColor = Color.Transparent,
                                         unfocusedIndicatorColor = Color.Transparent,
                                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
                                     ),
                                     textStyle = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier.fillMaxWidth()

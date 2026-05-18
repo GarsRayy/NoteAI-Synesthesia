@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,6 +22,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
+fun SimplePreview() {
+    androidx.compose.material3.Text("Hello Preview")
+}
+
+@Composable
+@Preview
 fun GlassCardPreview() {
     AuroraBackground {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -30,7 +35,7 @@ fun GlassCardPreview() {
                 modifier = Modifier.size(300.dp, 200.dp).padding(16.dp)
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Glass Card", color = Color.White)
+                    androidx.compose.material3.Text("Glass Card", color = Color.White)
                 }
             }
         }

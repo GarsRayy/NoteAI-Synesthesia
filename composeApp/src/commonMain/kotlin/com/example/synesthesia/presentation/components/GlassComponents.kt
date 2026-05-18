@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,7 +30,7 @@ fun GlassCardPreview() {
                 modifier = Modifier.size(300.dp, 200.dp).padding(16.dp)
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    androidx.compose.material3.Text("Glass Card", color = Color.White)
+                    Text("Glass Card", color = Color.White)
                 }
             }
         }
@@ -112,7 +113,7 @@ fun GlowOrb(
 ) {
     val infiniteTransition = rememberInfiniteTransition()
     val animatedOffset by infiniteTransition.animateValue(
-        initialValue = -20.dp,
+        initialValue = (-20).dp,
         targetValue = 20.dp,
         typeConverter = Dp.VectorConverter,
         animationSpec = infiniteRepeatable(

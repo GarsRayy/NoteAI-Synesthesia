@@ -88,7 +88,7 @@ fun HomeScreen(
                                 }
                             )
                         } else {
-                            Text("NoteAI", style = MaterialTheme.typography.headlineMedium)
+                            Text("Synesthesia", style = MaterialTheme.typography.headlineMedium)
                         }
                     },
                     actions = {

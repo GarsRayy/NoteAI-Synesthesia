@@ -12,6 +12,7 @@ import com.example.synesthesia.presentation.screens.addnote.AddNoteScreen
 import com.example.synesthesia.presentation.screens.ai.AIAssistantScreen
 import com.example.synesthesia.presentation.screens.detail.NoteDetailScreen
 import com.example.synesthesia.presentation.screens.home.HomeScreen
+import com.example.synesthesia.presentation.screens.settings.SettingsScreen
 import androidx.compose.runtime.getValue
 
 @Composable
@@ -30,7 +31,8 @@ fun AppNavHost(
             HomeScreen(
                 onNavigateToAddNote = { navigationActions.navigateToAddNote() },
                 onNavigateToDetail = { noteId -> navigationActions.navigateToNoteDetail(noteId) },
-                onNavigateToAI = { navigationActions.navigateToAIAssistant() }
+                onNavigateToAI = { navigationActions.navigateToAIAssistant() },
+                onNavigateToSettings = { navigationActions.navigateToSettings() }
             )
         }
         
@@ -73,6 +75,12 @@ fun AppNavHost(
                 }
             )
         }
+
+        composable<Route.Settings> {
+            SettingsScreen(
+                onNavigateBack = { navigationActions.navigateBack() }
+            )
+        }
     }
 }
 
@@ -94,6 +102,10 @@ private fun createNavigationActions(navController: NavHostController): Navigatio
         
         override fun navigateToAIAssistant(noteId: Long?, initialText: String?) {
             navController.navigate(Route.AIAssistant(noteId, initialText))
+        }
+
+        override fun navigateToSettings() {
+            navController.navigate(Route.Settings)
         }
 
         override fun navigateBack() {

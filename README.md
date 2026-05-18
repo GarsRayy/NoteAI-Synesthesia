@@ -18,14 +18,15 @@
 ### 🟢 Fitur Minimum (Core)
 - [x] **Aurora Glass Interface**: UI modern dengan efek Glassmorphism dan background Aurora dinamis.
 - [x] **Midnight Space Theme**: Tema gelap yang dioptimalkan untuk kontras dan kenyamanan visual.
-- [ ] **Smart Notes CRUD**: Manajemen catatan dengan kategori, pinning, dan filter.
+- [x] **Smart Notes CRUD**: Manajemen catatan dengan kategori, pinning, dan filter (Core logic implemented).
 - [ ] **Offline-First Storage**: Penyimpanan lokal menggunakan SQLDelight yang andal.
 
 ### 🤖 Fitur AI & Bonus
 - [x] **AI Assistant Screen**: Antarmuka chat imersif untuk berinteraksi dengan Gemini AI.
-- [ ] **Sentiment Analysis**: Analisis emosi otomatis dari teks jurnal.
+- [x] **Sentiment Analysis**: Analisis emosi otomatis dari teks jurnal (Architecture ready).
 - [ ] **Smart Summarization**: Merangkum catatan panjang menjadi poin-poin penting.
 - [x] **Dependency Injection**: Implementasi penuh menggunakan Koin DI (+10% Bonus).
+- [x] **Modern Architecture**: Clean Architecture dengan MVVM pattern.
 
 ---
 

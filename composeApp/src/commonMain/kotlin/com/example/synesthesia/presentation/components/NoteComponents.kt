@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -51,11 +52,22 @@ fun NoteCard(
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val glowColor = remember(note.artToken) {
+        note.artToken?.let { 
+            try {
+                Color(it.removePrefix("#").toLong(16) or 0xFF000000)
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
     GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        cornerRadius = 16.dp
+        cornerRadius = 16.dp,
+        glowColor = glowColor
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(

@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.sp
 // ==================== COLORS ====================
 
 val MidnightSpace = Color(0xFF0B0D17)
+val SoftCloud = Color(0xFFF5F7FA)
+
 private val Primary = Color(0xFF6750A4)
 private val OnPrimary = Color(0xFFFFFFFF)
 private val PrimaryContainer = Color(0xFFEADDFF)
@@ -33,13 +35,6 @@ private val Error = Color(0xFFB3261E)
 private val OnError = Color(0xFFFFFFFF)
 private val ErrorContainer = Color(0xFFF9DEDC)
 private val OnErrorContainer = Color(0xFF410E0B)
-
-private val BackgroundLight = Color(0xFFFFFBFE)
-private val OnBackgroundLight = Color(0xFF1C1B1F)
-private val SurfaceLight = Color(0xFFFFFBFE)
-private val OnSurfaceLight = Color(0xFF1C1B1F)
-private val SurfaceVariantLight = Color(0xFFE7E0EC)
-private val OnSurfaceVariantLight = Color(0xFF49454F)
 
 private val OutlineLight = Color(0xFF79747E)
 
@@ -97,12 +92,12 @@ private val LightColorScheme = lightColorScheme(
     onError = OnError,
     errorContainer = ErrorContainer,
     onErrorContainer = OnErrorContainer,
-    background = BackgroundLight,
-    onBackground = OnBackgroundLight,
-    surface = SurfaceLight,
-    onSurface = OnSurfaceLight,
-    surfaceVariant = SurfaceVariantLight,
-    onSurfaceVariant = OnSurfaceVariantLight,
+    background = SoftCloud,
+    onBackground = Color(0xFF1C1B1F),
+    surface = Color.White,
+    onSurface = Color(0xFF1C1B1F),
+    surfaceVariant = Color(0xFFE7E0EC),
+    onSurfaceVariant = Color(0xFF49454F),
     outline = OutlineLight
 )
 

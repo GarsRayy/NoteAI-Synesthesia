@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,12 +24,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun SimplePreview() {
-    androidx.compose.material3.Text("Hello Preview")
-}
-
-@Composable
-@Preview
 fun GlassCardPreview() {
     AuroraBackground {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -35,7 +31,7 @@ fun GlassCardPreview() {
                 modifier = Modifier.size(300.dp, 200.dp).padding(16.dp)
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    androidx.compose.material3.Text("Glass Card", color = Color.White)
+                    Text("Glass Card")
                 }
             }
         }
@@ -51,6 +47,10 @@ fun GlassCard(
     glowColor: Color? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val isDark = MaterialTheme.colorScheme.background.red < 0.5f
+    val baseColor = if (isDark) Color.White else Color.Black
+    val backgroundOpacity = if (isDark) 0.08f else 0.05f
+
     Box(
         modifier = modifier
             .drawBehind {
@@ -64,13 +64,13 @@ fun GlassCard(
                 }
             }
             .clip(RoundedCornerShape(cornerRadius))
-            .background(Color.White.copy(alpha = 0.08f))
+            .background(baseColor.copy(alpha = backgroundOpacity))
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = borderOpacity),
-                        Color.White.copy(alpha = borderOpacity * 0.5f)
+                        baseColor.copy(alpha = borderOpacity),
+                        baseColor.copy(alpha = borderOpacity * 0.5f)
                     )
                 ),
                 shape = RoundedCornerShape(cornerRadius)
@@ -95,13 +95,16 @@ fun GlassShimmer(
         )
     )
 
+    val isDark = MaterialTheme.colorScheme.background.red < 0.5f
+    val baseColor = if (isDark) Color.White else Color.Black
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(cornerRadius))
-            .background(Color.White.copy(alpha = alpha))
+            .background(baseColor.copy(alpha = alpha))
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.1f),
+                color = baseColor.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(cornerRadius)
             )
             .blur(16.dp)
@@ -140,25 +143,32 @@ fun GlowOrb(
 fun AuroraBackground(
     content: @Composable BoxScope.() -> Unit
 ) {
+    val isDark = MaterialTheme.colorScheme.background.red < 0.5f
+    
+    // Adjust colors based on theme for better contrast
+    val color1 = if (isDark) Color(0xFF4A90E2).copy(alpha = 0.4f) else Color(0xFF4A90E2).copy(alpha = 0.15f)
+    val color2 = if (isDark) Color(0xFF9013FE).copy(alpha = 0.3f) else Color(0xFF9013FE).copy(alpha = 0.12f)
+    val color3 = if (isDark) Color(0xFF50E3C2).copy(alpha = 0.25f) else Color(0xFF50E3C2).copy(alpha = 0.1f)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0B0D17))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Glow Orbs
         GlowOrb(
             modifier = Modifier.align(Alignment.TopStart).offset(x = (-50).dp, y = 100.dp),
-            color = Color(0xFF4A90E2).copy(alpha = 0.4f),
+            color = color1,
             size = 300.dp
         )
         GlowOrb(
             modifier = Modifier.align(Alignment.CenterEnd).offset(x = 50.dp, y = (-100).dp),
-            color = Color(0xFF9013FE).copy(alpha = 0.3f),
+            color = color2,
             size = 350.dp
         )
         GlowOrb(
             modifier = Modifier.align(Alignment.BottomStart).offset(x = (-20).dp, y = 50.dp),
-            color = Color(0xFF50E3C2).copy(alpha = 0.25f),
+            color = color3,
             size = 250.dp
         )
 

@@ -38,6 +38,7 @@ fun AddNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val isDarkMode = MaterialTheme.colorScheme.background.red < 0.5f
     
     LaunchedEffect(aiResult) {
         if (aiResult != null) {
@@ -67,9 +68,9 @@ fun AddNoteScreen(
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White,
-                        actionIconContentColor = Color.White
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
                     ),
                     title = { 
                         Text(
@@ -123,7 +124,12 @@ fun AddNoteScreen(
                                 TextField(
                                     value = uiState.title,
                                     onValueChange = viewModel::onTitleChange,
-                                    placeholder = { Text("Judul", color = Color.White.copy(alpha = 0.5f)) },
+                                    placeholder = { 
+                                        Text(
+                                            "Judul", 
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                        ) 
+                                    },
                                     singleLine = true,
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.Transparent,
@@ -131,8 +137,8 @@ fun AddNoteScreen(
                                         disabledContainerColor = Color.Transparent,
                                         focusedIndicatorColor = Color.Transparent,
                                         unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
+                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                                     ),
                                     textStyle = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.fillMaxWidth()
@@ -143,7 +149,12 @@ fun AddNoteScreen(
                                 TextField(
                                     value = uiState.content,
                                     onValueChange = viewModel::onContentChange,
-                                    placeholder = { Text("Tulis catatan di sini...", color = Color.White.copy(alpha = 0.4f)) },
+                                    placeholder = { 
+                                        Text(
+                                            "Tulis catatan di sini...", 
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                        ) 
+                                    },
                                     minLines = 10,
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.Transparent,
@@ -151,8 +162,8 @@ fun AddNoteScreen(
                                         disabledContainerColor = Color.Transparent,
                                         focusedIndicatorColor = Color.Transparent,
                                         unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White.copy(alpha = 0.8f)
+                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                     ),
                                     textStyle = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier.fillMaxWidth()
@@ -167,8 +178,8 @@ fun AddNoteScreen(
                         onClick = { viewModel.detectEmotion() },
                         enabled = uiState.content.isNotBlank() && !uiState.isAnalyzing,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White.copy(alpha = 0.1f),
-                            contentColor = Color.White
+                            containerColor = if (isDarkMode) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.primary,
+                            contentColor = if (isDarkMode) Color.White else MaterialTheme.colorScheme.onPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -186,7 +197,7 @@ fun AddNoteScreen(
                             Text(
                                 text = "Terdeteksi: ${uiState.emotion}",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = uiState.artToken?.let { Color(it.removePrefix("#").toLong(16) or 0xFF000000) } ?: Color.White
+                                color = uiState.artToken?.let { Color(it.removePrefix("#").toLong(16) or 0xFF000000) } ?: MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -203,7 +214,7 @@ fun AddNoteScreen(
                     Text(
                         text = "Aksen Warna",
                         style = MaterialTheme.typography.labelLarge,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     ColorPickerRow(
@@ -232,13 +243,18 @@ private fun CategoryDropdown(
             value = selectedCategory.displayName,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Kategori", color = Color.White.copy(alpha = 0.8f)) },
+            label = { 
+                Text(
+                    "Kategori", 
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                ) 
+            },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedTextColor = Color.White,
-                focusedTextColor = Color.White,
-                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                focusedBorderColor = Color.White.copy(alpha = 0.6f)
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                focusedBorderColor = MaterialTheme.colorScheme.primary
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -248,11 +264,16 @@ private fun CategoryDropdown(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(Color(0xFF1C1B1F))
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
         ) {
             NoteCategory.entries.forEach { category ->
                 DropdownMenuItem(
-                    text = { Text(category.displayName, color = Color.White) },
+                    text = { 
+                        Text(
+                            category.displayName, 
+                            color = MaterialTheme.colorScheme.onSurface
+                        ) 
+                    },
                     onClick = {
                         onCategorySelected(category)
                         expanded = false

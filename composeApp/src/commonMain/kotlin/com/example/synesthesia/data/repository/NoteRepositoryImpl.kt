@@ -60,8 +60,12 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
         var values = note.toEntityValues()
         val aiResult = geminiService.analyzeEmotion(note.content)
 
-        aiResult.onSuccess {
-            response -> values = values.copy(emotion = response.emotion, artToken = response.artToken)
+        aiResult.onSuccess { response -> 
+            values = values.copy(
+                emotion = response.emotion, 
+                artToken = response.artToken,
+                aiResonance = response.summary // Using summary as AI resonance
+            )
         }.onFailure { it.printStackTrace() }
 
         queries.insertNote(
@@ -71,6 +75,7 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
             color = values.color,
             emotion = values.emotion,
             art_token = values.artToken,
+            ai_resonance = values.aiResonance,
             is_pinned = values.isPinned,
             created_at = values.createdAt,
             updated_at = values.updatedAt
@@ -82,8 +87,12 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
         var values = note.toEntityValues()
         val aiResult = geminiService.analyzeEmotion(note.content)
 
-        aiResult.onSuccess {
-            response -> values = values.copy(emotion = response.emotion, artToken = response.artToken)
+        aiResult.onSuccess { response -> 
+            values = values.copy(
+                emotion = response.emotion, 
+                artToken = response.artToken,
+                aiResonance = response.summary
+            )
         }.onFailure { it.printStackTrace() }
 
         queries.updateNote(
@@ -93,6 +102,7 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
             color = values.color,
             emotion = values.emotion,
             art_token = values.artToken,
+            ai_resonance = values.aiResonance,
             is_pinned = values.isPinned,
             updated_at = Clock.System.now().toEpochMilliseconds(),
             id = note.id

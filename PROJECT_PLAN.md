@@ -18,11 +18,13 @@
 - [x] Design System Foundation (Midnight Space & Glassmorphism).
 - [x] Refaktor Dokumentasi & Project Plan.
 
-### Sprint 2: Core Features
-- [ ] Implementasi CRUD Notes lengkap (Local DB).
-- [ ] Integrasi Koin untuk seluruh layer.
-- [ ] Pembuatan UI untuk List, Add, dan Detail Notes.
-- [ ] Validasi input dan error handling.
+### Sprint 2: Core Features & Visual Overhaul
+- [x] Implementasi CRUD Notes lengkap (Local DB & Repository).
+- [x] Visual Overhaul: **Celestial Constellation** (Glowing stars, Twinkle animation, Lines).
+- [x] Theme Management: Penambahan **Astronomy Mode** & Settings integration.
+- [x] Integrasi Koin untuk seluruh layer.
+- [x] Pembuatan UI untuk List, Add, dan Detail Notes.
+- [x] Validasi input dan error handling.
 
 ### Sprint 3: Advanced UX
 - [ ] Fitur Search dengan debounce.

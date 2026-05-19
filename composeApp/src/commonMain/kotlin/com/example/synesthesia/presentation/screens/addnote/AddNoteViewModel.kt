@@ -48,6 +48,7 @@ class AddNoteViewModel(
                             color = note.color,
                             emotion = note.emotion,
                             artToken = note.artToken,
+                            aiResonance = note.aiResonance,
                             isLoading = false,
                             isEditMode = true,
                             createdAt = note.createdAt
@@ -88,7 +89,8 @@ class AddNoteViewModel(
                     _uiState.update { it.copy(
                         isAnalyzing = false,
                         emotion = response.emotion,
-                        artToken = response.artToken
+                        artToken = response.artToken,
+                        aiResonance = response.summary
                     ) }
                 }
                 .onFailure { error ->
@@ -117,6 +119,7 @@ class AddNoteViewModel(
                 color = state.color,
                 emotion = state.emotion,
                 artToken = state.artToken,
+                aiResonance = state.aiResonance,
                 createdAt = if (currentNoteId == null) Clock.System.now() else state.createdAt,
                 updatedAt = Clock.System.now()
             )
@@ -148,6 +151,7 @@ data class AddNoteUiState(
     val color: NoteColor = NoteColor.DEFAULT,
     val emotion: String? = null,
     val artToken: String? = null,
+    val aiResonance: String? = null,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isAnalyzing: Boolean = false,

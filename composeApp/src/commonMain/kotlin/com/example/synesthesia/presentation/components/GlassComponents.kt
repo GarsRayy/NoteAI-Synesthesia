@@ -51,33 +51,44 @@ fun GlassCard(
     val baseColor = if (isDark) Color.White else Color.Black
     val backgroundOpacity = if (isDark) 0.08f else 0.05f
 
-    Box(
-        modifier = modifier
-            .drawBehind {
-                if (glowColor != null) {
-                    drawCircle(
-                        color = glowColor.copy(alpha = 0.15f),
-                        radius = size.maxDimension / 2,
-                        center = center,
-                        style = Stroke(width = 40.dp.toPx())
-                    )
+    Box(modifier = modifier) {
+        // Blur Background Layer
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(cornerRadius))
+                .blur(blurRadius)
+                .background(baseColor.copy(alpha = backgroundOpacity))
+        )
+        
+        // Content and Border Layer (Sharp)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .drawBehind {
+                    if (glowColor != null) {
+                        drawCircle(
+                            color = glowColor.copy(alpha = 0.15f),
+                            radius = size.maxDimension / 2,
+                            center = center,
+                            style = Stroke(width = 40.dp.toPx())
+                        )
+                    }
                 }
-            }
-            .clip(RoundedCornerShape(cornerRadius))
-            .background(baseColor.copy(alpha = backgroundOpacity))
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        baseColor.copy(alpha = borderOpacity),
-                        baseColor.copy(alpha = borderOpacity * 0.5f)
-                    )
-                ),
-                shape = RoundedCornerShape(cornerRadius)
-            )
-            .blur(blurRadius),
-        content = content
-    )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            baseColor.copy(alpha = borderOpacity),
+                            baseColor.copy(alpha = borderOpacity * 0.5f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(cornerRadius)
+                )
+                .padding(4.dp), // Small padding to keep content away from border
+            content = content
+        )
+    }
 }
 
 @Composable

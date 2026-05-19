@@ -12,8 +12,8 @@ import com.example.synesthesia.presentation.screens.addnote.AddNoteScreen
 import com.example.synesthesia.presentation.screens.ai.AIAssistantScreen
 import com.example.synesthesia.presentation.screens.detail.NoteDetailScreen
 import com.example.synesthesia.presentation.screens.home.HomeScreen
-import com.example.synesthesia.presentation.screens.settings.SettingsScreen
 import androidx.compose.runtime.getValue
+import com.example.synesthesia.presentation.screens.settings.SettingsScreen
 
 @Composable
 fun AppNavHost(
@@ -24,42 +24,42 @@ fun AppNavHost(
     
     NavHost(
         navController = navController,
-        startDestination = Route.Home,
+        startDestination = Route.Constellation,
         modifier = modifier
     ) {
-        composable<Route.Home> {
+        composable<Route.Constellation> {
             HomeScreen(
-                onNavigateToAddNote = { navigationActions.navigateToAddNote() },
-                onNavigateToDetail = { noteId -> navigationActions.navigateToNoteDetail(noteId) },
+                onNavigateToAddNote = { navigationActions.navigateToAddMemory() },
+                onNavigateToDetail = { noteId -> navigationActions.navigateToMemoryDetail(noteId) },
                 onNavigateToAI = { navigationActions.navigateToAIAssistant() },
                 onNavigateToSettings = { navigationActions.navigateToSettings() }
             )
         }
         
-        composable<Route.AddNote> { backStackEntry ->
-            val route: Route.AddNote = backStackEntry.toRoute()
+        composable<Route.AddMemory> { backStackEntry ->
+            val route: Route.AddMemory = backStackEntry.toRoute()
             val aiResult by backStackEntry.savedStateHandle.getStateFlow<String?>("ai_result", null).collectAsStateWithLifecycle()
 
             AddNoteScreen(
-                noteId = route.noteId,
+                noteId = route.memoryId,
                 aiResult = aiResult,
                 onResultConsumed = { backStackEntry.savedStateHandle.remove<String>("ai_result") },
                 onNavigateBack = { navigationActions.navigateBack() },
                 onNavigateToAI = { text ->
                     navigationActions.navigateToAIAssistant(
-                        noteId = route.noteId,
+                        noteId = route.memoryId,
                         initialText = text
                     )
                 }
             )
         }
         
-        composable<Route.NoteDetail> { backStackEntry ->
-            val route: Route.NoteDetail = backStackEntry.toRoute()
+        composable<Route.MemoryDetail> { backStackEntry ->
+            val route: Route.MemoryDetail = backStackEntry.toRoute()
             NoteDetailScreen(
-                noteId = route.noteId,
+                noteId = route.memoryId,
                 onNavigateBack = { navigationActions.navigateBack() },
-                onNavigateToEdit = { navigationActions.navigateToAddNote(route.noteId) },
+                onNavigateToEdit = { navigationActions.navigateToAddMemory(it) },
                 onShare = { _ -> }
             )
         }
@@ -86,18 +86,18 @@ fun AppNavHost(
 
 private fun createNavigationActions(navController: NavHostController): NavigationActions {
     return object : NavigationActions {
-        override fun navigateToHome() {
-            navController.navigate(Route.Home) {
-                popUpTo(Route.Home) { inclusive = true }
+        override fun navigateToConstellation() {
+            navController.navigate(Route.Constellation) {
+                popUpTo(Route.Constellation) { inclusive = true }
             }
         }
         
-        override fun navigateToAddNote(noteId: Long?) {
-            navController.navigate(Route.AddNote(noteId))
+        override fun navigateToAddMemory(memoryId: Long?) {
+            navController.navigate(Route.AddMemory(memoryId))
         }
         
-        override fun navigateToNoteDetail(noteId: Long) {
-            navController.navigate(Route.NoteDetail(noteId))
+        override fun navigateToMemoryDetail(memoryId: Long) {
+            navController.navigate(Route.MemoryDetail(memoryId))
         }
         
         override fun navigateToAIAssistant(noteId: Long?, initialText: String?) {

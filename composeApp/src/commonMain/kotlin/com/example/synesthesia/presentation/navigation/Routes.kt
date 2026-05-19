@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 sealed interface Route {
     
     @Serializable
-    data object Home : Route
+    data object Constellation : Route // Home Screen
     
     @Serializable
-    data class AddNote(val noteId: Long? = null) : Route
+    data class AddMemory(val memoryId: Long? = null) : Route // Add/Edit Note
     
     @Serializable
-    data class NoteDetail(val noteId: Long) : Route
+    data class MemoryDetail(val memoryId: Long) : Route // Detail Note
     
     @Serializable
     data class AIAssistant(
@@ -24,9 +24,9 @@ sealed interface Route {
 }
 
 interface NavigationActions {
-    fun navigateToHome()
-    fun navigateToAddNote(noteId: Long? = null)
-    fun navigateToNoteDetail(noteId: Long)
+    fun navigateToConstellation()
+    fun navigateToAddMemory(memoryId: Long? = null)
+    fun navigateToMemoryDetail(memoryId: Long)
     fun navigateToAIAssistant(noteId: Long? = null, initialText: String? = null)
     fun navigateToSettings()
     fun navigateBack()

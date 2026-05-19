@@ -14,9 +14,13 @@ fun App(
     viewModel: AppViewModel = koinViewModel()
 ) {
     val isDarkMode by viewModel.isDarkMode.collectAsStateWithLifecycle()
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
 
     KoinContext {
-        NoteAITheme(darkTheme = isDarkMode) {
+        NoteAITheme(
+            themeMode = themeMode,
+            isDarkInNormal = isDarkMode
+        ) {
             AppNavHost()
         }
     }

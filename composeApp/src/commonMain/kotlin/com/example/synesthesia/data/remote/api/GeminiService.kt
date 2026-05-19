@@ -21,7 +21,7 @@ class GeminiService(private val client: HttpClient) {
     
     companion object {
         private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
-        private const val MODEL = "gemini-2.0-flash"
+        private const val MODEL = "gemini-2.5-flash"
     }
     
     suspend fun generateContent(
@@ -92,8 +92,8 @@ class GeminiService(private val client: HttpClient) {
         val request = GeminiRequest(
             contents = contents,
             generationConfig = GenerationConfig(
-                temperature = 0.4,
-                maxOutputTokens = 800,
+                temperature = 0.2,
+                maxOutputTokens = 500,
                 responseMimeType = "application/json"
             )
         )
@@ -108,7 +108,10 @@ class GeminiService(private val client: HttpClient) {
 
         val jsonString = response.getTextContent() ?: throw Exception("Respons kosong dari AI")
 
-        val jsonParser = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        val jsonParser = kotlinx.serialization.json.Json { 
+            ignoreUnknownKeys = true 
+            isLenient = true
+        }
         jsonParser.decodeFromString<EmotionAnalysisResponse>(jsonString)
     }
 }
@@ -173,12 +176,15 @@ object SystemPrompts {
 
     val EMOTION_ANALYZER = """
         Kamu adalah AI penganalisis emosi untuk aplikasi jurnal "Synesthesia". 
-        Analisis teks jurnal pengguna berikut dan berikan respons HANYA dalam format JSON persis dengan struktur ini tanpa tambahan teks markdown atau backticks:
+        Analisis teks jurnal pengguna berikut dan berikan respons HANYA dalam format JSON.
+        
+        Gunakan struktur JSON ini:
         {
             "sentiment": "Positif/Negatif/Netral",
-            "emotion": "Satu kata emosi utama (misal: Joy, Melancholy, Anger, Calm, dll)",
-            "emotionScore": Int (1-100),
-            "artToken": "Kode warna Hexadecimal yang merepresentasikan emosi tersebut (misal: #FF0000)"
+            "emotion": "Joy/Melancholy/Anger/Calm/Reflective",
+            "emotionScore": 1-100,
+            "artToken": "Kode warna HEX (Joy:#F4A44A, Melancholy:#3B82C4, Calm:#2EC9A0, Anger:#E05FA0, Reflective:#7B5EA7)",
+            "summary": "Satu kalimat puitis singkat (max 10 kata) yang merangkum esensi emosi catatan tersebut."
         }
     """.trimIndent()
 }

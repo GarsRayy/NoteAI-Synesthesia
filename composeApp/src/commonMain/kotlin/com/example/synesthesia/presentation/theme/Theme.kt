@@ -18,12 +18,22 @@ val BrightYellow = Color(0xFFF3E21B)
 val DeepIndigo = Color(0xFF01153B)
 val CrispWhite = Color(0xFFFBFBFB)
 
+// Celestial Colors
+val SpaceBlack = Color(0xFF030712)
+val StarWhite = Color(0xFFF8FAFC)
+val NebulaPurple = Color(0xFF7C3AED)
+val SupernovaOrange = Color(0xFFF97316)
+
 // Emotion Tokens
 val JoyColor = Color(0xFFF4A44A)
 val MelancholyColor = Color(0xFF3B82C4)
 val CalmColor = Color(0xFF2EC9A0)
 val AngerColor = Color(0xFFE05FA0)
 val ReflectiveColor = Color(0xFF7B5EA7)
+
+enum class ThemeMode {
+    NORMAL, ASTRONOMY
+}
 
 private val LightColorScheme = lightColorScheme(
     primary = RoyalBlue,
@@ -53,6 +63,21 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = CrispWhite,
     error = Color(0xFFFFB4AB),
     outline = Color(0xFF8E9099)
+)
+
+private val AstronomyColorScheme = darkColorScheme(
+    primary = BrightYellow,
+    onPrimary = SpaceBlack,
+    primaryContainer = NebulaPurple.copy(alpha = 0.3f),
+    onPrimaryContainer = StarWhite,
+    secondary = NebulaPurple,
+    onSecondary = StarWhite,
+    background = SpaceBlack,
+    onBackground = StarWhite,
+    surface = Color(0xFF111827),
+    onSurface = StarWhite,
+    error = Color(0xFFFFB4AB),
+    outline = Color(0xFF4B5563)
 )
 
 // ==================== TYPOGRAPHY ====================
@@ -87,10 +112,14 @@ private val AppTypography = Typography(
 
 @Composable
 fun NoteAITheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = if (isSystemInDarkTheme()) ThemeMode.NORMAL else ThemeMode.NORMAL, // Default to Normal
+    isDarkInNormal: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = when (themeMode) {
+        ThemeMode.NORMAL -> if (isDarkInNormal) DarkColorScheme else LightColorScheme
+        ThemeMode.ASTRONOMY -> AstronomyColorScheme
+    }
     
     MaterialTheme(
         colorScheme = colorScheme,

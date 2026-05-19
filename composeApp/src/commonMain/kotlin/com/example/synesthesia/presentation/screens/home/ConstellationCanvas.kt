@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
 import com.example.synesthesia.domain.model.Note
 import kotlin.math.cos
 import kotlin.math.sin
@@ -34,6 +37,15 @@ fun ConstellationCanvas(
         animationSpec = infiniteRepeatable(
             animation = tween(4000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
+        )
+    )
+
+    val twinkleAnim by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
         )
     )
 
@@ -89,32 +101,106 @@ fun ConstellationCanvas(
                     translationY = offset.y
                 )
         ) {
+            // Draw background "space dust" or distant stars
+            repeat(50) { i ->
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.2f * twinkleAnim),
+                    radius = 1f + (i % 3),
+                    center = Offset(
+                        x = (i * 12345f % size.width),
+                        y = (i * 54321f % size.height)
+                    )
+                )
+            }
+
+            // Draw connecting lines (Constellation Lines)
+            val positionsList = nodePositions.values.toList()
+            if (positionsList.size > 1) {
+                for (i in 0 until positionsList.size - 1) {
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.15f),
+                        start = positionsList[i],
+                        end = positionsList[i+1],
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+                // Close the loop if many
+                if (positionsList.size > 2) {
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.15f),
+                        start = positionsList.last(),
+                        end = positionsList.first(),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+            }
+
             groupedNotes.entries.forEachIndexed { index, entry ->
                 val emotion = entry.key
                 val noteList = entry.value
                 val count = noteList.size
                 
-                // Calculate base position in a circle
+                // Calculate base position in a circle (larger radius for interest)
                 val angle = (index.toFloat() / groupedNotes.size) * 2f * kotlin.math.PI.toFloat()
-                val radius = 300f
+                val radius = 400f
                 val baseX = centerX + cos(angle) * radius
                 val baseY = centerY + sin(angle) * radius
 
                 // Add floating effect
-                val floatX = baseX + sin(floatAnim + index) * 20f
-                val floatY = baseY + sin(floatAnim * 0.8f + index) * 20f
+                val floatX = baseX + sin(floatAnim + index) * 30f
+                val floatY = baseY + sin(floatAnim * 0.8f + index) * 30f
                 
                 val currentPos = Offset(floatX, floatY)
                 nodePositions[emotion] = currentPos
 
-                val nodeRadius = 40f + (count * 15f)
+                val starBaseRadius = 15f + (count * 5f)
                 val color = parseHexColor(noteList.firstOrNull()?.artToken) ?: Color.Blue
 
+                // 1. Draw Outer Glow (Large, soft)
                 drawCircle(
-                    color = color.copy(alpha = 0.6f),
-                    radius = nodeRadius,
+                    brush = Brush.radialGradient(
+                        colors = listOf(color.copy(alpha = 0.3f * twinkleAnim), Color.Transparent),
+                        center = currentPos,
+                        radius = starBaseRadius * 4f
+                    ),
+                    radius = starBaseRadius * 4f,
                     center = currentPos
                 )
+
+                // 2. Draw Secondary Glow (Medium)
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(color.copy(alpha = 0.6f), Color.Transparent),
+                        center = currentPos,
+                        radius = starBaseRadius * 2f
+                    ),
+                    radius = starBaseRadius * 2f,
+                    center = currentPos
+                )
+
+                // 3. Draw Core Star
+                drawCircle(
+                    color = Color.White,
+                    radius = starBaseRadius * 0.6f,
+                    center = currentPos
+                )
+                
+                // 4. Draw Flare / Cross effect for larger stars
+                if (count > 2) {
+                    val flareLen = starBaseRadius * 3f
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.8f * twinkleAnim),
+                        start = Offset(currentPos.x - flareLen, currentPos.y),
+                        end = Offset(currentPos.x + flareLen, currentPos.y),
+                        strokeWidth = 2f
+                    )
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.8f * twinkleAnim),
+                        start = Offset(currentPos.x, currentPos.y - flareLen),
+                        end = Offset(currentPos.x, currentPos.y + flareLen),
+                        strokeWidth = 2f
+                    )
+                }
             }
         }
     }

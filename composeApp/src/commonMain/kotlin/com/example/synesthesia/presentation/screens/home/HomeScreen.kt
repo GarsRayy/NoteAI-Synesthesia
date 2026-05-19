@@ -1,8 +1,10 @@
 package com.example.synesthesia.presentation.screens.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -47,6 +49,9 @@ fun HomeScreen(
                         ))
                     },
                     actions = {
+                        IconButton(onClick = onNavigateToAI) {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = "AI Assistant", tint = RoyalBlue)
+                        }
                         IconButton(onClick = onNavigateToSettings) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings", tint = RoyalBlue)
                         }

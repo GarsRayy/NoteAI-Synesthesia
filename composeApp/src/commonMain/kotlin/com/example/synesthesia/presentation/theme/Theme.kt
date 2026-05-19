@@ -11,32 +11,49 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// ==================== COLORS ====================
+// ==================== COLORS (MASTER PLAN) ====================
 
-val MidnightSpace = Color(0xFF0B0D17)
-val SoftCloud = Color(0xFFF5F7FA)
+val RoyalBlue = Color(0xFF0235AC)
+val BrightYellow = Color(0xFFF3E21B)
+val DeepIndigo = Color(0xFF01153B)
+val CrispWhite = Color(0xFFFBFBFB)
 
-private val Primary = Color(0xFF6750A4)
-private val OnPrimary = Color(0xFFFFFFFF)
-private val PrimaryContainer = Color(0xFFEADDFF)
-private val OnPrimaryContainer = Color(0xFF21005D)
+// Emotion Tokens
+val JoyColor = Color(0xFFF4A44A)
+val MelancholyColor = Color(0xFF3B82C4)
+val CalmColor = Color(0xFF2EC9A0)
+val AngerColor = Color(0xFFE05FA0)
+val ReflectiveColor = Color(0xFF7B5EA7)
 
-private val Secondary = Color(0xFF625B71)
-private val OnSecondary = Color(0xFFFFFFFF)
-private val SecondaryContainer = Color(0xFFE8DEF8)
-private val OnSecondaryContainer = Color(0xFF1D192B)
+private val LightColorScheme = lightColorScheme(
+    primary = RoyalBlue,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD9E2FF),
+    onPrimaryContainer = RoyalBlue,
+    secondary = BrightYellow,
+    onSecondary = Color.Black,
+    background = CrispWhite,
+    onBackground = DeepIndigo,
+    surface = Color.White,
+    onSurface = DeepIndigo,
+    error = Color(0xFFBA1A1A),
+    outline = Color(0xFF74777F)
+)
 
-private val Tertiary = Color(0xFF7D5260)
-private val OnTertiary = Color(0xFFFFFFFF)
-private val TertiaryContainer = Color(0xFFFFD8E4)
-private val OnTertiaryContainer = Color(0xFF31111D)
-
-private val Error = Color(0xFFB3261E)
-private val OnError = Color(0xFFFFFFFF)
-private val ErrorContainer = Color(0xFFF9DEDC)
-private val OnErrorContainer = Color(0xFF410E0B)
-
-private val OutlineLight = Color(0xFF79747E)
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFFADC6FF),
+    onPrimary = RoyalBlue,
+    primaryContainer = Color(0xFF004494),
+    onPrimaryContainer = Color(0xFFD9E2FF),
+    secondary = BrightYellow,
+    onSecondary = Color.Black,
+    background = DeepIndigo,
+    onBackground = CrispWhite,
+    surface = DeepIndigo,
+    onSurface = CrispWhite,
+    error = Color(0xFFFFB4AB),
+    outline = Color(0xFF8E9099)
+)
 
 // ==================== TYPOGRAPHY ====================
 
@@ -48,12 +65,12 @@ private val AppTypography = Typography(
     ),
     headlineMedium = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
+        fontSize = 24.sp,
         letterSpacing = 0.sp
     ),
     titleLarge = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
+        fontSize = 20.sp,
         letterSpacing = 0.sp
     ),
     bodyLarge = TextStyle(
@@ -65,69 +82,8 @@ private val AppTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         letterSpacing = 0.25.sp
-    ),
-    labelLarge = TextStyle(
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        letterSpacing = 0.1.sp
     )
 )
-
-// ==================== COLOR SCHEMES ====================
-
-private val LightColorScheme = lightColorScheme(
-    primary = Primary,
-    onPrimary = OnPrimary,
-    primaryContainer = PrimaryContainer,
-    onPrimaryContainer = OnPrimaryContainer,
-    secondary = Secondary,
-    onSecondary = OnSecondary,
-    secondaryContainer = SecondaryContainer,
-    onSecondaryContainer = OnSecondaryContainer,
-    tertiary = Tertiary,
-    onTertiary = OnTertiary,
-    tertiaryContainer = TertiaryContainer,
-    onTertiaryContainer = OnTertiaryContainer,
-    error = Error,
-    onError = OnError,
-    errorContainer = ErrorContainer,
-    onErrorContainer = OnErrorContainer,
-    background = SoftCloud,
-    onBackground = Color(0xFF1C1B1F),
-    surface = Color.White,
-    onSurface = Color(0xFF1C1B1F),
-    surfaceVariant = Color(0xFFE7E0EC),
-    onSurfaceVariant = Color(0xFF49454F),
-    outline = OutlineLight
-)
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFD0BCFF),
-    onPrimary = Color(0xFF381E72),
-    primaryContainer = Color(0xFF4F378B),
-    onPrimaryContainer = Color(0xFFEADDFF),
-    secondary = Color(0xFFCCC2DC),
-    onSecondary = Color(0xFF332D41),
-    secondaryContainer = Color(0xFF4A4458),
-    onSecondaryContainer = Color(0xFFE8DEF8),
-    tertiary = Color(0xFFEFB8C8),
-    onTertiary = Color(0xFF492532),
-    tertiaryContainer = Color(0xFF633B48),
-    onTertiaryContainer = Color(0xFFFFD8E4),
-    error = Color(0xFFF2B8B5),
-    onError = Color(0xFF601410),
-    errorContainer = Color(0xFF8C1D18),
-    onErrorContainer = Color(0xFFF9DEDC),
-    background = MidnightSpace,
-    onBackground = Color(0xFFFFFFFF),
-    surface = MidnightSpace,
-    onSurface = Color(0xFFFFFFFF),
-    surfaceVariant = Color(0xFF49454F),
-    onSurfaceVariant = Color(0xFFE6E1E5),
-    outline = Color(0xFF938F99)
-)
-
-// ==================== THEME ====================
 
 @Composable
 fun NoteAITheme(

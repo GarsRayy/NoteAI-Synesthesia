@@ -10,12 +10,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.synesthesia.presentation.components.AuroraBackground
-import com.example.synesthesia.presentation.components.EmptyState
-import com.example.synesthesia.presentation.components.ErrorState
-import com.example.synesthesia.presentation.components.LoadingIndicator
+import com.example.synesthesia.presentation.components.*
+import com.example.synesthesia.presentation.theme.RoyalBlue
+import com.example.synesthesia.presentation.theme.DeepIndigo
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,7 +30,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     
-    AuroraBackground {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -37,14 +38,17 @@ fun HomeScreen(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                         titleContentColor = MaterialTheme.colorScheme.onBackground,
-                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
+                        actionIconContentColor = RoyalBlue
                     ),
                     title = { 
-                        Text("Synesthesia", style = MaterialTheme.typography.headlineMedium)
+                        Text("SYNESTHESIA", style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        ))
                     },
                     actions = {
                         IconButton(onClick = onNavigateToSettings) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings")
+                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = RoyalBlue)
                         }
                     }
                 )
@@ -52,10 +56,12 @@ fun HomeScreen(
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = onNavigateToAddNote,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = RoyalBlue,
+                    contentColor = Color.White,
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Tambah Catatan")
+                    Icon(Icons.Default.Add, contentDescription = "Add Memory", modifier = Modifier.size(32.dp))
                 }
             }
         ) { paddingValues ->
@@ -77,18 +83,21 @@ fun HomeScreen(
                     }
                     
                     is HomeUiState.Empty -> {
-                        EmptyState(
-                            title = "Canvas Kosong",
-                            message = "Tap + untuk menambahkan memori baru",
-                            icon = {
-                                Icon(
-                                    Icons.Default.Add,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                                )
-                            }
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "Canvas is empty.",
+                                style = MaterialTheme.typography.headlineSmall.copy(color = DeepIndigo.copy(alpha = 0.4f))
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Begin adding memories.",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = RoyalBlue.copy(alpha = 0.6f))
+                            )
+                        }
                     }
                     
                     is HomeUiState.Error -> {

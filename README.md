@@ -17,9 +17,10 @@
 
 ### 🟢 Fitur Minimum (Core)
 - [x] **Aurora Glass Interface**: UI modern dengan efek Glassmorphism dan background Aurora dinamis.
-- [x] **Midnight Space Theme**: Tema gelap yang dioptimalkan untuk kontras dan kenyamanan visual.
-- [x] **Smart Notes CRUD**: Manajemen catatan dengan kategori, pinning, dan filter (Core logic implemented).
-- [ ] **Offline-First Storage**: Penyimpanan lokal menggunakan SQLDelight yang andal.
+- [x] **Celestial UI Overhaul**: Visual rasi bintang imersif dengan bintang bercahaya (*Glowing Stars*) dan animasi kedip (*Twinkle*).
+- [x] **Astronomy Mode**: Mode visual khusus bertema ruang angkasa mendalam yang dapat dipilih di pengaturan.
+- [x] **Smart Notes CRUD**: Manajemen catatan dengan kategori, pinning, dan filter.
+- [x] **Offline-First Storage**: Penyimpanan lokal menggunakan SQLDelight yang andal.
 
 ### 🤖 Fitur AI & Bonus
 - [x] **AI Assistant Screen**: Antarmuka chat imersif untuk berinteraksi dengan Gemini AI.

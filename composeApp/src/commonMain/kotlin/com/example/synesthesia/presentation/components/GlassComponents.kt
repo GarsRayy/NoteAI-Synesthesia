@@ -49,7 +49,7 @@ fun GlassCard(
 ) {
     val isDark = MaterialTheme.colorScheme.background.red < 0.5f
     val baseColor = if (isDark) Color.White else Color.Black
-    val backgroundOpacity = if (isDark) 0.08f else 0.05f
+    val backgroundOpacity = 0.05f
 
     Box(modifier = modifier) {
         // Blur Background Layer

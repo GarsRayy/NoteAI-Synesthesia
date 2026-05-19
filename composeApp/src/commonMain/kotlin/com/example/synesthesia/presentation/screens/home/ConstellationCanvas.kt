@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.example.synesthesia.domain.model.Note
+import com.example.synesthesia.domain.model.EmotionSystem
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -34,24 +35,19 @@ fun ConstellationCanvas(
         initialValue = 0f,
         targetValue = 2f * kotlin.math.PI.toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
+            animation = tween(6000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         )
     )
 
     val twinkleAnim by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
+        initialValue = 0.5f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
+            animation = tween(2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         )
     )
-
-    // Group notes by emotion and sort for stability
-    val groupedNotes = remember(notes) {
-        notes.groupBy { it.emotion ?: "Unknown" }.toList().sortedBy { it.first }
-    }
 
     // Positions of individual note nodes
     val notePositions = remember(notes) {
@@ -69,15 +65,11 @@ fun ConstellationCanvas(
             }
             .pointerInput(notes) {
                 detectTapGestures { tapOffset ->
-                    // Adjust tap offset by current transform
                     val adjustedTap = (tapOffset - offset) / scale
-                    
-                    // Check if any note was clicked
                     notePositions.forEach { (id, pos) ->
-                        val nodeRadius = 40f 
                         val dx = adjustedTap.x - pos.x
                         val dy = adjustedTap.y - pos.y
-                        if (sqrt(dx * dx + dy * dy) <= nodeRadius) {
+                        if (sqrt(dx * dx + dy * dy) <= 40f) {
                             onNoteClick(id)
                         }
                     }
@@ -97,128 +89,109 @@ fun ConstellationCanvas(
                     translationY = offset.y
                 )
         ) {
-            // Draw background "space dust" or distant stars
-            repeat(50) { i ->
+            // Background stars
+            repeat(100) { i ->
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.2f * twinkleAnim),
-                    radius = 1f + (i % 3),
+                    color = Color.White.copy(alpha = 0.15f * twinkleAnim),
+                    radius = 1f + (i % 2),
                     center = Offset(
-                        x = (i * 12345f % size.width),
-                        y = (i * 54321f % size.height)
+                        x = (i * 777f % size.width),
+                        y = (i * 333f % size.height)
                     )
                 )
             }
 
-            val groupPositions = mutableListOf<Offset>()
-
-            // First pass: calculate all positions and draw intra-group lines
-            groupedNotes.forEachIndexed { groupIndex, entry ->
-                val notesInGroup = entry.second.sortedBy { it.id }
-                
-                // Calculate base position for the group
-                val groupAngle = (groupIndex.toFloat() / groupedNotes.size) * 2f * kotlin.math.PI.toFloat()
-                val groupRadius = 500f
-                val groupBaseX = centerX + cos(groupAngle) * groupRadius
-                val groupBaseY = centerY + sin(groupAngle) * groupRadius
-
-                val groupCurrentCenter = Offset(
-                    groupBaseX + sin(floatAnim + groupIndex) * 20f,
-                    groupBaseY + cos(floatAnim * 0.7f + groupIndex) * 20f
+            // Define Hub positions (Diamond layout)
+            val hubDistance = 800f
+            val hubs = EmotionSystem.categories.mapIndexed { index, category ->
+                val angle = (index.toFloat() / EmotionSystem.categories.size) * 2f * kotlin.math.PI.toFloat()
+                val hubPos = Offset(
+                    centerX + cos(angle) * hubDistance,
+                    centerY + sin(angle) * hubDistance
                 )
-                groupPositions.add(groupCurrentCenter)
-
-                // Calculate and draw individual note positions and lines within group
-                val clusterRadius = 120f
-                var prevNotePos: Offset? = null
-                
-                notesInGroup.forEachIndexed { noteIndex, note ->
-                    val noteAngle = (noteIndex.toFloat() / notesInGroup.size) * 2f * kotlin.math.PI.toFloat()
-                    val notePos = Offset(
-                        groupCurrentCenter.x + cos(noteAngle) * clusterRadius,
-                        groupCurrentCenter.y + sin(noteAngle) * clusterRadius
-                    )
-                    notePositions[note.id] = notePos
-
-                    // Draw line to previous note in group
-                    prevNotePos?.let {
-                        drawLine(
-                            color = Color.White.copy(alpha = 0.2f),
-                            start = it,
-                            end = notePos,
-                            strokeWidth = 1.dp.toPx()
-                        )
-                    }
-                    prevNotePos = notePos
-                }
-                
-                // Close the loop within the group if more than 2 notes
-                if (notesInGroup.size > 2) {
-                    val firstPos = notePositions[notesInGroup.first().id]
-                    val lastPos = notePositions[notesInGroup.last().id]
-                    if (firstPos != null && lastPos != null) {
-                        drawLine(
-                            color = Color.White.copy(alpha = 0.2f),
-                            start = lastPos,
-                            end = firstPos,
-                            strokeWidth = 1.dp.toPx()
-                        )
-                    }
-                }
+                category to hubPos
             }
 
-            // Draw inter-group lines (connect centers of groups)
-            if (groupPositions.size > 1) {
-                for (i in 0 until groupPositions.size - 1) {
-                    drawLine(
-                        color = Color.White.copy(alpha = 0.1f),
-                        start = groupPositions[i],
-                        end = groupPositions[i+1],
-                        strokeWidth = 0.5.dp.toPx()
-                    )
-                }
-                if (groupPositions.size > 2) {
-                    drawLine(
-                        color = Color.White.copy(alpha = 0.1f),
-                        start = groupPositions.last(),
-                        end = groupPositions.first(),
-                        strokeWidth = 0.5.dp.toPx()
-                    )
-                }
-            }
+            // Draw Hubs and Notes
+            hubs.forEachIndexed { hubIndex, (category, hubBasePos) ->
+                val hubColor = parseHexColor(category.color)
+                val hubCurrentPos = Offset(
+                    hubBasePos.x + sin(floatAnim + hubIndex) * 15f,
+                    hubBasePos.y + cos(floatAnim * 0.5f + hubIndex) * 15f
+                )
 
-            // Second pass: Draw the notes themselves
-            notes.forEach { note ->
-                val currentPos = notePositions[note.id] ?: return@forEach
-                val starBaseRadius = 15f
-                val color = parseHexColor(note.artToken) ?: Color.Blue
-
-                // 1. Draw Outer Glow
+                // 1. Draw Hub Glow
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(color.copy(alpha = 0.3f * twinkleAnim), Color.Transparent),
-                        center = currentPos,
-                        radius = starBaseRadius * 4f
+                        colors = listOf(hubColor.copy(alpha = 0.4f), Color.Transparent),
+                        center = hubCurrentPos,
+                        radius = 150f
                     ),
-                    radius = starBaseRadius * 4f,
-                    center = currentPos
+                    radius = 150f,
+                    center = hubCurrentPos
                 )
 
-                // 2. Draw Core Star
+                // 2. Draw Hub Core
                 drawCircle(
-                    color = Color.White,
-                    radius = starBaseRadius * 0.6f,
-                    center = currentPos
+                    color = Color.White.copy(alpha = 0.8f),
+                    radius = 20f,
+                    center = hubCurrentPos
                 )
+                drawCircle(
+                    color = hubColor,
+                    radius = 20f,
+                    center = hubCurrentPos,
+                    style = Stroke(width = 4f)
+                )
+
+                // 3. Draw Notes belonging to this Hub
+                // Notes are grouped by their main category name stored in artToken
+                val notesInCategory = notes.filter { it.artToken == category.name }
+                notesInCategory.forEachIndexed { noteIndex, note ->
+                    val noteAngle = (noteIndex.toFloat() / (notesInCategory.size.coerceAtLeast(1))) * 2f * kotlin.math.PI.toFloat()
+                    val noteRadius = 200f + (noteIndex * 20f % 100f)
+                    val noteBasePos = Offset(
+                        hubCurrentPos.x + cos(noteAngle) * noteRadius,
+                        hubCurrentPos.y + sin(noteAngle) * noteRadius
+                    )
+                    
+                    val noteCurrentPos = Offset(
+                        noteBasePos.x + sin(floatAnim * 1.2f + noteIndex) * 10f,
+                        noteBasePos.y + cos(floatAnim * 0.8f + noteIndex) * 10f
+                    )
+                    notePositions[note.id] = noteCurrentPos
+
+                    // Draw connection to Hub
+                    drawLine(
+                        color = hubColor.copy(alpha = 0.3f),
+                        start = hubCurrentPos,
+                        end = noteCurrentPos,
+                        strokeWidth = 1.dp.toPx()
+                    )
+
+                    // Draw Note Dot
+                    drawCircle(
+                        color = hubColor,
+                        radius = 8f,
+                        center = noteCurrentPos
+                    )
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.6f * twinkleAnim),
+                        radius = 12f,
+                        center = noteCurrentPos,
+                        style = Stroke(width = 2f)
+                    )
+                }
             }
         }
     }
 }
 
-private fun parseHexColor(hex: String?): Color? {
-    if (hex == null || !hex.startsWith("#")) return null
+private fun parseHexColor(hex: String?): Color {
+    if (hex == null || !hex.startsWith("#")) return Color.Gray
     return try {
         Color(hex.removePrefix("#").toLong(16) or 0xFF000000)
     } catch (e: Exception) {
-        null
+        Color.Gray
     }
 }

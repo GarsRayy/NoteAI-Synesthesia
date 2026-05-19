@@ -57,17 +57,8 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
     }
     
     override suspend fun insertNote(note: Note): Long = withContext(Dispatchers.Default) {
-        var values = note.toEntityValues()
-        val aiResult = geminiService.analyzeEmotion(note.content)
-
-        aiResult.onSuccess { response -> 
-            values = values.copy(
-                emotion = response.emotion, 
-                artToken = response.artToken,
-                aiResonance = response.summary // Using summary as AI resonance
-            )
-        }.onFailure { it.printStackTrace() }
-
+        val values = note.toEntityValues()
+        
         queries.insertNote(
             title = values.title,
             content = values.content,
@@ -84,16 +75,7 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
     }
     
     override suspend fun updateNote(note: Note) = withContext(Dispatchers.Default) {
-        var values = note.toEntityValues()
-        val aiResult = geminiService.analyzeEmotion(note.content)
-
-        aiResult.onSuccess { response -> 
-            values = values.copy(
-                emotion = response.emotion, 
-                artToken = response.artToken,
-                aiResonance = response.summary
-            )
-        }.onFailure { it.printStackTrace() }
+        val values = note.toEntityValues()
 
         queries.updateNote(
             title = values.title,

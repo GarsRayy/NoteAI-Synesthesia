@@ -1,10 +1,13 @@
 package com.example.synesthesia.presentation.screens.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PushPin
@@ -17,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,23 +42,24 @@ fun NoteDetailScreen(
         viewModel.loadNote(noteId)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Generative Art Layer
-        val emotion = (uiState as? NoteDetailUiState.Success)?.note?.emotion
-        EmotionArtCanvas(
-            emotion = emotion,
-            modifier = Modifier.fillMaxSize()
-        )
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            if (event is NoteDetailEvent.NoteDeleted) {
+                onNavigateBack()
+            }
+        }
+    }
 
+    AuroraBackground {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White,
-                        actionIconContentColor = Color.White
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
                     ),
                     title = {},
                     navigationIcon = {
@@ -98,10 +103,10 @@ fun NoteDetailScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 IconButton(onClick = { onNavigateToEdit(noteId) }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurface)
                                 }
                                 IconButton(onClick = { viewModel.deleteNote() }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = Color.White.copy(alpha = 0.7f))
+                                    Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f))
                                 }
                             }
                         }
@@ -126,7 +131,7 @@ fun NoteDetailScreen(
                         Text(
                             text = state.note.title.ifBlank { "Tanpa Judul" },
                             style = MaterialTheme.typography.headlineMedium,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold
                         )
                         
@@ -136,12 +141,45 @@ fun NoteDetailScreen(
                         
                         Spacer(modifier = Modifier.height(24.dp))
                         
-                        Text(
-                            text = state.note.content,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White.copy(alpha = 0.9f),
-                            lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.5
-                        )
+                        GlassCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = state.note.content,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.5,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+
+                        state.note.aiResonance?.let { resonance ->
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Surface(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(24.dp),
+                                border = BorderStroke(1.dp, Color(0xFF0235AC))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = Color(0xFF0235AC)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = resonance,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Color(0xFF0235AC),
+                                        fontStyle = FontStyle.Italic
+                                    )
+                                }
+                            }
+                        }
                         
                         Spacer(modifier = Modifier.height(100.dp))
                     }

@@ -15,6 +15,7 @@ fun NoteEntity.toDomain(): Note {
         color = NoteColor.fromString(color),
         emotion = emotion,
         artToken = art_token,
+        aiResonance = ai_resonance,
         isPinned = is_pinned == 1L,
         createdAt = Instant.fromEpochMilliseconds(created_at),
         updatedAt = Instant.fromEpochMilliseconds(updated_at)
@@ -28,6 +29,7 @@ data class NoteEntityValues(
     val color: String,
     val emotion: String?,
     val artToken: String?,
+    val aiResonance: String?,
     val isPinned: Long,
     val createdAt: Long,
     val updatedAt: Long
@@ -41,6 +43,7 @@ fun Note.toEntityValues(): NoteEntityValues {
         color = color.name,
         emotion = emotion,
         artToken = artToken,
+        aiResonance = aiResonance,
         isPinned = if (isPinned) 1L else 0L,
         createdAt = createdAt.toEpochMilliseconds(),
         updatedAt = updatedAt.toEpochMilliseconds()

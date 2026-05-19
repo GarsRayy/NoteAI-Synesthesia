@@ -178,7 +178,8 @@ object SystemPrompts {
             "sentiment": "Positif/Negatif/Netral",
             "emotion": "Satu kata emosi utama (misal: Joy, Melancholy, Anger, Calm, dll)",
             "emotionScore": Int (1-100),
-            "artToken": "Kode warna Hexadecimal yang merepresentasikan emosi tersebut (misal: #FF0000)"
+            "artToken": "Kode warna Hexadecimal yang merepresentasikan emosi tersebut (misal: #FF0000)",
+            "summary": "Satu kalimat puitis singkat (max 10 kata) yang merangkum esensi emosi catatan tersebut."
         }
     """.trimIndent()
 }

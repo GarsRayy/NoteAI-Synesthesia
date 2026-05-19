@@ -12,7 +12,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -49,14 +48,14 @@ fun ConstellationCanvas(
         )
     )
 
-    // Group notes by emotion for "Super Nodes"
+    // Group notes by emotion and sort for stability
     val groupedNotes = remember(notes) {
-        notes.groupBy { it.emotion ?: "Unknown" }
+        notes.groupBy { it.emotion ?: "Unknown" }.toList().sortedBy { it.first }
     }
 
-    // Positions of super nodes
-    val nodePositions = remember(groupedNotes) {
-        mutableMapOf<String, Offset>()
+    // Positions of individual note nodes
+    val notePositions = remember(notes) {
+        mutableMapOf<Long, Offset>()
     }
 
     BoxWithConstraints(
@@ -68,21 +67,18 @@ fun ConstellationCanvas(
                     offset += pan
                 }
             }
-            .pointerInput(groupedNotes) {
+            .pointerInput(notes) {
                 detectTapGestures { tapOffset ->
                     // Adjust tap offset by current transform
                     val adjustedTap = (tapOffset - offset) / scale
                     
-                    // Check if any node was clicked
-                    nodePositions.forEach { (emotion, pos) ->
-                        val count = groupedNotes[emotion]?.size ?: 0
-                        val nodeRadius = 40f + (count * 15f)
+                    // Check if any note was clicked
+                    notePositions.forEach { (id, pos) ->
+                        val nodeRadius = 40f 
                         val dx = adjustedTap.x - pos.x
                         val dy = adjustedTap.y - pos.y
                         if (sqrt(dx * dx + dy * dy) <= nodeRadius) {
-                            // If clicked, navigate to the first note of this emotion
-                            // (Or we could show a list, but MIP says navigate to detail)
-                            groupedNotes[emotion]?.firstOrNull()?.let { onNoteClick(it.id) }
+                            onNoteClick(id)
                         }
                     }
                 }
@@ -113,50 +109,90 @@ fun ConstellationCanvas(
                 )
             }
 
-            // Draw connecting lines (Constellation Lines)
-            val positionsList = nodePositions.values.toList()
-            if (positionsList.size > 1) {
-                for (i in 0 until positionsList.size - 1) {
+            val groupPositions = mutableListOf<Offset>()
+
+            // First pass: calculate all positions and draw intra-group lines
+            groupedNotes.forEachIndexed { groupIndex, entry ->
+                val notesInGroup = entry.second.sortedBy { it.id }
+                
+                // Calculate base position for the group
+                val groupAngle = (groupIndex.toFloat() / groupedNotes.size) * 2f * kotlin.math.PI.toFloat()
+                val groupRadius = 500f
+                val groupBaseX = centerX + cos(groupAngle) * groupRadius
+                val groupBaseY = centerY + sin(groupAngle) * groupRadius
+
+                val groupCurrentCenter = Offset(
+                    groupBaseX + sin(floatAnim + groupIndex) * 20f,
+                    groupBaseY + cos(floatAnim * 0.7f + groupIndex) * 20f
+                )
+                groupPositions.add(groupCurrentCenter)
+
+                // Calculate and draw individual note positions and lines within group
+                val clusterRadius = 120f
+                var prevNotePos: Offset? = null
+                
+                notesInGroup.forEachIndexed { noteIndex, note ->
+                    val noteAngle = (noteIndex.toFloat() / notesInGroup.size) * 2f * kotlin.math.PI.toFloat()
+                    val notePos = Offset(
+                        groupCurrentCenter.x + cos(noteAngle) * clusterRadius,
+                        groupCurrentCenter.y + sin(noteAngle) * clusterRadius
+                    )
+                    notePositions[note.id] = notePos
+
+                    // Draw line to previous note in group
+                    prevNotePos?.let {
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.2f),
+                            start = it,
+                            end = notePos,
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+                    prevNotePos = notePos
+                }
+                
+                // Close the loop within the group if more than 2 notes
+                if (notesInGroup.size > 2) {
+                    val firstPos = notePositions[notesInGroup.first().id]
+                    val lastPos = notePositions[notesInGroup.last().id]
+                    if (firstPos != null && lastPos != null) {
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.2f),
+                            start = lastPos,
+                            end = firstPos,
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+                }
+            }
+
+            // Draw inter-group lines (connect centers of groups)
+            if (groupPositions.size > 1) {
+                for (i in 0 until groupPositions.size - 1) {
                     drawLine(
-                        color = Color.White.copy(alpha = 0.15f),
-                        start = positionsList[i],
-                        end = positionsList[i+1],
-                        strokeWidth = 1.dp.toPx()
+                        color = Color.White.copy(alpha = 0.1f),
+                        start = groupPositions[i],
+                        end = groupPositions[i+1],
+                        strokeWidth = 0.5.dp.toPx()
                     )
                 }
-                // Close the loop if many
-                if (positionsList.size > 2) {
+                if (groupPositions.size > 2) {
                     drawLine(
-                        color = Color.White.copy(alpha = 0.15f),
-                        start = positionsList.last(),
-                        end = positionsList.first(),
-                        strokeWidth = 1.dp.toPx()
+                        color = Color.White.copy(alpha = 0.1f),
+                        start = groupPositions.last(),
+                        end = groupPositions.first(),
+                        strokeWidth = 0.5.dp.toPx()
                     )
                 }
             }
 
-            groupedNotes.entries.forEachIndexed { index, entry ->
-                val emotion = entry.key
-                val noteList = entry.value
-                val count = noteList.size
-                
-                // Calculate base position in a circle (larger radius for interest)
-                val angle = (index.toFloat() / groupedNotes.size) * 2f * kotlin.math.PI.toFloat()
-                val radius = 400f
-                val baseX = centerX + cos(angle) * radius
-                val baseY = centerY + sin(angle) * radius
+            // Second pass: Draw the notes themselves
+            notes.forEach { note ->
+                val currentPos = notePositions[note.id] ?: return@forEach
+                val starBaseRadius = 15f
+                val color = parseHexColor(note.artToken) ?: Color.Blue
 
-                // Add floating effect
-                val floatX = baseX + sin(floatAnim + index) * 30f
-                val floatY = baseY + sin(floatAnim * 0.8f + index) * 30f
-                
-                val currentPos = Offset(floatX, floatY)
-                nodePositions[emotion] = currentPos
-
-                val starBaseRadius = 15f + (count * 5f)
-                val color = parseHexColor(noteList.firstOrNull()?.artToken) ?: Color.Blue
-
-                // 1. Draw Outer Glow (Large, soft)
+                // 1. Draw Outer Glow
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(color.copy(alpha = 0.3f * twinkleAnim), Color.Transparent),
@@ -167,40 +203,12 @@ fun ConstellationCanvas(
                     center = currentPos
                 )
 
-                // 2. Draw Secondary Glow (Medium)
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(color.copy(alpha = 0.6f), Color.Transparent),
-                        center = currentPos,
-                        radius = starBaseRadius * 2f
-                    ),
-                    radius = starBaseRadius * 2f,
-                    center = currentPos
-                )
-
-                // 3. Draw Core Star
+                // 2. Draw Core Star
                 drawCircle(
                     color = Color.White,
                     radius = starBaseRadius * 0.6f,
                     center = currentPos
                 )
-                
-                // 4. Draw Flare / Cross effect for larger stars
-                if (count > 2) {
-                    val flareLen = starBaseRadius * 3f
-                    drawLine(
-                        color = Color.White.copy(alpha = 0.8f * twinkleAnim),
-                        start = Offset(currentPos.x - flareLen, currentPos.y),
-                        end = Offset(currentPos.x + flareLen, currentPos.y),
-                        strokeWidth = 2f
-                    )
-                    drawLine(
-                        color = Color.White.copy(alpha = 0.8f * twinkleAnim),
-                        start = Offset(currentPos.x, currentPos.y - flareLen),
-                        end = Offset(currentPos.x, currentPos.y + flareLen),
-                        strokeWidth = 2f
-                    )
-                }
             }
         }
     }

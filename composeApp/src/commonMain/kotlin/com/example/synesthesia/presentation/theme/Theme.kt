@@ -11,45 +11,77 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// ==================== COLORS ====================
+// ==================== COLORS (MASTER PLAN) ====================
 
-val MidnightSpace = Color(0xFF0B0D17)
-private val Primary = Color(0xFF6750A4)
-private val OnPrimary = Color(0xFFFFFFFF)
-private val PrimaryContainer = Color(0xFFEADDFF)
-private val OnPrimaryContainer = Color(0xFF21005D)
+val ObsidianBlack = Color(0xFF0A0A0C)
+val VibrantAmber = Color(0xFFFFB020)   // Quadrant 1: High Energy, Pleasant
+val SynapseRed = Color(0xFFFF3B30)     // Quadrant 2: High Energy, Unpleasant
+val NeuralMint = Color(0xFF34C759)     // Quadrant 3: Low Energy, Pleasant
+val MelancholyBlue = Color(0xFF007AFF) // Quadrant 4: Low Energy, Unpleasant
+val CrispWhite = Color(0xFFFBFBFB)
+val GlassWhite = Color.White.copy(alpha = 0.05f)
 
-private val Secondary = Color(0xFF625B71)
-private val OnSecondary = Color(0xFFFFFFFF)
-private val SecondaryContainer = Color(0xFFE8DEF8)
-private val OnSecondaryContainer = Color(0xFF1D192B)
+val RoyalBlue = Color(0xFF0235AC)
+val BrightYellow = Color(0xFFF3E21B)
+val DeepIndigo = Color(0xFF01153B)
 
-private val Tertiary = Color(0xFF7D5260)
-private val OnTertiary = Color(0xFFFFFFFF)
-private val TertiaryContainer = Color(0xFFFFD8E4)
-private val OnTertiaryContainer = Color(0xFF31111D)
+// Celestial Colors
+val SpaceBlack = Color(0xFF030712)
+val StarWhite = Color(0xFFF8FAFC)
+val NebulaPurple = Color(0xFF7C3AED)
+val SupernovaOrange = Color(0xFFF97316)
 
-private val Error = Color(0xFFB3261E)
-private val OnError = Color(0xFFFFFFFF)
-private val ErrorContainer = Color(0xFFF9DEDC)
-private val OnErrorContainer = Color(0xFF410E0B)
+// Emotion Tokens
+val JoyColor = Color(0xFFF4A44A)
+val MelancholyColor = Color(0xFF3B82C4)
+val CalmColor = Color(0xFF2EC9A0)
+val AngerColor = Color(0xFFE05FA0)
+val ReflectiveColor = Color(0xFF7B5EA7)
 
-private val BackgroundLight = Color(0xFFFFFBFE)
-private val OnBackgroundLight = Color(0xFF1C1B1F)
-private val SurfaceLight = Color(0xFFFFFBFE)
-private val OnSurfaceLight = Color(0xFF1C1B1F)
-private val SurfaceVariantLight = Color(0xFFE7E0EC)
-private val OnSurfaceVariantLight = Color(0xFF49454F)
+enum class ThemeMode {
+    NORMAL, ASTRONOMY
+}
 
-private val BackgroundDark = Color(0xFF1C1B1F)
-private val OnBackgroundDark = Color(0xFFE6E1E5)
-private val SurfaceDark = Color(0xFF1C1B1F)
-private val OnSurfaceDark = Color(0xFFE6E1E5)
-private val SurfaceVariantDark = Color(0xFF49454F)
-private val OnSurfaceVariantDark = Color(0xFFCAC4D0)
+private val LightColorScheme = lightColorScheme(
+    primary = RoyalBlue,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD9E2FF),
+    onPrimaryContainer = RoyalBlue,
+    secondary = BrightYellow,
+    onSecondary = Color.Black,
+    background = CrispWhite,
+    onBackground = DeepIndigo,
+    surface = Color.White,
+    onSurface = DeepIndigo,
+    error = Color(0xFFBA1A1A),
+    outline = Color(0xFF74777F)
+)
 
-private val OutlineLight = Color(0xFF79747E)
-private val OutlineDark = Color(0xFF938F99)
+private val DarkColorScheme = darkColorScheme(
+    primary = RoyalBlue,
+    onPrimary = Color.White,
+    background = ObsidianBlack,
+    onBackground = CrispWhite,
+    surface = ObsidianBlack,
+    onSurface = CrispWhite,
+    error = SynapseRed,
+    outline = Color(0xFF8E9099)
+)
+
+private val AstronomyColorScheme = darkColorScheme(
+    primary = BrightYellow,
+    onPrimary = SpaceBlack,
+    primaryContainer = NebulaPurple.copy(alpha = 0.3f),
+    onPrimaryContainer = StarWhite,
+    secondary = NebulaPurple,
+    onSecondary = StarWhite,
+    background = SpaceBlack,
+    onBackground = StarWhite,
+    surface = Color(0xFF111827),
+    onSurface = StarWhite,
+    error = Color(0xFFFFB4AB),
+    outline = Color(0xFF4B5563)
+)
 
 // ==================== TYPOGRAPHY ====================
 
@@ -61,12 +93,12 @@ private val AppTypography = Typography(
     ),
     headlineMedium = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
+        fontSize = 24.sp,
         letterSpacing = 0.sp
     ),
     titleLarge = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
+        fontSize = 20.sp,
         letterSpacing = 0.sp
     ),
     bodyLarge = TextStyle(
@@ -78,76 +110,19 @@ private val AppTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         letterSpacing = 0.25.sp
-    ),
-    labelLarge = TextStyle(
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        letterSpacing = 0.1.sp
     )
 )
 
-// ==================== COLOR SCHEMES ====================
-
-private val LightColorScheme = lightColorScheme(
-    primary = Primary,
-    onPrimary = OnPrimary,
-    primaryContainer = PrimaryContainer,
-    onPrimaryContainer = OnPrimaryContainer,
-    secondary = Secondary,
-    onSecondary = OnSecondary,
-    secondaryContainer = SecondaryContainer,
-    onSecondaryContainer = OnSecondaryContainer,
-    tertiary = Tertiary,
-    onTertiary = OnTertiary,
-    tertiaryContainer = TertiaryContainer,
-    onTertiaryContainer = OnTertiaryContainer,
-    error = Error,
-    onError = OnError,
-    errorContainer = ErrorContainer,
-    onErrorContainer = OnErrorContainer,
-    background = BackgroundLight,
-    onBackground = OnBackgroundLight,
-    surface = SurfaceLight,
-    onSurface = OnSurfaceLight,
-    surfaceVariant = SurfaceVariantLight,
-    onSurfaceVariant = OnSurfaceVariantLight,
-    outline = OutlineLight
-)
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFD0BCFF),
-    onPrimary = Color(0xFF381E72),
-    primaryContainer = Color(0xFF4F378B),
-    onPrimaryContainer = Color(0xFFEADDFF),
-    secondary = Color(0xFFCCC2DC),
-    onSecondary = Color(0xFF332D41),
-    secondaryContainer = Color(0xFF4A4458),
-    onSecondaryContainer = Color(0xFFE8DEF8),
-    tertiary = Color(0xFFEFB8C8),
-    onTertiary = Color(0xFF492532),
-    tertiaryContainer = Color(0xFF633B48),
-    onTertiaryContainer = Color(0xFFFFD8E4),
-    error = Color(0xFFF2B8B5),
-    onError = Color(0xFF601410),
-    errorContainer = Color(0xFF8C1D18),
-    onErrorContainer = Color(0xFFF9DEDC),
-    background = MidnightSpace,
-    onBackground = Color(0xFFFFFFFF),
-    surface = MidnightSpace,
-    onSurface = Color(0xFFFFFFFF),
-    surfaceVariant = Color(0xFF49454F),
-    onSurfaceVariant = Color(0xFFE6E1E5),
-    outline = Color(0xFF938F99)
-)
-
-// ==================== THEME ====================
-
 @Composable
 fun NoteAITheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = if (isSystemInDarkTheme()) ThemeMode.NORMAL else ThemeMode.NORMAL, // Default to Normal
+    isDarkInNormal: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = when (themeMode) {
+        ThemeMode.NORMAL -> if (isDarkInNormal) DarkColorScheme else LightColorScheme
+        ThemeMode.ASTRONOMY -> AstronomyColorScheme
+    }
     
     MaterialTheme(
         colorScheme = colorScheme,
@@ -155,3 +130,4 @@ fun NoteAITheme(
         content = content
     )
 }
+

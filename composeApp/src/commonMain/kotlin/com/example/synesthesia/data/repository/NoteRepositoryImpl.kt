@@ -7,6 +7,7 @@ import com.example.synesthesia.data.local.NoteDatabase
 import com.example.synesthesia.data.local.entity.toDomain
 import com.example.synesthesia.data.local.entity.toDomainList
 import com.example.synesthesia.data.local.entity.toEntityValues
+import com.example.synesthesia.data.remote.api.GeminiService
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.NoteCategory
 import com.example.synesthesia.domain.repository.NoteRepository
@@ -16,7 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 
-class NoteRepositoryImpl(private val database: NoteDatabase) : NoteRepository {
+class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiService: GeminiService) : NoteRepository {
     
     private val queries = database.noteQueries
     
@@ -57,11 +58,15 @@ class NoteRepositoryImpl(private val database: NoteDatabase) : NoteRepository {
     
     override suspend fun insertNote(note: Note): Long = withContext(Dispatchers.Default) {
         val values = note.toEntityValues()
+        
         queries.insertNote(
             title = values.title,
             content = values.content,
             category = values.category,
             color = values.color,
+            emotion = values.emotion,
+            art_token = values.artToken,
+            ai_resonance = values.aiResonance,
             is_pinned = values.isPinned,
             created_at = values.createdAt,
             updated_at = values.updatedAt
@@ -71,14 +76,18 @@ class NoteRepositoryImpl(private val database: NoteDatabase) : NoteRepository {
     
     override suspend fun updateNote(note: Note) = withContext(Dispatchers.Default) {
         val values = note.toEntityValues()
+
         queries.updateNote(
-            id = note.id,
             title = values.title,
             content = values.content,
             category = values.category,
             color = values.color,
+            emotion = values.emotion,
+            art_token = values.artToken,
+            ai_resonance = values.aiResonance,
             is_pinned = values.isPinned,
-            updated_at = Clock.System.now().toEpochMilliseconds()
+            updated_at = Clock.System.now().toEpochMilliseconds(),
+            id = note.id
         )
     }
     

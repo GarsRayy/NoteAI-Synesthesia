@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.NoteCategory
 import com.example.synesthesia.domain.model.NoteColor
+import com.example.synesthesia.domain.model.EmotionSystem
+import com.example.synesthesia.domain.model.EmotionCategory
 import com.example.synesthesia.domain.repository.NoteRepository
 import com.example.synesthesia.domain.usecase.SaveNoteUseCase
+import com.example.synesthesia.data.remote.api.GeminiService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,7 +23,8 @@ import kotlinx.datetime.Instant
 
 class AddNoteViewModel(
     private val repository: NoteRepository,
-    private val saveNoteUseCase: SaveNoteUseCase
+    private val saveNoteUseCase: SaveNoteUseCase,
+    private val geminiService: GeminiService
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddNoteUiState())
@@ -44,9 +48,14 @@ class AddNoteViewModel(
                             content = note.content,
                             category = note.category,
                             color = note.color,
+                            emotion = note.emotion,
+                            artToken = note.artToken,
+                            aiResonance = note.aiResonance,
                             isLoading = false,
                             isEditMode = true,
-                            createdAt = note.createdAt
+                            createdAt = note.createdAt,
+                            selectedMainCategory = EmotionSystem.categories.find { it.name == note.artToken },
+                            selectedSubEmotion = note.emotion
                         )
                     }
                 }
@@ -64,12 +73,19 @@ class AddNoteViewModel(
         _uiState.update { it.copy(content = content) }
     }
     
-    fun onCategoryChange(category: NoteCategory) {
-        _uiState.update { it.copy(category = category) }
+    fun onMainCategorySelected(category: EmotionCategory?) {
+        _uiState.update { it.copy(
+            selectedMainCategory = category,
+            selectedSubEmotion = null,
+            artToken = category?.name // Using artToken to store main category name
+        ) }
     }
     
-    fun onColorChange(color: NoteColor) {
-        _uiState.update { it.copy(color = color) }
+    fun onSubEmotionSelected(subEmotion: String?) {
+        _uiState.update { it.copy(
+            selectedSubEmotion = subEmotion,
+            emotion = subEmotion
+        ) }
     }
     
     fun saveNote() {
@@ -77,6 +93,13 @@ class AddNoteViewModel(
         
         if (state.title.isBlank() && state.content.isBlank()) {
             _uiState.update { it.copy(titleError = "Judul atau konten harus diisi") }
+            return
+        }
+
+        if (state.selectedMainCategory == null || state.selectedSubEmotion == null) {
+            viewModelScope.launch {
+                _events.emit(AddNoteEvent.Error("Pilih emosi terlebih dahulu"))
+            }
             return
         }
         
@@ -89,6 +112,9 @@ class AddNoteViewModel(
                 content = state.content.trim(),
                 category = state.category,
                 color = state.color,
+                emotion = state.selectedSubEmotion,
+                artToken = state.selectedMainCategory.name, // Storing category name
+                aiResonance = state.aiResonance,
                 createdAt = if (currentNoteId == null) Clock.System.now() else state.createdAt,
                 updatedAt = Clock.System.now()
             )
@@ -103,14 +129,6 @@ class AddNoteViewModel(
                 }
         }
     }
-    
-    fun applyAISuggestion(newContent: String) {
-        _uiState.update { it.copy(content = newContent) }
-    }
-    
-    fun applyAITitle(newTitle: String) {
-        _uiState.update { it.copy(title = newTitle) }
-    }
 }
 
 data class AddNoteUiState(
@@ -118,17 +136,23 @@ data class AddNoteUiState(
     val content: String = "",
     val category: NoteCategory = NoteCategory.GENERAL,
     val color: NoteColor = NoteColor.DEFAULT,
+    val emotion: String? = null,
+    val artToken: String? = null,
+    val aiResonance: String? = null,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
+    val isAnalyzing: Boolean = false,
     val isEditMode: Boolean = false,
     val titleError: String? = null,
-    val createdAt: Instant = Clock.System.now()
+    val createdAt: Instant = Clock.System.now(),
+    val selectedMainCategory: EmotionCategory? = null,
+    val selectedSubEmotion: String? = null
 ) {
     val isValid: Boolean
         get() = title.isNotBlank() || content.isNotBlank()
     
     val canSave: Boolean
-        get() = isValid && !isSaving
+        get() = isValid && !isSaving && !isAnalyzing
 }
 
 sealed interface AddNoteEvent {

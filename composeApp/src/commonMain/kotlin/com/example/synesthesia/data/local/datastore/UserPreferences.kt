@@ -25,6 +25,7 @@ class UserPreferences(
     
     private object Keys {
         val DARK_MODE = booleanPreferencesKey("dark_mode")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
         val SORT_BY = stringPreferencesKey("sort_by")
         val DEFAULT_CATEGORY = stringPreferencesKey("default_category")
         val SHOW_PREVIEW = booleanPreferencesKey("show_preview")
@@ -46,6 +47,24 @@ class UserPreferences(
     suspend fun setDarkMode(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[Keys.DARK_MODE] = enabled
+        }
+    }
+
+    // ==================== THEME MODE ====================
+
+    /**
+     * Observe theme mode setting
+     */
+    val themeMode: Flow<String> = dataStore.data.map { prefs ->
+        prefs[Keys.THEME_MODE] ?: "NORMAL"
+    }
+
+    /**
+     * Set theme mode
+     */
+    suspend fun setThemeMode(mode: String) {
+        dataStore.edit { prefs ->
+            prefs[Keys.THEME_MODE] = mode
         }
     }
     

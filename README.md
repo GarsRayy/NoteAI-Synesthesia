@@ -8,23 +8,26 @@
 | Foto                                                 | Informasi                                                                       | Role Utama |
 |------------------------------------------------------|---------------------------------------------------------------------------------|------------|
 | ![Profile](https://github.com/GarsRayy.png?size=100) | **Garis Rayya Rabbani** (123140018)<br>[@GarsRayy](https://github.com/GarsRayy) | UI/UX Design, Presentation Layer, Animations, Navigation |
-| ![Profile](https://github.com/Ondor-R.png?size=100)  | **Reyhan Oktavian Putra** (123140202)<br>[@Ondor-R](https://github.com/Ondor-R) | Domain & Data Layer (AI, SQLDelight, Ktor) |
+| ![Profile](https://github.com/Ondor-R.png?size=100)  | **Reyhan Oktavian Putra** (123140202)<br>[@Ondor-R](https://github.com/Ondor-R) | Domain & Data Layer (AI, SQLDelight, Ktor) | 
 
 ---
 
 ## ✨ Fitur Aplikasi
 
+
 ### 🟢 Fitur Minimum (Core)
 - [x] **Aurora Glass Interface**: UI modern dengan efek Glassmorphism dan background Aurora dinamis.
-- [x] **Midnight Space Theme**: Tema gelap yang dioptimalkan untuk kontras dan kenyamanan visual.
-- [ ] **Smart Notes CRUD**: Manajemen catatan dengan kategori, pinning, dan filter.
-- [ ] **Offline-First Storage**: Penyimpanan lokal menggunakan SQLDelight yang andal.
+- [x] **Celestial UI Overhaul**: Visual rasi bintang imersif dengan bintang bercahaya (*Glowing Stars*) dan animasi kedip (*Twinkle*).
+- [x] **Astronomy Mode**: Mode visual khusus bertema ruang angkasa mendalam yang dapat dipilih di pengaturan.
+- [x] **Smart Notes CRUD**: Manajemen catatan dengan kategori, pinning, dan filter.
+- [x] **Offline-First Storage**: Penyimpanan lokal menggunakan SQLDelight yang andal.
 
 ### 🤖 Fitur AI & Bonus
 - [x] **AI Assistant Screen**: Antarmuka chat imersif untuk berinteraksi dengan Gemini AI.
-- [ ] **Sentiment Analysis**: Analisis emosi otomatis dari teks jurnal.
+- [x] **Sentiment Analysis**: Analisis emosi otomatis dari teks jurnal (Architecture ready).
 - [ ] **Smart Summarization**: Merangkum catatan panjang menjadi poin-poin penting.
 - [x] **Dependency Injection**: Implementasi penuh menggunakan Koin DI (+10% Bonus).
+- [x] **Modern Architecture**: Clean Architecture dengan MVVM pattern.
 
 ---
 

@@ -9,6 +9,9 @@ data class Note(
     val content: String,
     val category: NoteCategory = NoteCategory.GENERAL,
     val color: NoteColor = NoteColor.DEFAULT,
+    val emotion: String? = null,
+    val artToken: String? = null,
+    val aiResonance: String? = null,
     val isPinned: Boolean = false,
     val createdAt: Instant = Clock.System.now(),
     val updatedAt: Instant = Clock.System.now()
@@ -37,13 +40,11 @@ enum class NoteCategory(val displayName: String) {
 
 enum class NoteColor(val hexValue: Long) {
     DEFAULT(0xFFFFFFFF),
-    RED(0xFFFFCDD2),
-    ORANGE(0xFFFFE0B2),
-    YELLOW(0xFFFFF9C4),
-    GREEN(0xFFC8E6C9),
-    BLUE(0xFFBBDEFB),
-    PURPLE(0xFFE1BEE7),
-    PINK(0xFFF8BBD9);
+    JOY(0xFFF4A44A),
+    MELANCHOLY(0xFF3B82C4),
+    CALM(0xFF2EC9A0),
+    ANGER(0xFFE05FA0),
+    REFLECTIVE(0xFF7B5EA7);
     
     companion object {
         fun fromString(value: String): NoteColor {

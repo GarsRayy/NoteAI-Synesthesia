@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.2"
+agp = "8.7.3"
 kotlin = "2.0.21"
 compose-multiplatform = "1.7.0"
 kotlinx-coroutines = "1.9.0"
@@ -56,6 +56,9 @@ lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name =
 
 # Navigation
 navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
+# Compose Tooling
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version = "1.7.0" }
 
 # Coil (Image Loading)
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }

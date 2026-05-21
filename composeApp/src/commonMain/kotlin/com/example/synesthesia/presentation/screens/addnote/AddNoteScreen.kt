@@ -1,34 +1,60 @@
 package com.example.synesthesia.presentation.screens.addnote
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.*
-import androidx.compose.ui.graphics.Color
-import com.example.synesthesia.presentation.components.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.domain.model.NoteCategory
-import com.example.synesthesia.presentation.components.ColorPickerRow
-import com.example.synesthesia.presentation.components.LoadingIndicator
+import com.example.synesthesia.domain.model.EmotionSystem
+import com.example.synesthesia.domain.model.EmotionCategory
+import com.example.synesthesia.presentation.components.*
+import com.example.synesthesia.presentation.theme.RoyalBlue
+import com.example.synesthesia.presentation.theme.DeepIndigo
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNoteScreen(
     noteId: Long?,
+    aiResult: String? = null,
+    onResultConsumed: () -> Unit = {},
     onNavigateBack: () -> Unit,
     onNavigateToAI: (String) -> Unit,
     viewModel: AddNoteViewModel = koinViewModel()
@@ -49,7 +75,7 @@ fun AddNoteScreen(
         }
     }
     
-    AuroraBackground {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Scaffold(
             containerColor = Color.Transparent,
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -57,34 +83,27 @@ fun AddNoteScreen(
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White,
-                        actionIconContentColor = Color.White
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground
                     ),
                     title = { 
                         Text(
-                            if (uiState.isEditMode) "Edit Catatan" else "Catatan Baru",
-                            style = MaterialTheme.typography.titleLarge
+                            if (uiState.isEditMode) "Edit Note" else "New Note",
+                            fontWeight = FontWeight.Bold
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     },
                     actions = {
-                        IconButton(
-                            onClick = { onNavigateToAI(uiState.content) },
-                            enabled = uiState.content.isNotBlank()
-                        ) {
-                            Icon(Icons.Outlined.AutoAwesome, contentDescription = "AI Assistant")
-                        }
-                        
-                        IconButton(
+                        TextButton(
                             onClick = { viewModel.saveNote() },
-                            enabled = uiState.canSave
+                            enabled = uiState.canSave,
+                            colors = ButtonDefaults.textButtonColors(contentColor = RoyalBlue)
                         ) {
-                            Icon(Icons.Default.Check, contentDescription = "Simpan")
+                            Text("SAVE", fontWeight = FontWeight.Bold)
                         }
                     }
                 )
@@ -97,121 +116,142 @@ fun AddNoteScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(16.dp)
+                        .padding(horizontal = 24.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    GlassCard(
+                    TextField(
+                        value = uiState.title,
+                        onValueChange = viewModel::onTitleChange,
+                        placeholder = { Text("Title") },
+                        singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    TextField(
+                        value = uiState.content,
+                        onValueChange = viewModel::onContentChange,
+                        placeholder = { Text("Write your thoughts...") },
+                        minLines = 5,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Text("How do you feel?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    // Main Category Selection
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            TextField(
-                                value = uiState.title,
-                                onValueChange = viewModel::onTitleChange,
-                                placeholder = { Text("Judul", color = Color.White.copy(alpha = 0.5f)) },
-                                singleLine = true,
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
-                                ),
-                                textStyle = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            TextField(
-                                value = uiState.content,
-                                onValueChange = viewModel::onContentChange,
-                                placeholder = { Text("Tulis catatan di sini...", color = Color.White.copy(alpha = 0.4f)) },
-                                minLines = 10,
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White.copy(alpha = 0.8f)
-                                ),
-                                textStyle = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                        EmotionSystem.categories.forEach { category ->
+                            val isSelected = uiState.selectedMainCategory?.id == category.id
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) parseHexColor(category.color) else parseHexColor(category.color).copy(alpha = 0.2f))
+                                    .clickable { viewModel.onMainCategorySelected(category) }
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    category.name.split(",").first(),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isSelected) Color.White else parseHexColor(category.color),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                     
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                     
-                    CategoryDropdown(
-                        selectedCategory = uiState.category,
-                        onCategorySelected = viewModel::onCategoryChange
-                    )
+                    // Sub-emotion Selection
+                    AnimatedVisibility(visible = uiState.selectedMainCategory != null) {
+                        Column {
+                            Text("Specific feeling:", style = MaterialTheme.typography.labelLarge)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                uiState.selectedMainCategory?.subEmotions?.forEach { sub ->
+                                    val isSelected = uiState.selectedSubEmotion == sub
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { viewModel.onSubEmotionSelected(sub) },
+                                        label = { Text(sub) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = parseHexColor(uiState.selectedMainCategory?.color),
+                                            selectedLabelColor = Color.White
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
                     
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
                     
-                    Text(
-                        text = "Aksen Warna",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ColorPickerRow(
-                        selectedColor = uiState.color,
-                        onColorSelected = viewModel::onColorChange
-                    )
+                    Button(
+                        onClick = { viewModel.saveNote() },
+                        enabled = uiState.canSave,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RoyalBlue),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("SAVE MEMORY", fontWeight = FontWeight.Bold)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CategoryDropdown(
-    selectedCategory: NoteCategory,
-    onCategorySelected: (NoteCategory) -> Unit
+fun FlowRow(
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: @Composable () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
+    androidx.compose.foundation.layout.FlowRow(
+        modifier = modifier,
+        horizontalArrangement = horizontalArrangement,
+        verticalArrangement = verticalArrangement
     ) {
-        OutlinedTextField(
-            value = selectedCategory.displayName,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Kategori", color = Color.White.copy(alpha = 0.8f)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedTextColor = Color.White,
-                focusedTextColor = Color.White,
-                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                focusedBorderColor = Color.White.copy(alpha = 0.6f)
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-        )
-        
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(Color(0xFF1C1B1F))
-        ) {
-            NoteCategory.entries.forEach { category ->
-                DropdownMenuItem(
-                    text = { Text(category.displayName, color = Color.White) },
-                    onClick = {
-                        onCategorySelected(category)
-                        expanded = false
-                    }
-                )
-            }
-        }
+        content()
     }
 }
+
+private fun parseHexColor(hex: String?): Color {
+    if (hex == null || !hex.startsWith("#")) return Color.Gray
+    return try {
+        Color(hex.removePrefix("#").toLong(16) or 0xFF000000)
+    } catch (e: Exception) {
+        Color.Gray
+    }
+}
+
+annotation class LayoutOutLvl

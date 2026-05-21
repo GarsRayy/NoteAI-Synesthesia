@@ -1,14 +1,14 @@
 package com.example.synesthesia.presentation.screens.insights
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +33,42 @@ fun InsightsScreen() {
             .padding(24.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        // --- USER PROFILE SECTION ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(64.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = "Profile",
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    "Garis Rayya",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    "Stargazer Level 12",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         Text(
             "INSIGHTS",
             style = MaterialTheme.typography.headlineSmall.copy(
@@ -43,19 +79,21 @@ fun InsightsScreen() {
         Text(
             "Emotional intelligence analytics",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         
-        // Emotional Trend (Chart Card)
+        // Emotional Trend (Chart Card with High Contrast)
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp)
+                .height(240.dp)
                 .shadow(12.dp, RoundedCornerShape(28.dp)),
             shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+            )
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -76,16 +114,24 @@ fun InsightsScreen() {
                 .fillMaxWidth()
                 .shadow(8.dp, RoundedCornerShape(24.dp)),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+            )
         ) {
             Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = RoyalBlue)
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text("AI PERSPECTIVE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        "AI PERSPECTIVE", 
+                        style = MaterialTheme.typography.labelSmall, 
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
                     Text(
                         "You've been more 'Calm' this week compared to last. Your evening journals show high reflective capacity.",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -119,7 +165,7 @@ fun MoodChart(modifier: Modifier = Modifier) {
             
             drawCircle(
                 color = RoyalBlue,
-                radius = 4.dp.toPx(),
+                radius = 5.dp.toPx(),
                 center = Offset(x, y)
             )
         }
@@ -127,22 +173,22 @@ fun MoodChart(modifier: Modifier = Modifier) {
         drawPath(
             path = path,
             color = RoyalBlue,
-            style = Stroke(width = 3.dp.toPx())
+            style = Stroke(width = 4.dp.toPx())
         )
     }
 }
 
 @Composable
 fun EmotionStatRow(label: String, percentage: Int, color: Color) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(label, style = MaterialTheme.typography.bodyMedium)
-            Text("$percentage%", fontWeight = FontWeight.Bold)
+            Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            Text("$percentage%", fontWeight = FontWeight.Black)
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         LinearProgressIndicator(
-            progress = percentage / 100f,
-            modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+            progress = { percentage / 100f },
+            modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape),
             color = color,
             trackColor = color.copy(alpha = 0.2f)
         )

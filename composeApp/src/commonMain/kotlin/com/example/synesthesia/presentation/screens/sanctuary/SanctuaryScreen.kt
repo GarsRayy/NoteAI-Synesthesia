@@ -1,22 +1,20 @@
 package com.example.synesthesia.presentation.screens.sanctuary
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,12 +38,12 @@ fun SanctuaryScreen() {
         Text(
             "Guided rituals to calm your universe",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        // Featured Ritual (3D Card)
+        // Featured Ritual (High Contrast)
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -57,7 +55,7 @@ fun SanctuaryScreen() {
             Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
                 Column(modifier = Modifier.align(Alignment.CenterStart)) {
                     Text("Daily Breathing", color = Color.White, fontWeight = FontWeight.Black, fontSize = 24.sp)
-                    Text("5 minutes of clarity", color = Color.White.copy(alpha = 0.8f))
+                    Text("5 minutes of clarity", color = Color.White.copy(alpha = 0.9f))
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {},
@@ -67,10 +65,11 @@ fun SanctuaryScreen() {
                         Text("START", color = CalmColor, fontWeight = FontWeight.Bold)
                     }
                 }
-                Text(
-                    "🧘",
-                    fontSize = 80.sp,
-                    modifier = Modifier.align(Alignment.CenterEnd).offset(x = 20.dp)
+                Icon(
+                    imageVector = Icons.Default.Air,
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp).align(Alignment.CenterEnd).offset(x = 10.dp),
+                    tint = Color.White.copy(alpha = 0.2f)
                 )
             }
         }
@@ -101,27 +100,39 @@ fun RitualCard(ritual: Ritual) {
             .shadow(8.dp, RoundedCornerShape(24.dp))
             .clickable { },
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+        )
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(ritual.emoji, fontSize = 32.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(ritual.name, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Icon(
+                imageVector = ritual.icon,
+                contentDescription = null,
+                modifier = Modifier.size(36.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                ritual.name, 
+                fontWeight = FontWeight.Bold, 
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
 
-data class Ritual(val name: String, val emoji: String)
+data class Ritual(val name: String, val icon: ImageVector)
 
 val rituals = listOf(
-    Ritual("Meditation", "🧘"),
-    Ritual("Sleep Well", "💤"),
-    Ritual("Focus Flow", "🎯"),
-    Ritual("Gratitude", "🙏"),
-    Ritual("Anxiety Relief", "🍃"),
-    Ritual("Energy Boost", "⚡")
+    Ritual("Meditation", Icons.Default.SelfImprovement),
+    Ritual("Sleep Well", Icons.Default.Bedtime),
+    Ritual("Focus Flow", Icons.Default.FilterCenterFocus),
+    Ritual("Gratitude", Icons.Default.Favorite),
+    Ritual("Anxiety Relief", Icons.Default.Spa),
+    Ritual("Energy Boost", Icons.Default.Bolt)
 )

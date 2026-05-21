@@ -2,6 +2,7 @@ package com.example.synesthesia.presentation.screens.detail
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -81,35 +82,59 @@ fun MemoryDetailScreen(
                             .padding(24.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
-                        Text(
-                            state.note.title,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Black
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            state.note.emotion?.uppercase() ?: "UNKNOWN EMOTION",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            state.note.content,
-                            style = MaterialTheme.typography.bodyLarge,
-                            lineHeight = 28.sp
-                        )
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                            ),
+                            shape = RoundedCornerShape(24.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(24.dp)) {
+                                Text(
+                                    state.note.title,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    state.note.emotion?.uppercase() ?: "UNKNOWN EMOTION",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Text(
+                                    state.note.content,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    lineHeight = 28.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+                                )
+                            }
+                        }
                         
                         state.note.aiResonance?.let { resonance ->
-                            Spacer(modifier = Modifier.height(40.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                             Card(
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
+                                ),
                                 shape = MaterialTheme.shapes.extraLarge
                             ) {
                                 Column(modifier = Modifier.padding(24.dp)) {
-                                    Text("AI RESONANCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "AI RESONANCE", 
+                                        style = MaterialTheme.typography.labelSmall, 
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                    )
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Text(resonance, style = MaterialTheme.typography.bodyMedium, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                                    Text(
+                                        resonance, 
+                                        style = MaterialTheme.typography.bodyMedium, 
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
                                 }
                             }
                         }

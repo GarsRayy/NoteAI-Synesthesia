@@ -1,15 +1,20 @@
 package com.example.synesthesia.presentation.screens.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,36 +33,46 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    
+
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
                 ),
                 title = { 
-                    Text("SYNESTHESIA", style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 4.sp
-                    ))
+                    Column {
+                        Text("SYNESTHESIA", style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        ))
+                        Text("Welcome, Stargazer", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                    }
                 },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                        ) {
+                            Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.padding(8.dp))
+                        }
                     }
                 }
             )
         },
         floatingActionButton = {
-            LargeFloatingActionButton(
+            FloatingActionButton(
                 onClick = onNavigateToAddNote,
                 containerColor = RoyalBlue,
                 contentColor = Color.White,
-                shape = MaterialTheme.shapes.extraLarge
+                shape = CircleShape,
+                modifier = Modifier.size(56.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "New Memory", modifier = Modifier.size(32.dp))
+                Icon(Icons.Default.Add, contentDescription = "New Memory")
             }
         }
     ) { padding ->
@@ -69,31 +84,39 @@ fun HomeScreen(
                         onNoteClick = onNavigateToDetail,
                         modifier = Modifier.fillMaxSize()
                     )
+                    
+                    // Small Insight Overlay (Top Left)
+                    Column(modifier = Modifier.padding(16.dp).align(Alignment.TopStart)) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.shadow(4.dp, RoundedCornerShape(12.dp))
+                        ) {
+                            Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = RoyalBlue)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("${state.notes.size} Memories in Galaxy", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
                 }
                 is HomeUiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                is HomeUiState.Empty -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("No memories yet", style = MaterialTheme.typography.titleMedium)
-                        Text("Your galaxy is empty", style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-                is HomeUiState.Error -> {
-                    Text(state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.align(Alignment.Center))
-                }
+                else -> { /* Handle empty/error */ }
             }
             
-            // AI Assistant shortcut
-            SmallFloatingActionButton(
+            // AI Button
+            IconButton(
                 onClick = onNavigateToAI,
-                modifier = Modifier.align(Alignment.BottomStart).padding(24.dp),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(24.dp)
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = "AI")
+                Icon(Icons.Default.AutoAwesome, contentDescription = "AI", tint = RoyalBlue)
             }
         }
     }

@@ -3,15 +3,13 @@ package com.example.synesthesia.presentation.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.unit.dp
 import com.example.synesthesia.presentation.theme.SpaceBlack
 import com.example.synesthesia.presentation.theme.StarWhite
 import kotlin.random.Random
@@ -21,15 +19,57 @@ fun CelestialBackground(
     isAstronomyMode: Boolean,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val bgColor = if (isAstronomyMode) SpaceBlack else Color(0xFFF0F9FF) // Sky Blue for Light Mode
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(if (isAstronomyMode) SpaceBlack else Color.White)
+            .background(bgColor)
     ) {
         if (isAstronomyMode) {
             StarField()
+        } else {
+            DaylightSky()
         }
         content()
+    }
+}
+
+@Composable
+private fun DaylightSky() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val sunPulse by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        // Soft Sun Glow
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFFFEF08A).copy(alpha = 0.3f), Color.Transparent),
+                center = Offset(size.width * 0.8f, size.height * 0.15f),
+                radius = 400f * sunPulse
+            ),
+            radius = 400f * sunPulse,
+            center = Offset(size.width * 0.8f, size.height * 0.15f)
+        )
+        
+        // Subtle Clouds (drawn as soft ovals)
+        repeat(3) { i ->
+            drawCircle(
+                color = Color.White.copy(alpha = 0.4f),
+                radius = 150f,
+                center = Offset(
+                    size.width * (0.2f + i * 0.3f),
+                    size.height * (0.1f + i * 0.05f)
+                )
+            )
+        }
     }
 }
 

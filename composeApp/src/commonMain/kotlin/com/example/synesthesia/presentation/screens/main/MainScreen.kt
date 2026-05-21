@@ -19,6 +19,7 @@ import com.example.synesthesia.presentation.screens.home.HomeScreen
 import com.example.synesthesia.presentation.screens.insights.InsightsScreen
 import com.example.synesthesia.presentation.screens.sanctuary.SanctuaryScreen
 import com.example.synesthesia.presentation.screens.soniczen.SonicZenScreen
+import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.RoyalBlue
 import com.example.synesthesia.presentation.theme.ThemeMode
 
@@ -33,6 +34,7 @@ fun MainScreen(
     var currentTab by remember { mutableStateOf<Route>(Route.Constellation) }
     val isAstronomy = themeMode == ThemeMode.ASTRONOMY
     val onBg = if (isAstronomy) Color.White else MaterialTheme.colorScheme.onBackground
+    val activeColor = if (isAstronomy) BrightYellow else RoyalBlue
 
     CelestialBackground(isAstronomyMode = isAstronomy) {
         Scaffold(
@@ -49,11 +51,11 @@ fun MainScreen(
                         icon = { Icon(Icons.Default.AutoGraph, contentDescription = "Galaxy") },
                         label = { Text("Galaxy") },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = RoyalBlue,
-                            selectedTextColor = RoyalBlue,
-                            unselectedIconColor = onBg.copy(alpha = 0.6f),
-                            unselectedTextColor = onBg.copy(alpha = 0.6f),
-                            indicatorColor = onBg.copy(alpha = 0.1f)
+                            selectedIconColor = activeColor,
+                            selectedTextColor = activeColor,
+                            unselectedIconColor = onBg.copy(alpha = 0.5f),
+                            unselectedTextColor = onBg.copy(alpha = 0.5f),
+                            indicatorColor = activeColor.copy(alpha = 0.1f)
                         )
                     )
                     NavigationBarItem(
@@ -62,11 +64,11 @@ fun MainScreen(
                         icon = { Icon(Icons.Default.MusicNote, contentDescription = "Sonic Zen") },
                         label = { Text("Sonic Zen") },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = RoyalBlue,
-                            selectedTextColor = RoyalBlue,
-                            unselectedIconColor = onBg.copy(alpha = 0.6f),
-                            unselectedTextColor = onBg.copy(alpha = 0.6f),
-                            indicatorColor = onBg.copy(alpha = 0.1f)
+                            selectedIconColor = activeColor,
+                            selectedTextColor = activeColor,
+                            unselectedIconColor = onBg.copy(alpha = 0.5f),
+                            unselectedTextColor = onBg.copy(alpha = 0.5f),
+                            indicatorColor = activeColor.copy(alpha = 0.1f)
                         )
                     )
                     NavigationBarItem(
@@ -75,11 +77,11 @@ fun MainScreen(
                         icon = { Icon(Icons.Default.SelfImprovement, contentDescription = "Sanctuary") },
                         label = { Text("Sanctuary") },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = RoyalBlue,
-                            selectedTextColor = RoyalBlue,
-                            unselectedIconColor = onBg.copy(alpha = 0.6f),
-                            unselectedTextColor = onBg.copy(alpha = 0.6f),
-                            indicatorColor = onBg.copy(alpha = 0.1f)
+                            selectedIconColor = activeColor,
+                            selectedTextColor = activeColor,
+                            unselectedIconColor = onBg.copy(alpha = 0.5f),
+                            unselectedTextColor = onBg.copy(alpha = 0.5f),
+                            indicatorColor = activeColor.copy(alpha = 0.1f)
                         )
                     )
                     NavigationBarItem(
@@ -88,11 +90,11 @@ fun MainScreen(
                         icon = { Icon(Icons.Default.Insights, contentDescription = "Insights") },
                         label = { Text("Insights") },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = RoyalBlue,
-                            selectedTextColor = RoyalBlue,
-                            unselectedIconColor = onBg.copy(alpha = 0.6f),
-                            unselectedTextColor = onBg.copy(alpha = 0.6f),
-                            indicatorColor = onBg.copy(alpha = 0.1f)
+                            selectedIconColor = activeColor,
+                            selectedTextColor = activeColor,
+                            unselectedIconColor = onBg.copy(alpha = 0.5f),
+                            unselectedTextColor = onBg.copy(alpha = 0.5f),
+                            indicatorColor = activeColor.copy(alpha = 0.1f)
                         )
                     )
                 }

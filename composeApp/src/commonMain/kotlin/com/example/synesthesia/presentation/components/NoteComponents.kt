@@ -37,12 +37,112 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
-import com.example.synesthesia.presentation.components.GlassCard
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.draw.blur
+import com.example.synesthesia.presentation.theme.ObsidianBlack
+import com.example.synesthesia.presentation.theme.VibrantAmber
+import com.example.synesthesia.presentation.theme.SynapseRed
+import com.example.synesthesia.presentation.theme.NeuralMint
+import com.example.synesthesia.presentation.theme.MelancholyBlue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.NoteColor
+
+@Composable
+fun EndelBackground(emotionQuadrant: Int) {
+    val quadrantColors = listOf(
+        VibrantAmber,    // Q1: Amber
+        SynapseRed,      // Q2: Pink/Red
+        NeuralMint,      // Q3: Neural Mint
+        MelancholyBlue   // Q4: Melancholy Blue
+    )
+    
+    val color = quadrantColors.getOrNull(emotionQuadrant - 1) ?: MelancholyBlue
+    
+    val infiniteTransition = rememberInfiniteTransition(label = "endel_bg")
+    
+    // Orb 1 drifting
+    val orb1X by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(20000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "orb1X"
+    )
+    val orb1Y by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(25000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "orb1Y"
+    )
+
+    // Orb 2 drifting
+    val orb2X by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 0.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(22000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "orb2X"
+    )
+    val orb2Y by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 0.4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(28000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "orb2Y"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(ObsidianBlack)
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize().blur(80.dp)) {
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(color.copy(alpha = 0.3f), Color.Transparent),
+                    center = Offset(size.width * orb1X, size.height * orb1Y),
+                    radius = size.maxDimension * 0.5f
+                ),
+                center = Offset(size.width * orb1X, size.height * orb1Y),
+                radius = size.maxDimension * 0.5f
+            )
+            
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(color.copy(alpha = 0.25f), Color.Transparent),
+                    center = Offset(size.width * orb2X, size.height * orb2Y),
+                    radius = size.maxDimension * 0.6f
+                ),
+                center = Offset(size.width * orb2X, size.height * orb2Y),
+                radius = size.maxDimension * 0.6f
+            )
+        }
+    }
+}
+
+fun getQuadrantFromEmotion(emotion: String?): Int {
+    return when (emotion?.lowercase()) {
+        "joy", "excited", "happy", "vibrant", "energetic" -> 1
+        "anger", "anxious", "frustrated", "stressed", "tense" -> 2
+        "calm", "relaxed", "peaceful", "neutral", "serene" -> 3
+        "sad", "tired", "melancholy", "depressed", "lonely" -> 4
+        else -> 3 // Default to Calm
+    }
+}
 
 @Composable
 fun NoteCard(

@@ -2,7 +2,24 @@ package com.example.synesthesia.presentation.screens.addnote
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -14,20 +31,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.domain.model.NoteCategory
+import com.example.synesthesia.domain.model.EmotionSystem
+import com.example.synesthesia.domain.model.EmotionCategory
 import com.example.synesthesia.presentation.components.*
 import com.example.synesthesia.presentation.theme.RoyalBlue
-import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.DeepIndigo
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -43,14 +61,6 @@ fun AddNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val isDarkMode = MaterialTheme.colorScheme.background.red < 0.5f
-    
-    LaunchedEffect(aiResult) {
-        if (aiResult != null) {
-            viewModel.applyAISuggestion(aiResult)
-            onResultConsumed()
-        }
-    }
     
     LaunchedEffect(noteId) {
         noteId?.let { viewModel.loadNote(it) }
@@ -78,8 +88,7 @@ fun AddNoteScreen(
                     ),
                     title = { 
                         Text(
-                            if (uiState.isEditMode) "Memory Editor" else "New Memory",
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif,
+                            if (uiState.isEditMode) "Edit Note" else "New Note",
                             fontWeight = FontWeight.Bold
                         )
                     },
@@ -94,7 +103,7 @@ fun AddNoteScreen(
                             enabled = uiState.canSave,
                             colors = ButtonDefaults.textButtonColors(contentColor = RoyalBlue)
                         ) {
-                            Text("SAVE", fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
+                            Text("SAVE", fontWeight = FontWeight.Bold)
                         }
                     }
                 )
@@ -110,137 +119,139 @@ fun AddNoteScreen(
                         .padding(horizontal = 24.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Pure Canvas Editor
                     TextField(
                         value = uiState.title,
                         onValueChange = viewModel::onTitleChange,
-                        placeholder = { 
-                            Text("Entry Title", style = MaterialTheme.typography.headlineMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                            )) 
-                        },
+                        placeholder = { Text("Title") },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
                             focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface
+                            unfocusedIndicatorColor = Color.Transparent
                         ),
-                        textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.fillMaxWidth()
-                    )
-                    
-                    Divider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                        thickness = 1.dp
                     )
                     
                     TextField(
                         value = uiState.content,
                         onValueChange = viewModel::onContentChange,
-                        placeholder = { 
-                            Text("Begin your cognitive journey...", style = MaterialTheme.typography.bodyLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                            )) 
-                        },
-                        minLines = 15,
+                        placeholder = { Text("Write your thoughts...") },
+                        minLines = 5,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
                             focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface
+                            unfocusedIndicatorColor = Color.Transparent
                         ),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
                         modifier = Modifier.fillMaxWidth()
                     )
                     
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    // Primary Action: Save & Analyze
-                    Button(
-                        onClick = { viewModel.saveNote() },
-                        enabled = uiState.canSave,
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = RoyalBlue,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Text("How do you feel?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    // Main Category Selection
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (uiState.isSaving) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                        } else {
-                            Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("SAVE & ANALYZE", fontWeight = FontWeight.Bold)
+                        EmotionSystem.categories.forEach { category ->
+                            val isSelected = uiState.selectedMainCategory?.id == category.id
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) parseHexColor(category.color) else parseHexColor(category.color).copy(alpha = 0.2f))
+                                    .clickable { viewModel.onMainCategorySelected(category) }
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    category.name.split(",").first(),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isSelected) Color.White else parseHexColor(category.color),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Emotion Feedback (if any)
-                    AnimatedVisibility(visible = uiState.emotion != null) {
-                        GlassCard(modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                    // Sub-emotion Selection
+                    AnimatedVisibility(visible = uiState.selectedMainCategory != null) {
+                        Column {
+                            Text("Specific feeling:", style = MaterialTheme.typography.labelLarge)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(12.dp)
-                                        .background(
-                                            color = uiState.artToken?.let { parseHexColor(it) } ?: RoyalBlue,
-                                            shape = androidx.compose.foundation.shape.CircleShape
+                                uiState.selectedMainCategory?.subEmotions?.forEach { sub ->
+                                    val isSelected = uiState.selectedSubEmotion == sub
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { viewModel.onSubEmotionSelected(sub) },
+                                        label = { Text(sub) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = parseHexColor(uiState.selectedMainCategory?.color),
+                                            selectedLabelColor = Color.White
                                         )
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    "Detected Resonance: ${uiState.emotion}",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = RoyalBlue
-                                )
+                                    )
+                                }
                             }
                         }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
+                    
+                    Button(
+                        onClick = { viewModel.saveNote() },
+                        enabled = uiState.canSave,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RoyalBlue),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("SAVE MEMORY", fontWeight = FontWeight.Bold)
                     }
                     
                     Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         }
-        
-        // Loading Overlay
-        if (uiState.isAnalyzing) {
-            Box(
-                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)),
-                contentAlignment = Alignment.Center
-            ) {
-                GlassCard(modifier = Modifier.padding(32.dp)) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator(color = RoyalBlue)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Analyzing emotions...", fontWeight = FontWeight.Medium)
-                    }
-                }
-            }
-        }
     }
 }
 
-private fun parseHexColor(hex: String?): Color? {
-    if (hex == null || !hex.startsWith("#")) return null
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun FlowRow(
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: @Composable () -> Unit
+) {
+    androidx.compose.foundation.layout.FlowRow(
+        modifier = modifier,
+        horizontalArrangement = horizontalArrangement,
+        verticalArrangement = verticalArrangement
+    ) {
+        content()
+    }
+}
+
+private fun parseHexColor(hex: String?): Color {
+    if (hex == null || !hex.startsWith("#")) return Color.Gray
     return try {
         Color(hex.removePrefix("#").toLong(16) or 0xFF000000)
     } catch (e: Exception) {
-        null
+        Color.Gray
     }
 }
+
+annotation class LayoutOutLvl

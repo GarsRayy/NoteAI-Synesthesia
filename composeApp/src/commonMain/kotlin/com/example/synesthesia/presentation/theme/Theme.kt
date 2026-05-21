@@ -13,10 +13,17 @@ import androidx.compose.ui.unit.sp
 
 // ==================== COLORS (MASTER PLAN) ====================
 
+val ObsidianBlack = Color(0xFF0A0A0C)
+val VibrantAmber = Color(0xFFFFB020)   // Quadrant 1: High Energy, Pleasant
+val SynapseRed = Color(0xFFFF3B30)     // Quadrant 2: High Energy, Unpleasant
+val NeuralMint = Color(0xFF34C759)     // Quadrant 3: Low Energy, Pleasant
+val MelancholyBlue = Color(0xFF007AFF) // Quadrant 4: Low Energy, Unpleasant
+val CrispWhite = Color(0xFFFBFBFB)
+val GlassWhite = Color.White.copy(alpha = 0.05f)
+
 val RoyalBlue = Color(0xFF0235AC)
 val BrightYellow = Color(0xFFF3E21B)
 val DeepIndigo = Color(0xFF01153B)
-val CrispWhite = Color(0xFFFBFBFB)
 
 // Celestial Colors
 val SpaceBlack = Color(0xFF030712)
@@ -51,17 +58,13 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFADC6FF),
-    onPrimary = RoyalBlue,
-    primaryContainer = Color(0xFF004494),
-    onPrimaryContainer = Color(0xFFD9E2FF),
-    secondary = BrightYellow,
-    onSecondary = Color.Black,
-    background = DeepIndigo,
+    primary = RoyalBlue,
+    onPrimary = Color.White,
+    background = ObsidianBlack,
     onBackground = CrispWhite,
-    surface = DeepIndigo,
+    surface = ObsidianBlack,
     onSurface = CrispWhite,
-    error = Color(0xFFFFB4AB),
+    error = SynapseRed,
     outline = Color(0xFF8E9099)
 )
 
@@ -127,3 +130,4 @@ fun NoteAITheme(
         content = content
     )
 }
+

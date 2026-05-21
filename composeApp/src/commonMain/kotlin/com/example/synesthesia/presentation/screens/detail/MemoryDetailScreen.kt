@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,17 +26,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.presentation.components.*
-import com.example.synesthesia.presentation.theme.RoyalBlue
-import com.example.synesthesia.presentation.theme.DeepIndigo
+import com.example.synesthesia.presentation.theme.CrispWhite
+import com.example.synesthesia.presentation.theme.VibrantAmber
+import com.example.synesthesia.presentation.theme.ObsidianBlack
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteDetailScreen(
+fun MemoryDetailScreen(
     noteId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
-    onShare: (String) -> Unit,
     viewModel: NoteDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,20 +53,13 @@ fun NoteDetailScreen(
         }
     }
 
-    val emotionColor = (uiState as? NoteDetailUiState.Success)?.note?.artToken?.let { parseHexColor(it) } ?: RoyalBlue
+    val quadrant = (uiState as? NoteDetailUiState.Success)?.note?.let { 
+        getQuadrantFromEmotion(it.emotion) 
+    } ?: 3
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // Dynamic Radial Background
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(emotionColor.copy(alpha = 0.15f), Color.Transparent),
-                        radius = 2000f
-                    )
-                )
-        )
+    Box(modifier = Modifier.fillMaxSize().background(ObsidianBlack)) {
+        // Generative Background
+        EndelBackground(emotionQuadrant = quadrant)
 
         Scaffold(
             containerColor = Color.Transparent,
@@ -76,8 +67,8 @@ fun NoteDetailScreen(
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                        navigationIconContentColor = RoyalBlue
+                        titleContentColor = CrispWhite,
+                        navigationIconContentColor = CrispWhite
                     ),
                     title = {},
                     navigationIcon = {
@@ -92,7 +83,7 @@ fun NoteDetailScreen(
                                 Icon(
                                     imageVector = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
                                     contentDescription = "Pin",
-                                    tint = RoyalBlue
+                                    tint = if (isPinned) VibrantAmber else CrispWhite.copy(alpha = 0.6f)
                                 )
                             }
                             IconButton(onClick = { viewModel.deleteNote() }) {
@@ -106,8 +97,8 @@ fun NoteDetailScreen(
                 if (uiState is NoteDetailUiState.Success) {
                     FloatingActionButton(
                         onClick = { onNavigateToEdit(noteId) },
-                        containerColor = RoyalBlue,
-                        contentColor = Color.White,
+                        containerColor = VibrantAmber,
+                        contentColor = ObsidianBlack,
                         shape = androidx.compose.foundation.shape.CircleShape
                     ) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit")
@@ -124,90 +115,84 @@ fun NoteDetailScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(horizontal = 28.dp)
+                            .padding(horizontal = 24.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(32.dp))
                         
+                        // Typography focused title
                         Text(
                             text = state.note.title.ifBlank { "Untitled Reflection" },
                             style = MaterialTheme.typography.headlineLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = DeepIndigo
+                                fontWeight = FontWeight.Black,
+                                color = CrispWhite,
+                                letterSpacing = (-1).sp
                             )
                         )
                         
                         Spacer(modifier = Modifier.height(12.dp))
                         
-                        Surface(
-                            color = emotionColor.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = state.note.emotion?.uppercase() ?: "RESONANCE",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = emotionColor,
-                                    letterSpacing = 1.sp
-                                )
+                        // Subtitle/Emotion tag
+                        Text(
+                            text = state.note.emotion?.uppercase() ?: "RESONANCE",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = CrispWhite.copy(alpha = 0.5f),
+                                letterSpacing = 2.sp
                             )
-                        }
+                        )
                         
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(48.dp))
                         
-                        // Sharp Content Card
+                        // Sleek Glassmorphic Content Card
                         GlassCard(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            cornerRadius = 24.dp
                         ) {
                             Text(
                                 text = state.note.content,
                                 style = MaterialTheme.typography.bodyLarge.copy(
-                                    lineHeight = 30.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    lineHeight = 32.sp,
+                                    color = CrispWhite
                                 ),
-                                modifier = Modifier.padding(20.dp)
+                                modifier = Modifier.padding(24.dp)
                             )
                         }
 
                         state.note.aiResonance?.let { resonance ->
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Surface(
-                                color = RoyalBlue.copy(alpha = 0.05f),
-                                shape = RoundedCornerShape(20.dp),
-                                border = BorderStroke(1.dp, RoyalBlue.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(20.dp)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            Icons.Default.AutoAwesome,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                            tint = RoyalBlue
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            "AI RESONANCE",
-                                            style = MaterialTheme.typography.labelLarge.copy(
-                                                fontWeight = FontWeight.Black,
-                                                color = RoyalBlue,
-                                                letterSpacing = 1.sp
-                                            )
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(40.dp))
+                            
+                            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = VibrantAmber
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
                                     Text(
-                                        text = resonance,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontStyle = FontStyle.Italic,
-                                            color = RoyalBlue.copy(alpha = 0.8f)
+                                        "AI RESONANCE",
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.Black,
+                                            color = VibrantAmber,
+                                            letterSpacing = 1.5.sp
                                         )
                                     )
                                 }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = resonance,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontStyle = FontStyle.Italic,
+                                        color = CrispWhite.copy(alpha = 0.8f),
+                                        lineHeight = 26.sp
+                                    )
+                                )
                             }
                         }
                         
-                        Spacer(modifier = Modifier.height(100.dp))
+                        Spacer(modifier = Modifier.height(120.dp))
                     }
                 }
                 is NoteDetailUiState.NotFound -> {
@@ -215,14 +200,5 @@ fun NoteDetailScreen(
                 }
             }
         }
-    }
-}
-
-private fun parseHexColor(hex: String?): Color? {
-    if (hex == null || !hex.startsWith("#")) return null
-    return try {
-        Color(hex.removePrefix("#").toLong(16) or 0xFF000000)
-    } catch (e: Exception) {
-        null
     }
 }

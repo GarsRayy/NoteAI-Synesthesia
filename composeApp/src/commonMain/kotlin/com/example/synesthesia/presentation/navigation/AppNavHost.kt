@@ -10,7 +10,7 @@ import androidx.navigation.toRoute
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.presentation.screens.addnote.AddNoteScreen
 import com.example.synesthesia.presentation.screens.ai.AIAssistantScreen
-import com.example.synesthesia.presentation.screens.detail.NoteDetailScreen
+import com.example.synesthesia.presentation.screens.detail.MemoryDetailScreen
 import com.example.synesthesia.presentation.screens.home.HomeScreen
 import androidx.compose.runtime.getValue
 import com.example.synesthesia.presentation.screens.settings.SettingsScreen
@@ -56,11 +56,10 @@ fun AppNavHost(
         
         composable<Route.MemoryDetail> { backStackEntry ->
             val route: Route.MemoryDetail = backStackEntry.toRoute()
-            NoteDetailScreen(
+            MemoryDetailScreen(
                 noteId = route.memoryId,
                 onNavigateBack = { navigationActions.navigateBack() },
-                onNavigateToEdit = { navigationActions.navigateToAddMemory(it) },
-                onShare = { _ -> }
+                onNavigateToEdit = { navigationActions.navigateToAddMemory(it) }
             )
         }
         

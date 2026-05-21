@@ -16,6 +16,9 @@ import androidx.compose.ui.text.style.TextAlign
 import com.example.synesthesia.presentation.components.CelestialBackground
 import com.example.synesthesia.presentation.navigation.Route
 import com.example.synesthesia.presentation.screens.home.HomeScreen
+import com.example.synesthesia.presentation.screens.insights.InsightsScreen
+import com.example.synesthesia.presentation.screens.sanctuary.SanctuaryScreen
+import com.example.synesthesia.presentation.screens.soniczen.SonicZenScreen
 import com.example.synesthesia.presentation.theme.RoyalBlue
 import com.example.synesthesia.presentation.theme.ThemeMode
 
@@ -105,9 +108,9 @@ fun MainScreen(
                             onNavigateToSettings = onNavigateToSettings
                         )
                     }
-                    Route.SonicZen -> PlaceholderScreen("Sonic Zen", "Immersive Audio Experience Coming Soon")
-                    Route.Sanctuary -> PlaceholderScreen("Sanctuary", "Mindfulness & Meditation Coming Soon")
-                    Route.Insights -> PlaceholderScreen("Insights", "Emotional Intelligence Analytics Coming Soon")
+                    Route.SonicZen -> SonicZenScreen()
+                    Route.Sanctuary -> SanctuaryScreen()
+                    Route.Insights -> InsightsScreen()
                     else -> {}
                 }
             }

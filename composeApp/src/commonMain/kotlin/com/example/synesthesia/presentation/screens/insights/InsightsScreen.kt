@@ -1,7 +1,6 @@
 package com.example.synesthesia.presentation.screens.insights
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,6 +21,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.JoyColor
 import com.example.synesthesia.presentation.theme.RoyalBlue
 
@@ -57,12 +57,14 @@ fun InsightsScreen() {
                 Text(
                     "Garis Rayya",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Black
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     "Stargazer Level 12",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -74,17 +76,18 @@ fun InsightsScreen() {
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp
-            )
+            ),
+            color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             "Emotional intelligence analytics",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
         )
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Emotional Trend (Chart Card with High Contrast)
+        // Emotional Trend
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,12 +100,15 @@ fun InsightsScreen() {
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Timeline, contentDescription = null, tint = RoyalBlue)
+                    Icon(Icons.Default.Timeline, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Weekly Mood Galaxy", fontWeight = FontWeight.Bold)
+                    Text("Weekly Mood Galaxy", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                MoodChart(modifier = Modifier.fillMaxSize())
+                MoodChart(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
         
@@ -115,7 +121,7 @@ fun InsightsScreen() {
                 .shadow(8.dp, RoundedCornerShape(24.dp)),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
             )
         ) {
             Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -126,7 +132,7 @@ fun InsightsScreen() {
                         "AI PERSPECTIVE", 
                         style = MaterialTheme.typography.labelSmall, 
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                     )
                     Text(
                         "You've been more 'Calm' this week compared to last. Your evening journals show high reflective capacity.",
@@ -139,7 +145,12 @@ fun InsightsScreen() {
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        Text("EMOTION DISTRIBUTION", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        Text(
+            "EMOTION DISTRIBUTION", 
+            style = MaterialTheme.typography.labelLarge, 
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
         
         EmotionStatRow("Joy", 45, JoyColor)
@@ -152,7 +163,7 @@ fun InsightsScreen() {
 }
 
 @Composable
-fun MoodChart(modifier: Modifier = Modifier) {
+fun MoodChart(modifier: Modifier = Modifier, color: Color) {
     Canvas(modifier = modifier) {
         val path = Path()
         val points = listOf(0.8f, 0.6f, 0.9f, 0.4f, 0.7f, 0.8f, 0.9f)
@@ -164,7 +175,7 @@ fun MoodChart(modifier: Modifier = Modifier) {
             if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
             
             drawCircle(
-                color = RoyalBlue,
+                color = color,
                 radius = 5.dp.toPx(),
                 center = Offset(x, y)
             )
@@ -172,7 +183,7 @@ fun MoodChart(modifier: Modifier = Modifier) {
         
         drawPath(
             path = path,
-            color = RoyalBlue,
+            color = color,
             style = Stroke(width = 4.dp.toPx())
         )
     }
@@ -182,15 +193,15 @@ fun MoodChart(modifier: Modifier = Modifier) {
 fun EmotionStatRow(label: String, percentage: Int, color: Color) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-            Text("$percentage%", fontWeight = FontWeight.Black)
+            Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            Text("$percentage%", fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onBackground)
         }
         Spacer(modifier = Modifier.height(6.dp))
         LinearProgressIndicator(
             progress = { percentage / 100f },
             modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape),
             color = color,
-            trackColor = color.copy(alpha = 0.2f)
+            trackColor = color.copy(alpha = 0.3f)
         )
     }
 }

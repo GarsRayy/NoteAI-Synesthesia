@@ -54,7 +54,8 @@ fun MemoryDetailScreen(
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground
                     ),
                     title = { Text("MEMORY DETAIL", fontWeight = FontWeight.Black, letterSpacing = 2.sp) },
                     navigationIcon = {
@@ -126,7 +127,7 @@ fun MemoryDetailScreen(
                                         "AI RESONANCE", 
                                         style = MaterialTheme.typography.labelSmall, 
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
@@ -147,7 +148,7 @@ fun MemoryDetailScreen(
                 }
                 is NoteDetailUiState.NotFound -> {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        Text("Memory not found", modifier = Modifier.align(Alignment.Center))
+                        Text("Memory not found", modifier = Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }

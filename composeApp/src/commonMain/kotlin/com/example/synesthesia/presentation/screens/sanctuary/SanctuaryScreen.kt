@@ -33,17 +33,18 @@ fun SanctuaryScreen() {
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp
-            )
+            ),
+            color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             "Guided rituals to calm your universe",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
         )
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        // Featured Ritual (High Contrast)
+        // Featured Ritual
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,7 +77,12 @@ fun SanctuaryScreen() {
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        Text("RITUAL CATEGORIES", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        Text(
+            "RITUAL CATEGORIES", 
+            style = MaterialTheme.typography.labelLarge, 
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
         
         LazyVerticalGrid(
@@ -101,7 +107,7 @@ fun RitualCard(ritual: Ritual) {
             .clickable { },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
         )
     ) {
         Column(
@@ -120,7 +126,8 @@ fun RitualCard(ritual: Ritual) {
                 ritual.name, 
                 fontWeight = FontWeight.Bold, 
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

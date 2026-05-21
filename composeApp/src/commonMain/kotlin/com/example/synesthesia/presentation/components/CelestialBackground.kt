@@ -4,12 +4,14 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.synesthesia.presentation.theme.DeepIndigo
 import com.example.synesthesia.presentation.theme.SpaceBlack
 import com.example.synesthesia.presentation.theme.StarWhite
 import kotlin.random.Random
@@ -20,18 +22,23 @@ fun CelestialBackground(
     content: @Composable BoxScope.() -> Unit
 ) {
     val bgColor = if (isAstronomyMode) SpaceBlack else Color(0xFFF0F9FF) // Sky Blue for Light Mode
-    
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(bgColor)
+    val contentColor = if (isAstronomyMode) StarWhite else DeepIndigo
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = bgColor,
+        contentColor = contentColor
     ) {
-        if (isAstronomyMode) {
-            StarField()
-        } else {
-            DaylightSky()
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (isAstronomyMode) {
+                StarField()
+            } else {
+                DaylightSky()
+            }
+            content()
         }
-        content()
     }
 }
 

@@ -58,12 +58,12 @@ fun SettingsScreen(
                     "APPEARANCE",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Black
                 )
                 
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.extraLarge
@@ -75,14 +75,14 @@ fun SettingsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Brush, contentDescription = null)
+                                Icon(Icons.Default.Brush, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column {
-                                    Text("Astronomy Mode", fontWeight = FontWeight.Bold)
+                                    Text("Astronomy Mode", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     Text(
                                         "Deep space visual experience",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                     )
                                 }
                             }
@@ -102,20 +102,20 @@ fun SettingsScreen(
                     "AI ENGINE",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Black
                 )
                 
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.extraLarge
                 ) {
                     ListItem(
-                        headlineContent = { Text("Gemini AI", fontWeight = FontWeight.Bold) },
-                        supportingContent = { Text("Automatic title & emotion sensing") },
-                        leadingContent = { Icon(Icons.Default.AutoAwesome, contentDescription = null) },
+                        headlineContent = { Text("Gemini AI", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) },
+                        supportingContent = { Text("Automatic title & emotion sensing", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)) },
+                        leadingContent = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                         trailingContent = { Badge { Text("Active") } },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )

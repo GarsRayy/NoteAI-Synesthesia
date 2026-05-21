@@ -12,15 +12,21 @@ import com.example.synesthesia.presentation.screens.addnote.AddNoteScreen
 import com.example.synesthesia.presentation.screens.ai.AIAssistantScreen
 import com.example.synesthesia.presentation.screens.detail.MemoryDetailScreen
 import com.example.synesthesia.presentation.screens.home.HomeScreen
+import com.example.synesthesia.presentation.screens.main.MainScreen
 import androidx.compose.runtime.getValue
 import com.example.synesthesia.presentation.screens.settings.SettingsScreen
+
+import com.example.synesthesia.presentation.app.AppViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AppViewModel = koinViewModel()
 ) {
     val navigationActions = createNavigationActions(navController)
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     
     NavHost(
         navController = navController,
@@ -28,7 +34,8 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable<Route.Constellation> {
-            HomeScreen(
+            MainScreen(
+                themeMode = themeMode,
                 onNavigateToAddNote = { navigationActions.navigateToAddMemory() },
                 onNavigateToDetail = { noteId -> navigationActions.navigateToMemoryDetail(noteId) },
                 onNavigateToAI = { navigationActions.navigateToAIAssistant() },

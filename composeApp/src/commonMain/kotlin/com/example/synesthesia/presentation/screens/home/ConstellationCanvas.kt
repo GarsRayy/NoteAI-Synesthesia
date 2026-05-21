@@ -17,6 +17,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.EmotionSystem
+import com.example.synesthesia.presentation.theme.BrightYellow
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -29,6 +30,7 @@ fun ConstellationCanvas(
 ) {
     var offset by remember { mutableStateOf(Offset.Zero) }
     var scale by remember { mutableStateOf(1f) }
+    var selectedNoteId by remember { mutableStateOf<Long?>(null) }
 
     val infiniteTransition = rememberInfiniteTransition()
     val floatAnim by infiniteTransition.animateFloat(
@@ -66,13 +68,17 @@ fun ConstellationCanvas(
             .pointerInput(notes) {
                 detectTapGestures { tapOffset ->
                     val adjustedTap = (tapOffset - offset) / scale
+                    var found = false
                     notePositions.forEach { (id, pos) ->
                         val dx = adjustedTap.x - pos.x
                         val dy = adjustedTap.y - pos.y
                         if (sqrt(dx * dx + dy * dy) <= 40f) {
+                            selectedNoteId = id
                             onNoteClick(id)
+                            found = true
                         }
                     }
+                    if (!found) selectedNoteId = null
                 }
             }
     ) {
@@ -181,6 +187,16 @@ fun ConstellationCanvas(
                         center = noteCurrentPos,
                         style = Stroke(width = 2f)
                     )
+
+                    // Draw Selection Ring
+                    if (selectedNoteId == note.id) {
+                        drawCircle(
+                            color = BrightYellow,
+                            radius = 24f,
+                            center = noteCurrentPos,
+                            style = Stroke(width = 2.dp.toPx())
+                        )
+                    }
                 }
             }
         }

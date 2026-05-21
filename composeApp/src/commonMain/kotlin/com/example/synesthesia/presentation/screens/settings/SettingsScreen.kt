@@ -3,17 +3,19 @@ package com.example.synesthesia.presentation.screens.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.synesthesia.presentation.components.AuroraBackground
+import com.example.synesthesia.presentation.components.CelestialBackground
 import com.example.synesthesia.presentation.theme.ThemeMode
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -23,25 +25,25 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     viewModel: SettingsViewModel = koinViewModel()
 ) {
-    val isDarkMode by viewModel.isDarkMode.collectAsStateWithLifecycle()
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val isAstronomy = themeMode == ThemeMode.ASTRONOMY
 
-    AuroraBackground {
+    CelestialBackground(isAstronomyMode = isAstronomy) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopAppBar(
-                    title = { Text("Settings", style = MaterialTheme.typography.titleLarge) },
+                CenterAlignedTopAppBar(
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                    title = { Text("SETTINGS", fontWeight = FontWeight.Black, letterSpacing = 2.sp) },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                        titleContentColor = if (isDarkMode) Color.White else MaterialTheme.colorScheme.onBackground,
-                        navigationIconContentColor = if (isDarkMode) Color.White else MaterialTheme.colorScheme.onBackground
-                    )
+                    }
                 )
             }
         ) { padding ->
@@ -49,93 +51,76 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(16.dp),
+                    .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Theme Toggle
+                Text(
+                    "APPEARANCE",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isDarkMode) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.extraLarge
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
-                                    contentDescription = null,
-                                    tint = if (isDarkMode) Color.White else MaterialTheme.colorScheme.primary
-                                )
+                                Icon(Icons.Default.Brush, contentDescription = null)
                                 Spacer(modifier = Modifier.width(16.dp))
-                                Text(
-                                    text = "Dark Mode",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = if (isDarkMode) Color.White else MaterialTheme.colorScheme.onSurface
-                                )
+                                Column {
+                                    Text("Astronomy Mode", fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "Deep space visual experience",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
                             }
                             Switch(
-                                checked = isDarkMode,
-                                onCheckedChange = viewModel::toggleDarkMode,
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            )
-                        }
-
-                        Divider(modifier = Modifier.padding(vertical = 12.dp), color = if (isDarkMode) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-
-                        Text(
-                            text = "Visual Mode",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = if (isDarkMode) Color.White.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            ThemeOption(
-                                label = "Normal",
-                                selected = themeMode == ThemeMode.NORMAL,
-                                onClick = { viewModel.setThemeMode(ThemeMode.NORMAL) },
-                                isDarkMode = isDarkMode
-                            )
-                            ThemeOption(
-                                label = "Astronomy",
-                                selected = themeMode == ThemeMode.ASTRONOMY,
-                                onClick = { viewModel.setThemeMode(ThemeMode.ASTRONOMY) },
-                                isDarkMode = isDarkMode
+                                checked = isAstronomy,
+                                onCheckedChange = { 
+                                    viewModel.setThemeMode(if (it) ThemeMode.ASTRONOMY else ThemeMode.NORMAL)
+                                }
                             )
                         }
                     }
                 }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Text(
+                    "AI ENGINE",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.extraLarge
+                ) {
+                    ListItem(
+                        headlineContent = { Text("Gemini AI", fontWeight = FontWeight.Bold) },
+                        supportingContent = { Text("Automatic title & emotion sensing") },
+                        leadingContent = { Icon(Icons.Default.AutoAwesome, contentDescription = null) },
+                        trailingContent = { Badge { Text("Active") } },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                }
             }
         }
     }
-}
-
-@Composable
-fun RowScope.ThemeOption(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    isDarkMode: Boolean
-) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label) },
-        modifier = Modifier.weight(1f),
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.primary,
-            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-            containerColor = if (isDarkMode) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.05f)
-        )
-    )
 }

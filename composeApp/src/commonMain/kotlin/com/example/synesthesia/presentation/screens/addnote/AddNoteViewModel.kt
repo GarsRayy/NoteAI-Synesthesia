@@ -91,42 +91,54 @@ class AddNoteViewModel(
     fun saveNote() {
         val state = _uiState.value
         
-        if (state.title.isBlank() && state.content.isBlank()) {
-            _uiState.update { it.copy(titleError = "Judul atau konten harus diisi") }
+        if (state.content.isBlank()) {
+            viewModelScope.launch {
+                _events.emit(AddNoteEvent.Error("Tuliskan curhatanmu terlebih dahulu"))
+            }
             return
         }
 
-        if (state.selectedMainCategory == null || state.selectedSubEmotion == null) {
+        if (state.selectedMainCategory == null) {
             viewModelScope.launch {
-                _events.emit(AddNoteEvent.Error("Pilih emosi terlebih dahulu"))
+                _events.emit(AddNoteEvent.Error("Pilih kuadran emosi terlebih dahulu"))
             }
             return
         }
         
-        _uiState.update { it.copy(isSaving = true) }
+        _uiState.update { it.copy(isAnalyzing = true) }
         
         viewModelScope.launch {
-            val note = Note(
-                id = currentNoteId ?: 0,
-                title = state.title.trim(),
-                content = state.content.trim(),
-                category = state.category,
-                color = state.color,
-                emotion = state.selectedSubEmotion,
-                artToken = state.selectedMainCategory.name, // Storing category name
-                aiResonance = state.aiResonance,
-                createdAt = if (currentNoteId == null) Clock.System.now() else state.createdAt,
-                updatedAt = Clock.System.now()
-            )
+            // Step 1: Analyze with Gemini
+            val analysisResult = geminiService.analyzeEmotion(state.content)
             
-            saveNoteUseCase(note)
-                .onSuccess {
-                    _events.emit(AddNoteEvent.NoteSaved)
-                }
-                .onFailure { error ->
-                    _uiState.update { it.copy(isSaving = false) }
-                    _events.emit(AddNoteEvent.Error(error.message ?: "Gagal menyimpan"))
-                }
+            analysisResult.onSuccess { analysis ->
+                _uiState.update { it.copy(isAnalyzing = false, isSaving = true) }
+                
+                val note = Note(
+                    id = currentNoteId ?: 0,
+                    title = analysis.autoTitle,
+                    content = analysis.paraphrasedContent,
+                    category = state.category,
+                    color = state.color,
+                    emotion = analysis.emotionQuadrant,
+                    artToken = state.selectedMainCategory.name, // The hub name for graph
+                    aiResonance = analysis.summary,
+                    createdAt = if (currentNoteId == null) Clock.System.now() else state.createdAt,
+                    updatedAt = Clock.System.now()
+                )
+                
+                saveNoteUseCase(note)
+                    .onSuccess {
+                        _events.emit(AddNoteEvent.NoteSaved)
+                    }
+                    .onFailure { error ->
+                        _uiState.update { it.copy(isSaving = false) }
+                        _events.emit(AddNoteEvent.Error(error.message ?: "Gagal menyimpan"))
+                    }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isAnalyzing = false) }
+                _events.emit(AddNoteEvent.Error("AI gagal menganalisis: ${error.message}"))
+            }
         }
     }
 }

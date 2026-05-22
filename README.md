@@ -10,16 +10,16 @@
 
 | ☀️ Daylight Mode (Normal) | 🌌 Astronomy Mode (Space) |
 | :---: | :---: |
-| ![Daylight Home](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/home_light.png) | ![Astronomy Home](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/home_dark.png) |
+| ![Daylight Home](screenshots/Screenshot_20260522_141835.png) | ![Astronomy Home](screenshots/Screenshot_20260522_141805.png) |
 | *Clean interface with dynamic sky* | *Immersive galaxy with starfields* |
 
 | 🧘 Sanctuary (Mindfulness) | 📊 Insights (Analytics) |
 | :---: | :---: |
-| ![Sanctuary](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/sanctuary.png) | ![Insights](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/insights.png) |
+| ![Sanctuary](screenshots/Screenshot_20260522_141900.png) | ![Insights](screenshots/Screenshot_20260522_141911.png) |
 | *Interactive breathing & meditation* | *Real-time data-driven mood trends* |
 
 ### 🎥 Live Demo
-[![Watch the Demo](https://img.shields.io/badge/Demo-Watch%20Now-red?style=for-the-badge&logo=youtube)](https://link-to-your-demo-video.com)
+[![Watch the Demo](https://img.shields.io/badge/Demo-Watch%20Now-red?style=for-the-badge&logo=youtube)](https://youtube.com/shorts/Hg_JwBC4gr8?feature=share)
 
 ---
 
@@ -31,7 +31,7 @@
 *   **3D Interactive UI**: Clean, modern cards with realistic depth and clean Material iconography across all modules.
 
 ### 🤖 Intelligent Resonance (AI Engine)
-*   **Automated Metadata**: Powered by **Google Gemini API**. AI automatically generates titles, paraphrases content puitically, and senses your emotion quadrant.
+*   **Automated Metadata**: Powered by **Google Gemini API**. AI automatically generates titles, paraphrases content poetically, and senses your emotion quadrant.
 *   **AI Perspective**: Get intelligent summaries of your weekly emotional trends in the Insights tab.
 *   **Spotify AI Integration**: Personalized playlist recommendations triggered by your current "Galaxy Mood".
 

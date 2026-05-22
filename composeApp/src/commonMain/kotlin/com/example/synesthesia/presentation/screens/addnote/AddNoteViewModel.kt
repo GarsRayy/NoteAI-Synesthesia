@@ -9,6 +9,7 @@ import com.example.synesthesia.domain.model.EmotionSystem
 import com.example.synesthesia.domain.model.EmotionCategory
 import com.example.synesthesia.domain.repository.NoteRepository
 import com.example.synesthesia.domain.usecase.SaveNoteUseCase
+import com.example.synesthesia.domain.usecase.AnalyzeEmotionUseCase
 import com.example.synesthesia.data.remote.api.GeminiService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ import kotlinx.datetime.Instant
 class AddNoteViewModel(
     private val repository: NoteRepository,
     private val saveNoteUseCase: SaveNoteUseCase,
+    private val analyzeEmotionUseCase: AnalyzeEmotionUseCase,
     private val geminiService: GeminiService
 ) : ViewModel() {
     
@@ -86,6 +88,34 @@ class AddNoteViewModel(
             selectedSubEmotion = subEmotion,
             emotion = subEmotion
         ) }
+    }
+
+    fun analyzeEmotion() {
+        val state = _uiState.value
+        if (state.title.isBlank() && state.content.isBlank()) return
+
+        _uiState.update { it.copy(isAnalyzing = true) }
+
+        viewModelScope.launch {
+            analyzeEmotionUseCase(state.title, state.content)
+                .onSuccess { response ->
+                    val mainCategory = EmotionSystem.categories.find { it.id == response.mainCategoryId }
+                    _uiState.update { state ->
+                        state.copy(
+                            selectedMainCategory = mainCategory,
+                            selectedSubEmotion = response.subEmotion,
+                            emotion = response.subEmotion,
+                            artToken = mainCategory?.name,
+                            aiResonance = response.aiResonance,
+                            isAnalyzing = false
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isAnalyzing = false) }
+                    _events.emit(AddNoteEvent.Error(error.message ?: "Gagal menganalisis emosi"))
+                }
+        }
     }
     
     fun saveNote() {

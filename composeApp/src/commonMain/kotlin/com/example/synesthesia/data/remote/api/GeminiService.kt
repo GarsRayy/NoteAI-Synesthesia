@@ -56,7 +56,8 @@ class GeminiService(private val client: HttpClient) {
             contents = contents,
             generationConfig = GenerationConfig(
                 temperature = 0.7,
-                maxOutputTokens = 1000
+                maxOutputTokens = 1500,
+                responseMimeType = "application/json"
             )
         )
         
@@ -176,15 +177,19 @@ object SystemPrompts {
 
     val EMOTION_ANALYZER = """
         Kamu adalah AI penganalisis emosi untuk aplikasi jurnal "Synesthesia". 
-        Analisis teks jurnal pengguna berikut dan berikan respons HANYA dalam format JSON.
+        Analisis teks jurnal pengguna (judul dan isi) dan tentukan kategori emosi yang paling sesuai.
         
-        Gunakan struktur JSON ini:
+        Sistem Emosi kami memiliki 4 kategori utama:
+        1. HEU (High Energy, Unpleasant): Agitated, Volatile, Frantic, Furious, Frenzied
+        2. HEP (High Energy, Pleasant): Lively, Enthusiastic, Exuberant, Elated, Ecstatic
+        3. LEP (Low Energy, Pleasant): Relaxed, Mellow, Peaceful, Serene, Tranquil
+        4. LEU (Low Energy, Unpleasant): Disappointed, Weary, Gloomy, Desolate, Lethargic
+
+        Berikan respons HANYA dalam format JSON berikut:
         {
-            "sentiment": "Positif/Negatif/Netral",
-            "emotion": "Joy/Melancholy/Anger/Calm/Reflective",
-            "emotionScore": 1-100,
-            "artToken": "Kode warna HEX (Joy:#F4A44A, Melancholy:#3B82C4, Calm:#2EC9A0, Anger:#E05FA0, Reflective:#7B5EA7)",
-            "summary": "Satu kalimat puitis singkat (max 10 kata) yang merangkum esensi emosi catatan tersebut."
+            "mainCategoryId": "ID kategori (HEU/HEP/LEP/LEU)",
+            "subEmotion": "Salah satu sub-emosi yang paling spesifik dari daftar di atas",
+            "aiResonance": "Satu kalimat puitis singkat (max 10 kata) yang merangkum esensi emosi catatan tersebut."
         }
     """.trimIndent()
 }

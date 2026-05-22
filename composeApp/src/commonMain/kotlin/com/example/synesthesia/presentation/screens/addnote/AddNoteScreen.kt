@@ -150,7 +150,28 @@ fun AddNoteScreen(
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    Text("How do you feel?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("How do you feel?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        
+                        IconButton(
+                            onClick = viewModel::analyzeEmotion,
+                            enabled = !uiState.isAnalyzing && (uiState.title.isNotBlank() || uiState.content.isNotBlank())
+                        ) {
+                            if (uiState.isAnalyzing) {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp, color = RoyalBlue)
+                            } else {
+                                Icon(
+                                    Icons.Default.AutoAwesome,
+                                    contentDescription = "Analyze Emotion",
+                                    tint = if (uiState.title.isNotBlank() || uiState.content.isNotBlank()) RoyalBlue else Color.Gray
+                                )
+                            }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(12.dp))
                     
                     // Main Category Selection

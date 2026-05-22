@@ -11,6 +11,7 @@ import com.example.synesthesia.data.repository.AIRepositoryImpl
 import com.example.synesthesia.data.repository.NoteRepositoryImpl
 import com.example.synesthesia.domain.repository.AIRepository
 import com.example.synesthesia.domain.repository.NoteRepository
+import com.example.synesthesia.domain.usecase.AnalyzeEmotionUseCase
 import com.example.synesthesia.domain.usecase.DeleteNoteUseCase
 import com.example.synesthesia.domain.usecase.GenerateIdeasUseCase
 import com.example.synesthesia.domain.usecase.GetAllNotesUseCase
@@ -58,7 +59,7 @@ val preferencesModule = module {
 // ==================== REPOSITORY MODULE ====================
 
 val repositoryModule = module {
-    singleOf(::NoteRepositoryImpl) bind NoteRepository::class
+    single { NoteRepositoryImpl(get()) } bind NoteRepository::class
     singleOf(::AIRepositoryImpl) bind AIRepository::class
 }
 
@@ -72,6 +73,7 @@ val useCaseModule = module {
     singleOf(::SummarizeNoteUseCase)
     singleOf(::ImproveWritingUseCase)
     singleOf(::GenerateIdeasUseCase)
+    singleOf(::AnalyzeEmotionUseCase)
 }
 
 // ==================== VIEWMODEL MODULE ====================

@@ -153,7 +153,7 @@ fun NoteCard(
     modifier: Modifier = Modifier
 ) {
     val glowColor = remember(note.artToken) {
-        note.artToken?.let { 
+        note.artToken?.let {
             try {
                 Color(it.removePrefix("#").toLong(16) or 0xFF000000)
             } catch (e: Exception) {

@@ -18,8 +18,7 @@ fun App(
 
     KoinContext {
         NoteAITheme(
-            themeMode = themeMode,
-            isDarkInNormal = isDarkMode
+            themeMode = themeMode
         ) {
             AppNavHost()
         }

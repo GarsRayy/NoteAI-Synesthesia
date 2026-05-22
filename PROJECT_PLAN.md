@@ -1,51 +1,56 @@
-# Project Plan - Synesthesia
+# Project Plan: Synesthesia Super-App
 
-## 📋 Pembagian Tugas (Team Roles)
+## 📊 Sprint Status Overview
 
-| Anggota | Role | Fokus Area |
-|---------|------|------------|
-| **Garsia Rayhan** | Lead UI/UX & Presentation | Compose Multiplatform, Theme, Glassmorphism, Navigation, Animations |
-| **Reyhan Oktavian Putra** | Domain & Data Engineer | Use Cases, Gemini AI Integration, SQLDelight, Ktor, DataStore |
-
----
-
-## 🗓️ Timeline Sprint
-
-### Sprint 1: Foundation (Current)
-- [x] Setup Project KMP & Clean Architecture.
-- [x] Implementasi Koin Dependency Injection.
-- [x] Setup GitHub Actions CI.
-- [x] Design System Foundation (Midnight Space & Glassmorphism).
-- [x] Refaktor Dokumentasi & Project Plan.
-
-### Sprint 2: Core Features & Visual Overhaul
-- [x] Implementasi CRUD Notes lengkap (Local DB & Repository).
-- [x] Visual Overhaul: **Celestial Constellation** (Glowing stars, Twinkle animation, Lines).
-- [x] Theme Management: Penambahan **Astronomy Mode** & Settings integration.
-- [x] Integrasi Koin untuk seluruh layer.
-- [x] Pembuatan UI untuk List, Add, dan Detail Notes.
-- [x] Validasi input dan error handling.
-
-### Sprint 3: Advanced UX
-- [ ] Fitur Search dengan debounce.
-- [ ] Filter berdasarkan kategori dan Sorting.
-- [ ] Animasi transisi layar yang smooth.
-- [ ] Implementasi Offline-first logic.
-
-### Sprint 4: AI Power-up
-- [ ] Integrasi penuh Gemini AI untuk fitur Ringkasan.
-- [ ] Fitur deteksi emosi teks secara otomatis.
-- [ ] UI Polish: Efek Aurora yang lebih responsif.
-- [ ] Penambahan Unit Tests untuk Domain & Data layer.
-
-### Sprint 5: Finalization
-- [ ] Bug fixing dan Performance monitoring.
-- [ ] Final Documentation (Walkthrough & Demo).
-- [ ] Persiapan Demo Project Akhir.
+| Sprint | Phase | Focus | Status |
+| :--- | :--- | :--- | :--- |
+| **Sprint 1** | Foundation | KMP Setup, Clean Architecture, Design System Core | ✅ Complete |
+| **Sprint 2** | Core & UI Overhaul | Full CRUD, AI Automation, Celestial UI, Multi-module Tabs | ✅ Complete |
+| **Sprint 3** | Advanced UX | Real-time Analytics, Spotify API, Polish, Transitions | 🗓️ Planned |
 
 ---
 
-## 🛠️ Standar Kualitas
-- **Code Style**: Mengikuti Kotlin Style Guide resmi.
-- **CI/CD**: Setiap Pull Request wajib melewati build & test di GitHub Actions.
-- **Git**: Menggunakan Branching Strategy sesuai panduan (`project/[NIM]-[NIM]-[NamaAplikasi]`).
+## ✅ Sprint 2: Core Execution & Visual Overhaul (COMPLETED)
+
+### 1. Navigation & Root Refactor
+- [x] Implementation of **MainScreen** with high-contrast Bottom Navigation.
+- [x] Integration of 4 key tabs: Galaxy, Sonic Zen, Sanctuary, and Insights.
+- [x] Type-safe routing for detailed screens (Memory Detail, AI Resonance).
+
+### 2. Guided Journaling & AI Automation
+- [x] Two-step **Guided Journaling** flow with 3D Interactive Emotion Cards.
+- [x] Automated Metadata Generation (Title, Paraphrase, Emotion sensing) via Gemini API.
+- [x] Persistent storage implementation with SQLDelight.
+
+### 3. Celestial Design System
+- [x] **Daylight Sky** background for Normal Mode (Sun/Clouds animation).
+- [x] **Deep Space** background for Astronomy Mode (Twinkling starfield).
+- [x] Refinement of high-contrast typography and Material Iconography.
+- [x] Constellation Canvas interactivity with glowing selection effects.
+
+---
+
+## 🚀 Sprint 3: Advanced Intelligence & UX (UPCOMING)
+
+### 1. Enhanced Analytics (Insights 2.0)
+- [ ] Implementation of a month-view Mood Calendar.
+- [ ] Interactive Line Charts with period filtering (Weekly/Monthly).
+- [ ] AI-Generated comparative reports (Mood trends vs previous week).
+
+### 2. Immersive Sonic Zen
+- [ ] Live Spotify API integration for "Galaxy Playlist" playback.
+- [ ] Interactive audio visualizers in the Sonic Zone.
+- [ ] Offline audio track caching for meditation rituals.
+
+### 3. Polish & Performance
+- [ ] Shared element transitions for memory detail navigation.
+- [ ] Advanced parallax effects on the Constellation Canvas.
+- [ ] Unit testing for Domain Use Cases and Data Repositories.
+
+---
+
+## 🛠️ Quality Standards
+- **Architecture**: Strict adherence to Clean Architecture.
+- **Code Style**: 100% Kotlin idiomatic patterns.
+- **CI/CD**: Build verification on every push via GitHub Actions.
+- **Visuals**: Zero "clashing" elements between UI and dynamic backgrounds.

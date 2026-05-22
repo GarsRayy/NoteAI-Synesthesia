@@ -18,10 +18,13 @@ import com.example.synesthesia.domain.usecase.ImproveWritingUseCase
 import com.example.synesthesia.domain.usecase.SaveNoteUseCase
 import com.example.synesthesia.domain.usecase.SearchNotesUseCase
 import com.example.synesthesia.domain.usecase.SummarizeNoteUseCase
+import com.example.synesthesia.presentation.app.AppViewModel
 import com.example.synesthesia.presentation.screens.addnote.AddNoteViewModel
 import com.example.synesthesia.presentation.screens.ai.AIAssistantViewModel
 import com.example.synesthesia.presentation.screens.detail.NoteDetailViewModel
 import com.example.synesthesia.presentation.screens.home.HomeViewModel
+import com.example.synesthesia.presentation.screens.insights.InsightsViewModel
+import com.example.synesthesia.presentation.screens.settings.SettingsViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -75,10 +78,13 @@ val useCaseModule = module {
 // ==================== VIEWMODEL MODULE ====================
 
 val viewModelModule = module {
+    viewModelOf(::AppViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::AddNoteViewModel)
     viewModelOf(::NoteDetailViewModel)
     viewModelOf(::AIAssistantViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::InsightsViewModel)
 }
 
 // ==================== SHARED MODULES ====================

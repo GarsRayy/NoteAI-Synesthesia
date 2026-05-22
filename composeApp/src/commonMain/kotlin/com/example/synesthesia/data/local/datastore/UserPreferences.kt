@@ -25,6 +25,10 @@ class UserPreferences(
     
     private object Keys {
         val DARK_MODE = booleanPreferencesKey("dark_mode")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
+        val USER_NAME = stringPreferencesKey("user_name")
+        val USER_BIO = stringPreferencesKey("user_bio")
+        val USER_PHOTO_URI = stringPreferencesKey("user_photo_uri")
         val SORT_BY = stringPreferencesKey("sort_by")
         val DEFAULT_CATEGORY = stringPreferencesKey("default_category")
         val SHOW_PREVIEW = booleanPreferencesKey("show_preview")
@@ -46,6 +50,38 @@ class UserPreferences(
     suspend fun setDarkMode(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[Keys.DARK_MODE] = enabled
+        }
+    }
+
+    // ==================== THEME MODE ====================
+
+    /**
+     * Observe theme mode setting
+     */
+    val themeMode: Flow<String> = dataStore.data.map { prefs ->
+        prefs[Keys.THEME_MODE] ?: "NORMAL"
+    }
+
+    /**
+     * Set theme mode
+     */
+    suspend fun setThemeMode(mode: String) {
+        dataStore.edit { prefs ->
+            prefs[Keys.THEME_MODE] = mode
+        }
+    }
+
+    // ==================== PROFILE = [NEW] ====================
+
+    val userName: Flow<String> = dataStore.data.map { it[Keys.USER_NAME] ?: "Stargazer" }
+    val userBio: Flow<String> = dataStore.data.map { it[Keys.USER_BIO] ?: "Exploring the galaxy of my emotions." }
+    val userPhotoUri: Flow<String?> = dataStore.data.map { it[Keys.USER_PHOTO_URI] }
+
+    suspend fun updateProfile(name: String, bio: String, photoUri: String?) {
+        dataStore.edit { prefs ->
+            prefs[Keys.USER_NAME] = name
+            prefs[Keys.USER_BIO] = bio
+            photoUri?.let { prefs[Keys.USER_PHOTO_URI] = it }
         }
     }
     

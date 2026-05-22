@@ -93,6 +93,7 @@ kotlin {
         
         androidMain.dependencies {
             implementation(compose.preview)
+            implementation(compose.uiTooling)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.android.driver)
@@ -156,4 +157,8 @@ sqldelight {
             packageName.set("com.example.synesthesia.data.local")
         }
     }
+}
+
+dependencies {
+    debugImplementation(compose.uiTooling)
 }

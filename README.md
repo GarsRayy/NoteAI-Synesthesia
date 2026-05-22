@@ -6,6 +6,23 @@
 
 ---
 
+## 📺 Visual Showcase
+
+| ☀️ Daylight Mode (Normal) | 🌌 Astronomy Mode (Space) |
+| :---: | :---: |
+| ![Daylight Home](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/home_light.png) | ![Astronomy Home](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/home_dark.png) |
+| *Clean interface with dynamic sky* | *Immersive galaxy with starfields* |
+
+| 🧘 Sanctuary (Mindfulness) | 📊 Insights (Analytics) |
+| :---: | :---: |
+| ![Sanctuary](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/sanctuary.png) | ![Insights](https://raw.githubusercontent.com/GarsRayy/NoteAI-Synesthesia/main/screenshots/insights.png) |
+| *Interactive breathing & meditation* | *Real-time data-driven mood trends* |
+
+### 🎥 Live Demo
+[![Watch the Demo](https://img.shields.io/badge/Demo-Watch%20Now-red?style=for-the-badge&logo=youtube)](https://link-to-your-demo-video.com)
+
+---
+
 ## 🚀 Key Features
 
 ### 🌕 Celestial Design System
@@ -19,9 +36,9 @@
 *   **Spotify AI Integration**: Personalized playlist recommendations triggered by your current "Galaxy Mood".
 
 ### 🧘 Holistic Well-being Modules
-*   **Sonic Zone**: Immersive audio frequencies (Binaural beats, Nebula noise) designed for focus, energy, and sleep.
-*   **Sanctuary**: Guided mindfulness rituals including Daily Breathing, Meditation, and Anxiety Relief.
-*   **Insights**: Deep emotional analytics with custom-drawn mood charts and emotion distribution tracking.
+*   **Sonic Zone**: Immersive audio frequencies (Binaural beats, Nebula noise) with an active playback system.
+*   **Sanctuary**: Functional mindfulness rituals including Guided Breathing (with timer), Meditation, and Gratitude.
+*   **Insights**: Deep emotional analytics with custom-drawn mood charts and live database synchronization.
 
 ---
 

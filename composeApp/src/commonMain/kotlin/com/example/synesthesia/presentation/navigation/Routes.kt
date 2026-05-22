@@ -5,7 +5,16 @@ import kotlinx.serialization.Serializable
 sealed interface Route {
     
     @Serializable
-    data object Constellation : Route // Home Screen
+    data object Constellation : Route // Home Screen (Main Graph)
+
+    @Serializable
+    data object SonicZen : Route // Placeholder for Tab 2
+
+    @Serializable
+    data object Sanctuary : Route // Placeholder for Tab 3
+
+    @Serializable
+    data object Insights : Route // Placeholder for Tab 4
     
     @Serializable
     data class AddMemory(val memoryId: Long? = null) : Route // Add/Edit Note

@@ -165,10 +165,17 @@ fun EmotionCard3D(category: EmotionCategory, onClick: () -> Unit) {
         "LEU" -> "MELANCHOLY"
         else -> category.name
     }
+    val description = when(category.id) {
+        "HEP" -> "High Energy, Pleasant"
+        "HEU" -> "High Energy, Unpleasant"
+        "LEP" -> "Low Energy, Pleasant"
+        "LEU" -> "Low Energy, Unpleasant"
+        else -> ""
+    }
 
     Card(
         modifier = Modifier
-            .aspectRatio(0.8f)
+            .aspectRatio(0.7f)
             .shadow(12.dp, RoundedCornerShape(24.dp))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
@@ -187,6 +194,12 @@ fun EmotionCard3D(category: EmotionCategory, onClick: () -> Unit) {
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp,
                     style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    description,
+                    color = Color.White.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = TextAlign.Center
                 )
             }
         }

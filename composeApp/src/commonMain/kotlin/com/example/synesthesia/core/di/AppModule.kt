@@ -23,6 +23,7 @@ import com.example.synesthesia.presentation.screens.addnote.AddNoteViewModel
 import com.example.synesthesia.presentation.screens.ai.AIAssistantViewModel
 import com.example.synesthesia.presentation.screens.detail.NoteDetailViewModel
 import com.example.synesthesia.presentation.screens.home.HomeViewModel
+import com.example.synesthesia.presentation.screens.insights.InsightsViewModel
 import com.example.synesthesia.presentation.screens.settings.SettingsViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -83,6 +84,7 @@ val viewModelModule = module {
     viewModelOf(::NoteDetailViewModel)
     viewModelOf(::AIAssistantViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::InsightsViewModel)
 }
 
 // ==================== SHARED MODULES ====================

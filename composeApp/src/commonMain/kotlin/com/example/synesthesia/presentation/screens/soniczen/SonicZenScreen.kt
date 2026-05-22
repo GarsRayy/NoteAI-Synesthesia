@@ -1,6 +1,6 @@
 package com.example.synesthesia.presentation.screens.soniczen
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,25 +9,38 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.synesthesia.presentation.theme.RoyalBlue
+import kotlinx.coroutines.delay
 
 @Composable
 fun SonicZenScreen() {
+    var playingTrack by remember { mutableStateOf<AudioTrack?>(null) }
+    var isPlaying by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(isPlaying, playingTrack) {
+        if (isPlaying && playingTrack != null) {
+            while (progress < 1f) {
+                delay(1000)
+                progress += 0.01f
+            }
+            isPlaying = false
+            progress = 0f
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,11 +62,10 @@ fun SonicZenScreen() {
                 Text(
                     "Frequencies that resonate",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
             }
             
-            // AI Playlist Trigger
             IconButton(
                 onClick = { /* Trigger AI Spotify Recommendation */ },
                 modifier = Modifier
@@ -66,69 +78,86 @@ fun SonicZenScreen() {
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Featured Spotify AI Card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .shadow(16.dp, RoundedCornerShape(24.dp)),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1DB954)) // Spotify Green
+        // Active Track Player
+        AnimatedVisibility(
+            visible = playingTrack != null,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
         ) {
-            Row(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
+            playingTrack?.let { track ->
+                Card(
                     modifier = Modifier
-                        .size(60.dp)
-                        .background(Color.Black.copy(alpha = 0.2f), CircleShape),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp)
+                        .shadow(16.dp, RoundedCornerShape(24.dp)),
+                    colors = CardDefaults.cardColors(containerColor = track.color.copy(alpha = 0.9f))
                 ) {
-                    Icon(Icons.Default.MusicNote, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp))
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("AI Personalized Playlist", color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("Based on your current galaxy mood", color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
-                }
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("GET", color = Color(0xFF1DB954), fontWeight = FontWeight.Bold)
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(track.emoji, fontSize = 40.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(track.title, color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge)
+                                Text("Now Resonating...", color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
+                            }
+                            IconButton(onClick = { isPlaying = !isPlaying }) {
+                                Icon(
+                                    if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                            color = Color.White,
+                            trackColor = Color.White.copy(alpha = 0.2f)
+                        )
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
             items(audioTracks) { track ->
-                ModernAudioCard(track)
+                ModernAudioCard(
+                    track = track,
+                    isActive = playingTrack == track,
+                    onClick = {
+                        if (playingTrack == track) {
+                            isPlaying = !isPlaying
+                        } else {
+                            playingTrack = track
+                            isPlaying = true
+                            progress = 0f
+                        }
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun ModernAudioCard(track: AudioTrack) {
+fun ModernAudioCard(track: AudioTrack, isActive: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
-            .shadow(12.dp, RoundedCornerShape(20.dp))
-            .clickable { },
+            .shadow(if (isActive) 12.dp else 4.dp, RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isActive) track.color.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
+        )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Gradient Overlay for "Beyond Expectation" feel
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -158,23 +187,14 @@ fun ModernAudioCard(track: AudioTrack) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(track.title, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleMedium)
                     Text(track.description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("432Hz • 15:00", style = MaterialTheme.typography.labelSmall, color = RoyalBlue, fontWeight = FontWeight.Bold)
                 }
                 
-                Surface(
-                    onClick = {},
-                    shape = CircleShape,
-                    color = RoyalBlue.copy(alpha = 0.1f),
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        Icons.Default.PlayArrow, 
-                        contentDescription = "Play", 
-                        tint = RoyalBlue, 
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
+                Icon(
+                    if (isActive) Icons.Default.GraphicEq else Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    tint = track.color,
+                    modifier = Modifier.padding(8.dp).size(24.dp)
+                )
             }
         }
     }

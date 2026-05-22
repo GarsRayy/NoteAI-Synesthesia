@@ -10,10 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.dp
 import com.example.synesthesia.presentation.theme.DeepIndigo
 import com.example.synesthesia.presentation.theme.SpaceBlack
 import com.example.synesthesia.presentation.theme.StarWhite
+import kotlin.math.sin
 import kotlin.random.Random
 
 @Composable
@@ -21,7 +24,7 @@ fun CelestialBackground(
     isAstronomyMode: Boolean,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val bgColor = if (isAstronomyMode) SpaceBlack else Color(0xFFF0F9FF) // Sky Blue for Light Mode
+    val bgColor = if (isAstronomyMode) SpaceBlack else Color(0xFFF0F9FF)
     val contentColor = if (isAstronomyMode) StarWhite else DeepIndigo
 
     Surface(
@@ -46,35 +49,59 @@ fun CelestialBackground(
 private fun DaylightSky() {
     val infiniteTransition = rememberInfiniteTransition()
     val sunPulse by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.1f,
+        initialValue = 0.9f,
+        targetValue = 1.2f,
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = FastOutSlowInEasing),
+            animation = tween(5000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
+        )
+    )
+    val sunRotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(60000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
         )
     )
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        // Soft Sun Glow
+        val centerX = size.width * 0.85f
+        val centerY = size.height * 0.15f
+
+        // Sunrays
+        translate(centerX, centerY) {
+            rotate(sunRotation) {
+                repeat(8) { i ->
+                    rotate(i * 45f) {
+                        drawRect(
+                            color = Color(0xFFFEF08A).copy(alpha = 0.1f),
+                            topLeft = Offset(-20f, 100f),
+                            size = androidx.compose.ui.geometry.Size(40f, 1000f)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Sun Glow
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(Color(0xFFFEF08A).copy(alpha = 0.3f), Color.Transparent),
-                center = Offset(size.width * 0.8f, size.height * 0.15f),
-                radius = 400f * sunPulse
+                colors = listOf(Color(0xFFFEF08A).copy(alpha = 0.4f), Color.Transparent),
+                center = Offset(centerX, centerY),
+                radius = 350f * sunPulse
             ),
-            radius = 400f * sunPulse,
-            center = Offset(size.width * 0.8f, size.height * 0.15f)
+            radius = 350f * sunPulse,
+            center = Offset(centerX, centerY)
         )
         
-        // Subtle Clouds (drawn as soft ovals)
-        repeat(3) { i ->
+        // Clouds
+        repeat(5) { i ->
+            val cloudX = (size.width * (0.1f + i * 0.25f) + (sin(sunRotation * 0.05f + i) * 100f)) % size.width
             drawCircle(
-                color = Color.White.copy(alpha = 0.4f),
-                radius = 150f,
-                center = Offset(
-                    size.width * (0.2f + i * 0.3f),
-                    size.height * (0.1f + i * 0.05f)
-                )
+                color = Color.White.copy(alpha = 0.35f),
+                radius = 120f + (i * 20),
+                center = Offset(cloudX, size.height * (0.2f + (i % 2) * 0.1f))
             )
         }
     }

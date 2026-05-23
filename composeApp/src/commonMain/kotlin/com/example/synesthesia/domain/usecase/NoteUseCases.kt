@@ -129,3 +129,15 @@ class GenerateIdeasUseCase(
         return aiRepository.generateIdeas(topic)
     }
 }
+
+class AnalyzeEmotionUseCase(
+    private val aiRepository: AIRepository
+) {
+    suspend operator fun invoke(title: String, content: String): Result<com.example.synesthesia.data.remote.dto.EmotionAnalysisResponse> {
+        val combinedText = "Judul: $title\n\nIsi: $content"
+        if (combinedText.length < 10) {
+            return Result.failure(IllegalArgumentException("Teks terlalu pendek untuk dianalisis"))
+        }
+        return aiRepository.analyzeEmotion(combinedText)
+    }
+}

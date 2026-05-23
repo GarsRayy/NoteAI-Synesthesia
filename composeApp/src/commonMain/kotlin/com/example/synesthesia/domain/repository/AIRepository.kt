@@ -7,6 +7,7 @@ interface AIRepository {
     suspend fun translate(text: String, targetLanguage: String): Result<String>
     suspend fun chat(message: String): Result<String>
     suspend fun suggestTitle(content: String): Result<String>
+    suspend fun analyzeEmotion(text: String): Result<com.example.synesthesia.data.remote.dto.EmotionAnalysisResponse>
 }
 
 enum class WritingStyle(val displayName: String, val prompt: String) {

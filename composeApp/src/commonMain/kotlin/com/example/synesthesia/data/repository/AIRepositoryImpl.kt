@@ -8,25 +8,25 @@ import com.example.synesthesia.domain.repository.WritingStyle
 class AIRepositoryImpl(
     private val geminiService: GeminiService
 ) : AIRepository {
-    
+
     override suspend fun summarize(text: String): Result<String> {
         val prompt = """
             Rangkum teks berikut:
             
             $text
         """.trimIndent()
-        
+
         return geminiService.generateContent(
             prompt = prompt,
             systemPrompt = SystemPrompts.SUMMARIZER
         )
     }
-    
+
     override suspend fun generateIdeas(topic: String): Result<List<String>> {
         val prompt = """
             Berikan 5 ide kreatif untuk topik: $topic
         """.trimIndent()
-        
+
         return geminiService.generateContent(
             prompt = prompt,
             systemPrompt = SystemPrompts.IDEA_GENERATOR
@@ -39,7 +39,7 @@ class AIRepositoryImpl(
                 .filter { it.isNotBlank() }
         }
     }
-    
+
     override suspend fun improveWriting(text: String, style: WritingStyle): Result<String> {
         val styleInstruction = when (style) {
             WritingStyle.FORMAL -> "Gunakan gaya formal dan profesional."
@@ -48,7 +48,7 @@ class AIRepositoryImpl(
             WritingStyle.CREATIVE -> "Gunakan gaya kreatif dan menarik."
             WritingStyle.NEUTRAL -> "Gunakan gaya netral."
         }
-        
+
         val prompt = """
             $styleInstruction
             
@@ -56,40 +56,44 @@ class AIRepositoryImpl(
             
             $text
         """.trimIndent()
-        
+
         return geminiService.generateContent(
             prompt = prompt,
             systemPrompt = SystemPrompts.WRITING_IMPROVER
         )
     }
-    
+
     override suspend fun translate(text: String, targetLanguage: String): Result<String> {
         val prompt = """
             Terjemahkan ke bahasa $targetLanguage:
             
             $text
         """.trimIndent()
-        
+
         return geminiService.generateContent(
             prompt = prompt,
             systemPrompt = SystemPrompts.TRANSLATOR
         )
     }
-    
+
     override suspend fun chat(message: String): Result<String> {
         return geminiService.generateContent(prompt = message)
     }
-    
+
     override suspend fun suggestTitle(content: String): Result<String> {
         val prompt = """
             Berikan saran judul untuk konten berikut:
             
-            $content
+            ${content}
         """.trimIndent()
-        
+
         return geminiService.generateContent(
             prompt = prompt,
             systemPrompt = SystemPrompts.TITLE_SUGGESTER
         ).map { it.trim().removeSurrounding("\"") }
+    }
+
+    override suspend fun analyzeEmotion(text: String): Result<com.example.synesthesia.data.remote.dto.EmotionAnalysisResponse> {
+        return geminiService.analyzeEmotion(text)
     }
 }

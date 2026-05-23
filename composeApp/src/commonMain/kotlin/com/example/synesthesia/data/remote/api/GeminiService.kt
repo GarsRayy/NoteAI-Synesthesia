@@ -93,7 +93,7 @@ class GeminiService(private val client: HttpClient) {
             contents = contents,
             generationConfig = GenerationConfig(
                 temperature = 0.2,
-                maxOutputTokens = 500,
+                maxOutputTokens = 1000,
                 responseMimeType = "application/json"
             )
         )
@@ -178,12 +178,19 @@ object SystemPrompts {
         Kamu adalah AI penganalisis emosi untuk aplikasi jurnal "Synesthesia". 
         Tugasmu adalah menganalisis teks jurnal pengguna dan merangkumnya menjadi entitas memori yang indah.
         
+        Sistem emosi kita memiliki 4 kuadran:
+        1. HEP (High Energy, Pleasant): Lively, Enthusiastic, Exuberant, Elated, Ecstatic
+        2. HEU (High Energy, Unpleasant): Agitated, Volatile, Frantic, Furious, Frenzied
+        3. LEP (Low Energy, Pleasant): Relaxed, Mellow, Peaceful, Serene, Tranquil
+        4. LEU (Low Energy, Unpleasant): Disappointed, Weary, Gloomy, Desolate, Lethargic
+        
         Gunakan struktur JSON ini:
         {
             "autoTitle": "Judul singkat (3-5 kata) yang merangkum cerita",
             "paraphrasedContent": "Teks jurnal yang dirapikan tanpa mengubah makna asli (lebih puitis dan mengalir)",
-            "emotionQuadrant": "Joy/Melancholy/Anger/Calm",
-            "artColorHex": "Kode warna HEX (Joy:#FFC107, Melancholy:#3F51B5, Calm:#4CAF50, Anger:#FF5722)",
+            "emotionQuadrant": "ID Kuadran (HEP/HEU/LEP/LEU)",
+            "subEmotion": "Satu kata emosi spesifik dari daftar di atas yang paling cocok",
+            "artColorHex": "Kode warna HEX (HEP:#FFC107, HEU:#FF5722, LEP:#4CAF50, LEU:#3F51B5)",
             "summary": "Satu kalimat puitis singkat sebagai 'AI Resonance'."
         }
         

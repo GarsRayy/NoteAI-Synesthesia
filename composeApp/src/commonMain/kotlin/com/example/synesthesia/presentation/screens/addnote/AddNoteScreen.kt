@@ -95,6 +95,8 @@ fun AddNoteScreen(
                 JournalingStep(
                     content = uiState.content,
                     onContentChange = viewModel::onContentChange,
+                    isParaphraseEnabled = uiState.isParaphraseEnabled,
+                    onParaphraseToggle = viewModel::toggleParaphrase,
                     isAnalyzing = uiState.isAnalyzing,
                     isSaving = uiState.isSaving
                 )
@@ -107,6 +109,8 @@ fun AddNoteScreen(
 fun JournalingStep(
     content: String,
     onContentChange: (String) -> Unit,
+    isParaphraseEnabled: Boolean,
+    onParaphraseToggle: () -> Unit,
     isAnalyzing: Boolean,
     isSaving: Boolean
 ) {
@@ -124,17 +128,40 @@ fun JournalingStep(
                 )
             }
         } else {
-            OutlinedTextField(
-                value = content,
-                onValueChange = onContentChange,
-                placeholder = { Text("Write your soul here...") },
-                modifier = Modifier.fillMaxSize().padding(24.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
+            Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "AI Refinement",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Switch(
+                        checked = isParaphraseEnabled,
+                        onCheckedChange = { onParaphraseToggle() },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    )
+                }
+
+                OutlinedTextField(
+                    value = content,
+                    onValueChange = onContentChange,
+                    placeholder = { Text("Write your soul here...") },
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                    )
                 )
-            )
+            }
         }
     }
 }

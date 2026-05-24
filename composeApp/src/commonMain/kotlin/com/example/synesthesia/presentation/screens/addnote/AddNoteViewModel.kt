@@ -69,6 +69,10 @@ class AddNoteViewModel(
         _uiState.update { it.copy(content = content) }
     }
     
+    fun toggleParaphrase() {
+        _uiState.update { it.copy(isParaphraseEnabled = !it.isParaphraseEnabled) }
+    }
+    
     
     fun saveNote() {
         val state = _uiState.value
@@ -95,7 +99,7 @@ class AddNoteViewModel(
                 val note = Note(
                     id = currentNoteId ?: 0,
                     title = analysis.autoTitle,
-                    content = analysis.paraphrasedContent,
+                    content = if (state.isParaphraseEnabled) analysis.paraphrasedContent else state.content,
                     category = state.category,
                     color = state.color,
                     emotion = analysis.subEmotion,
@@ -136,7 +140,8 @@ data class AddNoteUiState(
     val titleError: String? = null,
     val createdAt: Instant = Clock.System.now(),
     val selectedMainCategory: EmotionCategory? = null,
-    val selectedSubEmotion: String? = null
+    val selectedSubEmotion: String? = null,
+    val isParaphraseEnabled: Boolean = true
 ) {
     val isValid: Boolean
         get() = title.isNotBlank() || content.isNotBlank()

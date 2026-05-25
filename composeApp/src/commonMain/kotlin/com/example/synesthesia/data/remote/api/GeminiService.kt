@@ -60,11 +60,15 @@ class GeminiService(private val client: HttpClient) {
             )
         )
         
-        val response: GeminiResponse = client.post("$BASE_URL/models/$MODEL:generateContent") {
-            contentType(ContentType.Application.Json)
-            parameter("key", ApiConfig.geminiApiKey)
-            setBody(request)
-        }.body()
+        val response: GeminiResponse = try {
+            client.post("$BASE_URL/models/$MODEL:generateContent") {
+                contentType(ContentType.Application.Json)
+                parameter("key", ApiConfig.geminiApiKey)
+                setBody(request)
+            }.body()
+        } catch (e: Exception) {
+            throw Exception("No internet connection. Please check your network and try again.")
+        }
         
         response.getErrorMessage()?.let { errorMsg ->
             throw Exception(errorMsg)
@@ -98,11 +102,15 @@ class GeminiService(private val client: HttpClient) {
             )
         )
 
-        val response: GeminiResponse = client.post("$BASE_URL/models/$MODEL:generateContent") {
-            contentType(ContentType.Application.Json)
-            parameter("key", ApiConfig.geminiApiKey)
-            setBody(request)
-        }.body()
+        val response: GeminiResponse = try {
+            client.post("$BASE_URL/models/$MODEL:generateContent") {
+                contentType(ContentType.Application.Json)
+                parameter("key", ApiConfig.geminiApiKey)
+                setBody(request)
+            }.body()
+        } catch (e: Exception) {
+            throw Exception("No internet connection. Please check your network and try again.")
+        }
 
         response.getErrorMessage()?.let { throw Exception(it) }
 

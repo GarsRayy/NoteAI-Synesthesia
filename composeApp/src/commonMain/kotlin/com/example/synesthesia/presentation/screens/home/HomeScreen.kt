@@ -3,7 +3,10 @@ package com.example.synesthesia.presentation.screens.home
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,8 +25,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.synesthesia.domain.model.NoteCategory
 import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.RoyalBlue
 import com.example.synesthesia.presentation.theme.SpaceBlack
@@ -42,6 +45,7 @@ fun HomeScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val userName by viewModel.userName.collectAsStateWithLifecycle()
     var isSearchActive by remember { mutableStateOf(false) }
+    var showFilterSheet by remember { mutableStateOf(false) }
     
     val query = when (val state = uiState) {
         is HomeUiState.Success -> state.query
@@ -139,6 +143,13 @@ fun HomeScreen(
                         }
 
                         if (!isSearchActive) {
+                            IconButton(onClick = { showFilterSheet = true }) {
+                                Icon(
+                                    Icons.Default.Tune,
+                                    contentDescription = "Filter",
+                                    tint = if (MaterialTheme.colorScheme.background == SpaceBlack) BrightYellow else RoyalBlue
+                                )
+                            }
                             IconButton(onClick = onNavigateToSettings) {
                                 Surface(
                                     modifier = Modifier.size(36.dp),
@@ -245,6 +256,106 @@ fun HomeScreen(
                     .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = "AI", tint = RoyalBlue)
+            }
+        }
+        
+        if (showFilterSheet) {
+            FilterSortBottomSheet(
+                selectedCategory = when(val state = uiState) {
+                    is HomeUiState.Success -> state.category
+                    is HomeUiState.Empty -> state.category
+                    else -> null
+                },
+                selectedSort = when(val state = uiState) {
+                    is HomeUiState.Success -> state.sortBy
+                    else -> com.example.synesthesia.domain.usecase.NoteSortBy.UPDATED_DESC
+                },
+                onCategorySelected = {
+                    viewModel.onCategorySelected(it)
+                    showFilterSheet = false
+                },
+                onSortByChanged = {
+                    viewModel.onSortByChanged(it)
+                    showFilterSheet = false
+                },
+                onDismiss = { showFilterSheet = false }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterSortBottomSheet(
+    selectedCategory: NoteCategory?,
+    selectedSort: com.example.synesthesia.domain.usecase.NoteSortBy,
+    onCategorySelected: (NoteCategory?) -> Unit,
+    onSortByChanged: (com.example.synesthesia.domain.usecase.NoteSortBy) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
+        ) {
+            Text(
+                "Filter Memories",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Black
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text("By Category", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedCategory == null,
+                    onClick = { onCategorySelected(null) },
+                    label = { Text("All") }
+                )
+                NoteCategory.entries.forEach { category ->
+                    FilterChip(
+                        selected = selectedCategory == category,
+                        onClick = { onCategorySelected(category) },
+                        label = { Text(category.displayName) }
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text("Sort By", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            com.example.synesthesia.domain.usecase.NoteSortBy.entries.forEach { sort ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth().clickable { onSortByChanged(sort) },
+                    color = if (selectedSort == sort) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            sort.displayName,
+                            modifier = Modifier.weight(1f),
+                            fontWeight = if (selectedSort == sort) FontWeight.Bold else FontWeight.Normal
+                        )
+                        if (selectedSort == sort) {
+                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
             }
         }
     }

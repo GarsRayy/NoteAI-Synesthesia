@@ -68,6 +68,21 @@ class AddNoteViewModel(
     fun onContentChange(content: String) {
         _uiState.update { it.copy(content = content) }
     }
+
+    fun onMainCategorySelected(category: EmotionCategory?) {
+        _uiState.update { it.copy(
+            selectedMainCategory = category,
+            selectedSubEmotion = null,
+            artToken = category?.name
+        ) }
+    }
+    
+    fun onSubEmotionSelected(subEmotion: String?) {
+        _uiState.update { it.copy(
+            selectedSubEmotion = subEmotion,
+            emotion = subEmotion
+        ) }
+    }
     
     fun toggleParaphrase() {
         _uiState.update { it.copy(isParaphraseEnabled = !it.isParaphraseEnabled) }
@@ -118,8 +133,33 @@ class AddNoteViewModel(
                         _events.emit(AddNoteEvent.Error(error.message ?: "Gagal menyimpan"))
                     }
             }.onFailure { error ->
-                _uiState.update { it.copy(isAnalyzing = false) }
-                _events.emit(AddNoteEvent.Error("AI gagal menganalisis: ${error.message}"))
+                // FALLBACK: Save without AI if analysis fails
+                _uiState.update { it.copy(isAnalyzing = false, isSaving = true) }
+                _events.emit(AddNoteEvent.Error("AI gagal: Menggunakan mode hemat daya (offline save)."))
+                
+                val fallbackNote = Note(
+                    id = currentNoteId ?: 0,
+                    title = if (state.content.length > 20) state.content.take(20) + "..." else state.content,
+                    content = state.content,
+                    category = state.category,
+                    color = state.color,
+                    emotion = state.selectedSubEmotion ?: "Calm",
+                    artToken = state.selectedMainCategory?.name ?: EmotionSystem.categories.first().name,
+                    aiResonance = "Saved in offline mode.",
+                    createdAt = if (currentNoteId == null) Clock.System.now() else state.createdAt,
+                    updatedAt = Clock.System.now()
+                )
+
+                viewModelScope.launch {
+                    saveNoteUseCase(fallbackNote)
+                        .onSuccess {
+                            _events.emit(AddNoteEvent.NoteSaved)
+                        }
+                        .onFailure { saveError ->
+                            _uiState.update { it.copy(isSaving = false) }
+                            _events.emit(AddNoteEvent.Error("Gagal menyimpan: ${saveError.message}"))
+                        }
+                }
             }
         }
     }

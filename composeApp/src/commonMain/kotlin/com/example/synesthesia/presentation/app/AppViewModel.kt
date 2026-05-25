@@ -2,6 +2,7 @@ package com.example.synesthesia.presentation.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.synesthesia.core.util.NetworkMonitor
 import com.example.synesthesia.data.local.datastore.UserPreferences
 import com.example.synesthesia.presentation.theme.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
@@ -10,8 +11,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 class AppViewModel(
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
+    networkMonitor: NetworkMonitor
 ) : ViewModel() {
+
+    val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
 
     val isDarkMode: StateFlow<Boolean> = userPreferences.isDarkMode
         .stateIn(

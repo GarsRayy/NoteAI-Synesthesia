@@ -21,6 +21,8 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
+import kotlinx.datetime.*
+
 @Composable
 fun MoodCalendar(
     monthName: String,
@@ -28,8 +30,18 @@ fun MoodCalendar(
     calendarData: Map<Int, String?>,
     modifier: Modifier = Modifier
 ) {
-    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    val today = now.dayOfMonth
     
+    // Calculate days in month and start offset
+    val firstDayOfMonth = LocalDate(year, now.month, 1)
+    val dayOfWeekOffset = (firstDayOfMonth.dayOfWeek.isoDayNumber - 1) % 7
+    val daysInMonth = when (now.month) {
+        Month.FEBRUARY -> if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) 29 else 28
+        Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> 30
+        else -> 31
+    }
+
     Card(
         modifier = modifier.fillMaxWidth().shadow(12.dp, RoundedCornerShape(28.dp)),
         shape = RoundedCornerShape(28.dp),
@@ -37,7 +49,7 @@ fun MoodCalendar(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "$monthName $year",
+                text = "${monthName.lowercase().replaceFirstChar { it.uppercase() }} $year",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.fillMaxWidth(),
@@ -61,13 +73,18 @@ fun MoodCalendar(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Calendar Grid (Approx 31 days)
+            // Calendar Grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(7),
-                modifier = Modifier.height(240.dp), // Fixed height for calendar
+                modifier = Modifier.heightIn(max = 300.dp),
                 userScrollEnabled = false
             ) {
-                items(31) { index ->
+                // Empty slots for offset
+                items(dayOfWeekOffset) {
+                    Spacer(modifier = Modifier.padding(2.dp).aspectRatio(1f))
+                }
+
+                items(daysInMonth) { index ->
                     val day = index + 1
                     val emotionColorHex = calendarData[day]
                     val backgroundColor = if (emotionColorHex != null) {

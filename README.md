@@ -33,11 +33,12 @@
 ### 🤖 Intelligent Resonance (AI Engine)
 *   **Automated Metadata**: Powered by **Google Gemini API**. AI automatically generates titles, paraphrases content poetically, and senses your emotion quadrant.
 *   **AI Perspective**: Get intelligent summaries of your weekly emotional trends in the Insights tab.
-*   **Spotify AI Integration**: Personalized playlist recommendations triggered by your current "Galaxy Mood".
+*   **Graceful Fallback**: Native "Offline Save" mode allows you to keep journaling even without internet connection, with AI analysis deferred for later.
 
 ### 🧘 Holistic Well-being Modules
 *   **Sonic Zone**: Immersive audio frequencies (Binaural beats, Nebula noise) with an active playback system.
 *   **Sanctuary**: Functional mindfulness rituals including Guided Breathing (with timer), Meditation, and Gratitude.
+*   **Worry Vault**: Secure, AI-supported exercise to release and lock away anxieties.
 *   **Insights**: Deep emotional analytics with custom-drawn mood charts and live database synchronization.
 
 ---
@@ -59,6 +60,7 @@ Synesthesia is built following **Clean Architecture** principles to ensure a sca
 | **AI Integration** | Google Gemini API |
 | **Database** | SQLDelight (2.0.2) |
 | **Networking** | Ktor Client (3.0.1) |
+| **Connectivity** | Real-time Network Monitoring |
 | **Concurrency** | Kotlin Coroutines & Flow |
 
 ---
@@ -66,7 +68,7 @@ Synesthesia is built following **Clean Architecture** principles to ensure a sca
 ## 📁 Project Structure
 ```bash
 composeApp/src/commonMain/kotlin/com/example/synesthesia/
-├── core/                      # DI, Network, App-wide Utils
+├── core/                      # DI, Network, Network Monitor, Utils
 ├── data/                      # DTOs, Local DB, API implementation
 ├── domain/                    # Entities, Repositories, Use Cases
 └── presentation/

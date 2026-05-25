@@ -42,17 +42,20 @@ class InsightsViewModel(
             val total = notes.size
             if (total == 0) return@map InsightsUiState.Empty
 
-            val distribution = notes.groupBy { it.emotion?.lowercase() ?: "calm" }
-                .mapValues { (it.value.size.toFloat() / total * 100).toInt() }
+            val labels = listOf("joy", "calm", "melancholy", "anger")
+            val distribution = labels.associateWith { label ->
+                val count = notes.count { it.emotion?.lowercase() == label }
+                (count.toFloat() / total * 100).toInt()
+            }
 
-            // Simplified weekly trend (last 7 days)
-            val last7Days = (0..6).map { i ->
+            val last7DaysData = (0..6).map { i ->
                 val date = now.minus(i, DateTimeUnit.DAY, tz)
-                // Count notes for this date (simplified)
-                notes.count { it.createdAt.toLocalDateTime(tz).date == date.toLocalDateTime(tz).date }.toFloat()
+                val dayNotes = notes.filter { it.createdAt.toLocalDateTime(tz).date == date.toLocalDateTime(tz).date }
+                val count = dayNotes.size.toFloat()
+                val dominant = dayNotes.groupBy { it.emotion?.lowercase() ?: "calm" }.maxByOrNull { it.value.size }?.key ?: "calm"
+                count to dominant
             }.reversed()
 
-            // Mood Calendar Data
             val currentMonth = now.toLocalDateTime(tz).month
             val calendarData = notes
                 .filter { note -> 
@@ -60,7 +63,6 @@ class InsightsViewModel(
                 }
                 .groupBy { note -> note.createdAt.toLocalDateTime(tz).dayOfMonth }
                 .mapValues { (_, dayNotes) ->
-                    // Ambil emosi yang paling sering muncul di hari itu
                     val dominant = dayNotes.groupBy { it.emotion }.maxByOrNull { it.value.size }?.key
                     EmotionSystem.categories.find { it.subEmotions.contains(dominant) }?.color
                 }
@@ -68,7 +70,8 @@ class InsightsViewModel(
             InsightsUiState.Success(
                 totalMemories = total,
                 emotionDistribution = distribution,
-                weeklyTrend = last7Days,
+                weeklyTrend = last7DaysData.map { it.first },
+                weeklyDominantEmotions = last7DaysData.map { it.second },
                 calendarData = calendarData,
                 currentMonthName = currentMonth.name,
                 currentYear = now.toLocalDateTime(tz).year
@@ -136,6 +139,7 @@ sealed interface InsightsUiState {
         val totalMemories: Int,
         val emotionDistribution: Map<String, Int>,
         val weeklyTrend: List<Float>,
+        val weeklyDominantEmotions: List<String>,
         val calendarData: Map<Int, String?>,
         val currentMonthName: String,
         val currentYear: Int

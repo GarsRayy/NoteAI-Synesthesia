@@ -134,18 +134,6 @@ private fun StarField() {
         )
     )
 
-    val particles = remember {
-        List(25) {
-            Particle(
-                x = Random.nextFloat(),
-                y = Random.nextFloat(),
-                size = Random.nextFloat() * 30f + 10f,
-                alpha = Random.nextFloat() * 0.2f + 0.1f,
-                speed = Random.nextFloat() * 0.001f + 0.0005f
-            )
-        }
-    }
-
     val stars = remember {
         List(100) {
             Star(
@@ -157,17 +145,7 @@ private fun StarField() {
         }
     }
 
-    val particleAnim by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
     Canvas(modifier = Modifier.fillMaxSize()) {
-        // Distant Stars
         stars.forEach { star ->
             drawCircle(
                 color = StarWhite.copy(alpha = star.alpha * twinkle),
@@ -175,19 +153,7 @@ private fun StarField() {
                 center = Offset(star.x * size.width, star.y * size.height)
             )
         }
-
-        // Floating Particles (Bokeh)
-        particles.forEachIndexed { i, p ->
-            val currentY = (p.y - (particleAnim + i * 0.1f)) % 1f
-            val yPos = if (currentY < 0) currentY + 1f else currentY
-            drawCircle(
-                color = StarWhite.copy(alpha = p.alpha),
-                radius = p.size,
-                center = Offset(p.x * size.width, yPos * size.height)
-            )
-        }
     }
 }
 
 private data class Star(val x: Float, val y: Float, val size: Float, val alpha: Float)
-private data class Particle(val x: Float, val y: Float, val size: Float, val alpha: Float, val speed: Float)

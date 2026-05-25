@@ -1,6 +1,7 @@
 package com.example.synesthesia.presentation.screens.insights
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -116,7 +117,10 @@ fun InsightsScreen(
         Card(
             modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(24.dp)),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f))
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+            ),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -158,7 +162,11 @@ fun InsightsScreen(
                             Text("Real-time Mood Galaxy", fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        MoodChart(modifier = Modifier.fillMaxSize(), points = state.weeklyTrend)
+                        MoodChart(
+                            modifier = Modifier.fillMaxSize(),
+                            points = state.weeklyTrend,
+                            dominantEmotions = state.weeklyDominantEmotions
+                        )
                     }
                 }
                 
@@ -203,7 +211,7 @@ private fun getEmotionColor(emotion: String): Color {
 }
 
 @Composable
-fun MoodChart(modifier: Modifier = Modifier, points: List<Float>) {
+fun MoodChart(modifier: Modifier = Modifier, points: List<Float>, dominantEmotions: List<String>) {
     Canvas(modifier = modifier) {
         if (points.size < 2) return@Canvas
         val path = Path()
@@ -215,10 +223,12 @@ fun MoodChart(modifier: Modifier = Modifier, points: List<Float>) {
             val y = size.height * (1f - (valRaw / maxVal))
             if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
             
-            drawCircle(color = RoyalBlue, radius = 5.dp.toPx(), center = Offset(x, y))
+            val emotionColor = getEmotionColor(dominantEmotions.getOrElse(index) { "calm" })
+            drawCircle(color = emotionColor, radius = 6.dp.toPx(), center = Offset(x, y))
+            drawCircle(color = Color.White.copy(alpha = 0.5f), radius = 8.dp.toPx(), center = Offset(x, y), style = Stroke(width = 2f))
         }
         
-        drawPath(path = path, color = RoyalBlue, style = Stroke(width = 4.dp.toPx()))
+        drawPath(path = path, color = Color.White.copy(alpha = 0.3f), style = Stroke(width = 3.dp.toPx()))
     }
 }
 

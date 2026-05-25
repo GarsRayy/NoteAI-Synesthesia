@@ -91,13 +91,15 @@ fun MemoryDetailScreen(
                             shape = RoundedCornerShape(24.dp)
                         ) {
                             Column(modifier = Modifier.padding(24.dp)) {
-                                Text(
-                                    state.note.title,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Black,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
+                                if (state.note.title.isNotBlank()) {
+                                    Text(
+                                        state.note.title,
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = FontWeight.Black,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                }
                                 Text(
                                     state.note.emotion?.uppercase() ?: "UNKNOWN EMOTION",
                                     style = MaterialTheme.typography.labelLarge,

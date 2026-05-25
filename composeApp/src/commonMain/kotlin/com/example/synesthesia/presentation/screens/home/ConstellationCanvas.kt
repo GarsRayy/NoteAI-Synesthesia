@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -18,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.EmotionSystem
 import com.example.synesthesia.presentation.theme.BrightYellow
+import com.example.synesthesia.presentation.theme.RoyalBlue
+import com.example.synesthesia.presentation.theme.SpaceBlack
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -28,6 +31,7 @@ fun ConstellationCanvas(
     onNoteClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isAstronomy = MaterialTheme.colorScheme.background == SpaceBlack
     var offset by remember { mutableStateOf(Offset.Zero) }
     var scale by remember { mutableStateOf(1f) }
     var selectedNoteId by remember { mutableStateOf<Long?>(null) }
@@ -95,10 +99,12 @@ fun ConstellationCanvas(
                     translationY = offset.y
                 )
         ) {
+            val starColor = if (isAstronomy) Color.White else Color(0xFFB39DDB) // Pastel Purple
+
             // Background stars
             repeat(100) { i ->
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.15f * twinkleAnim),
+                    color = starColor.copy(alpha = 0.15f * twinkleAnim),
                     radius = 1f + (i % 2),
                     center = Offset(
                         x = (i * 777f % size.width),

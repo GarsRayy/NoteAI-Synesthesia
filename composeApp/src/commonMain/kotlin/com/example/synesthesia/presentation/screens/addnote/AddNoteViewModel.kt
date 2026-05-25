@@ -65,28 +65,14 @@ class AddNoteViewModel(
     
     // ==================== USER ACTIONS ====================
     
-    fun onTitleChange(title: String) {
-        _uiState.update { it.copy(title = title, titleError = null) }
-    }
-    
     fun onContentChange(content: String) {
         _uiState.update { it.copy(content = content) }
     }
     
-    fun onMainCategorySelected(category: EmotionCategory?) {
-        _uiState.update { it.copy(
-            selectedMainCategory = category,
-            selectedSubEmotion = null,
-            artToken = category?.name // Using artToken to store main category name
-        ) }
+    fun toggleParaphrase() {
+        _uiState.update { it.copy(isParaphraseEnabled = !it.isParaphraseEnabled) }
     }
     
-    fun onSubEmotionSelected(subEmotion: String?) {
-        _uiState.update { it.copy(
-            selectedSubEmotion = subEmotion,
-            emotion = subEmotion
-        ) }
-    }
     
     fun saveNote() {
         val state = _uiState.value
@@ -98,13 +84,6 @@ class AddNoteViewModel(
             return
         }
 
-        if (state.selectedMainCategory == null) {
-            viewModelScope.launch {
-                _events.emit(AddNoteEvent.Error("Pilih kuadran emosi terlebih dahulu"))
-            }
-            return
-        }
-        
         _uiState.update { it.copy(isAnalyzing = true) }
         
         viewModelScope.launch {
@@ -114,14 +93,17 @@ class AddNoteViewModel(
             analysisResult.onSuccess { analysis ->
                 _uiState.update { it.copy(isAnalyzing = false, isSaving = true) }
                 
+                // Find category by ID returned from AI (HEP, HEU, LEP, LEU)
+                val category = EmotionSystem.categories.find { it.id == analysis.emotionQuadrant }
+                
                 val note = Note(
                     id = currentNoteId ?: 0,
                     title = analysis.autoTitle,
-                    content = analysis.paraphrasedContent,
+                    content = if (state.isParaphraseEnabled) analysis.paraphrasedContent else state.content,
                     category = state.category,
                     color = state.color,
-                    emotion = analysis.emotionQuadrant,
-                    artToken = state.selectedMainCategory.name, // The hub name for graph
+                    emotion = analysis.subEmotion,
+                    artToken = category?.name ?: EmotionSystem.categories.first().name, // The hub name for graph
                     aiResonance = analysis.summary,
                     createdAt = if (currentNoteId == null) Clock.System.now() else state.createdAt,
                     updatedAt = Clock.System.now()
@@ -158,7 +140,8 @@ data class AddNoteUiState(
     val titleError: String? = null,
     val createdAt: Instant = Clock.System.now(),
     val selectedMainCategory: EmotionCategory? = null,
-    val selectedSubEmotion: String? = null
+    val selectedSubEmotion: String? = null,
+    val isParaphraseEnabled: Boolean = true
 ) {
     val isValid: Boolean
         get() = title.isNotBlank() || content.isNotBlank()

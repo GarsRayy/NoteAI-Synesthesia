@@ -7,7 +7,6 @@ import com.example.synesthesia.data.local.NoteDatabase
 import com.example.synesthesia.data.local.entity.toDomain
 import com.example.synesthesia.data.local.entity.toDomainList
 import com.example.synesthesia.data.local.entity.toEntityValues
-import com.example.synesthesia.data.remote.api.GeminiService
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.NoteCategory
 import com.example.synesthesia.domain.repository.NoteRepository
@@ -17,10 +16,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 
-class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiService: GeminiService) : NoteRepository {
+class NoteRepositoryImpl(private val database: NoteDatabase) : NoteRepository {
     
     private val queries = database.noteQueries
-    
+
     override fun getAllNotes(): Flow<List<Note>> {
         return queries.getAllNotes()
             .asFlow()
@@ -55,10 +54,10 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
             .mapToOneOrNull(Dispatchers.Default)
             .map { entity -> entity?.toDomain() }
     }
-    
+
     override suspend fun insertNote(note: Note): Long = withContext(Dispatchers.Default) {
         val values = note.toEntityValues()
-        
+
         queries.insertNote(
             title = values.title,
             content = values.content,
@@ -73,7 +72,7 @@ class NoteRepositoryImpl(private val database: NoteDatabase, private val geminiS
         )
         queries.lastInsertId().executeAsOne()
     }
-    
+
     override suspend fun updateNote(note: Note) = withContext(Dispatchers.Default) {
         val values = note.toEntityValues()
 

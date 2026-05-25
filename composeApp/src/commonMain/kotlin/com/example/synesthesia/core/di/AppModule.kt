@@ -5,12 +5,14 @@ import com.example.synesthesia.core.util.DatabaseDriverFactory
 import com.example.synesthesia.data.local.NoteDatabase
 import com.example.synesthesia.data.local.datastore.DataStoreFactory
 import com.example.synesthesia.data.local.datastore.UserPreferences
+import com.example.synesthesia.data.local.datastore.UserPreferencesImpl
 import com.example.synesthesia.data.local.datastore.create
 import com.example.synesthesia.data.remote.api.GeminiService
 import com.example.synesthesia.data.repository.AIRepositoryImpl
 import com.example.synesthesia.data.repository.NoteRepositoryImpl
 import com.example.synesthesia.domain.repository.AIRepository
 import com.example.synesthesia.domain.repository.NoteRepository
+import com.example.synesthesia.domain.usecase.AnalyzeEmotionUseCase
 import com.example.synesthesia.domain.usecase.DeleteNoteUseCase
 import com.example.synesthesia.domain.usecase.GenerateIdeasUseCase
 import com.example.synesthesia.domain.usecase.GetAllNotesUseCase
@@ -24,6 +26,7 @@ import com.example.synesthesia.presentation.screens.ai.AIAssistantViewModel
 import com.example.synesthesia.presentation.screens.detail.NoteDetailViewModel
 import com.example.synesthesia.presentation.screens.home.HomeViewModel
 import com.example.synesthesia.presentation.screens.insights.InsightsViewModel
+import com.example.synesthesia.presentation.screens.sanctuary.SanctuaryViewModel
 import com.example.synesthesia.presentation.screens.settings.SettingsViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -53,13 +56,13 @@ val databaseModule = module {
 
 val preferencesModule = module {
     single { get<DataStoreFactory>().create() }
-    single { UserPreferences(get()) }
+    single<UserPreferences> { UserPreferencesImpl(get()) }
 }
 
 // ==================== REPOSITORY MODULE ====================
 
 val repositoryModule = module {
-    singleOf(::NoteRepositoryImpl) bind NoteRepository::class
+    single { NoteRepositoryImpl(get()) } bind NoteRepository::class
     singleOf(::AIRepositoryImpl) bind AIRepository::class
 }
 
@@ -73,6 +76,7 @@ val useCaseModule = module {
     singleOf(::SummarizeNoteUseCase)
     singleOf(::ImproveWritingUseCase)
     singleOf(::GenerateIdeasUseCase)
+    singleOf(::AnalyzeEmotionUseCase)
 }
 
 // ==================== VIEWMODEL MODULE ====================
@@ -85,6 +89,7 @@ val viewModelModule = module {
     viewModelOf(::AIAssistantViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::InsightsViewModel)
+    viewModelOf(::SanctuaryViewModel)
 }
 
 // ==================== SHARED MODULES ====================

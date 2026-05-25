@@ -5,6 +5,7 @@ import com.example.synesthesia.core.util.DatabaseDriverFactory
 import com.example.synesthesia.data.local.NoteDatabase
 import com.example.synesthesia.data.local.datastore.DataStoreFactory
 import com.example.synesthesia.data.local.datastore.UserPreferences
+import com.example.synesthesia.data.local.datastore.UserPreferencesImpl
 import com.example.synesthesia.data.local.datastore.create
 import com.example.synesthesia.data.remote.api.GeminiService
 import com.example.synesthesia.data.repository.AIRepositoryImpl
@@ -25,6 +26,7 @@ import com.example.synesthesia.presentation.screens.ai.AIAssistantViewModel
 import com.example.synesthesia.presentation.screens.detail.NoteDetailViewModel
 import com.example.synesthesia.presentation.screens.home.HomeViewModel
 import com.example.synesthesia.presentation.screens.insights.InsightsViewModel
+import com.example.synesthesia.presentation.screens.sanctuary.SanctuaryViewModel
 import com.example.synesthesia.presentation.screens.settings.SettingsViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -54,7 +56,7 @@ val databaseModule = module {
 
 val preferencesModule = module {
     single { get<DataStoreFactory>().create() }
-    single { UserPreferences(get()) }
+    single<UserPreferences> { UserPreferencesImpl(get()) }
 }
 
 // ==================== REPOSITORY MODULE ====================
@@ -87,6 +89,7 @@ val viewModelModule = module {
     viewModelOf(::AIAssistantViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::InsightsViewModel)
+    viewModelOf(::SanctuaryViewModel)
 }
 
 // ==================== SHARED MODULES ====================

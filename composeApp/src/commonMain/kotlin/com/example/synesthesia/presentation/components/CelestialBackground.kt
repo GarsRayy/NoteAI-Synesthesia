@@ -19,12 +19,26 @@ import com.example.synesthesia.presentation.theme.StarWhite
 import kotlin.math.sin
 import kotlin.random.Random
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+
 @Composable
 fun CelestialBackground(
     isAstronomyMode: Boolean,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val bgColor = if (isAstronomyMode) SpaceBlack else Color(0xFFF0F9FF)
+    val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+    
+    val skyGradient = remember(hour) {
+        when {
+            hour in 5..8 -> listOf(Color(0xFFFF8A65), Color(0xFFFFE082)) // Sunrise
+            hour in 17..20 -> listOf(Color(0xFFFFB74D), Color(0xFFEF9A9A)) // Golden Hour
+            else -> listOf(Color(0xFF87CEEB), Color(0xFFF0F9FF)) // Daylight
+        }
+    }
+
+    val bgColor = if (isAstronomyMode) SpaceBlack else skyGradient.last()
     val contentColor = if (isAstronomyMode) StarWhite else DeepIndigo
 
     Surface(
@@ -38,6 +52,7 @@ fun CelestialBackground(
             if (isAstronomyMode) {
                 StarField()
             } else {
+                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(skyGradient)))
                 DaylightSky()
             }
             content()

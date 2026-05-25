@@ -13,8 +13,14 @@ import org.koin.android.ext.koin.androidLogger
  */
 class NoteAIApplication : Application() {
     
+    companion object {
+        lateinit var instance: NoteAIApplication
+            private set
+    }
+
     override fun onCreate() {
         super.onCreate()
+        instance = this
         
         // Initialize Koin DI
         initKoin(

@@ -12,8 +12,12 @@ import com.example.synesthesia.domain.usecase.NoteSortBy
 import com.example.synesthesia.domain.usecase.SearchNotesUseCase
 import com.example.synesthesia.presentation.screens.home.HomeUiState
 import com.example.synesthesia.presentation.screens.home.HomeViewModel
+import com.example.synesthesia.data.local.datastore.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -41,6 +45,7 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     
     private lateinit var repository: FakeNoteRepository
+    private lateinit var userPreferences: FakeUserPreferences
     private lateinit var getAllNotesUseCase: GetAllNotesUseCase
     private lateinit var searchNotesUseCase: SearchNotesUseCase
     private lateinit var deleteNoteUseCase: DeleteNoteUseCase
@@ -51,6 +56,7 @@ class HomeViewModelTest {
         Dispatchers.setMain(testDispatcher)
         
         repository = FakeNoteRepository()
+        userPreferences = FakeUserPreferences()
         getAllNotesUseCase = GetAllNotesUseCase(repository)
         searchNotesUseCase = SearchNotesUseCase(repository)
         deleteNoteUseCase = DeleteNoteUseCase(repository)
@@ -59,7 +65,8 @@ class HomeViewModelTest {
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
     }
     
@@ -97,7 +104,8 @@ class HomeViewModelTest {
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
         
         // Act & Assert
@@ -125,7 +133,8 @@ class HomeViewModelTest {
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
         
         vm.uiState.test {
@@ -180,7 +189,8 @@ class HomeViewModelTest {
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
         
         vm.uiState.test {
@@ -255,4 +265,29 @@ class HomeViewModelTest {
             updatedAt = Clock.System.now()
         )
     }
+}
+
+class FakeUserPreferences : UserPreferences {
+    override val isDarkMode: Flow<Boolean> = flowOf(false)
+    override suspend fun setDarkMode(enabled: Boolean) {}
+
+    override val themeMode: Flow<String> = flowOf("NORMAL")
+    override suspend fun setThemeMode(mode: String) {}
+
+    override val userName: Flow<String> = flowOf("Test Stargazer")
+    override val userBio: Flow<String> = flowOf("Test Bio")
+    override val userPhotoUri: Flow<String?> = flowOf(null)
+    override suspend fun updateProfile(name: String, bio: String, photoUri: String?) {}
+
+    override val sortBy: Flow<String> = flowOf("UPDATED_DESC")
+    override suspend fun setSortBy(sortBy: String) {}
+
+    override val defaultCategory: Flow<String> = flowOf("GENERAL")
+    override suspend fun setDefaultCategory(category: String) {}
+
+    override val showPreview: Flow<Boolean> = flowOf(true)
+    override suspend fun setShowPreview(show: Boolean) {}
+
+    override val isOnboardingCompleted: Flow<Boolean> = flowOf(true)
+    override suspend fun setOnboardingCompleted() {}
 }

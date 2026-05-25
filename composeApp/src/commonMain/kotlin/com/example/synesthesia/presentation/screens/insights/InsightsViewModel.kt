@@ -3,6 +3,9 @@ package com.example.synesthesia.presentation.screens.insights
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synesthesia.data.local.datastore.UserPreferences
+import com.example.synesthesia.data.remote.api.GeminiService
+import com.example.synesthesia.domain.model.EmotionSystem
+import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -10,14 +13,25 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
 
 class InsightsViewModel(
     private val repository: NoteRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val geminiService: GeminiService
 ) : ViewModel() {
+    
+    private val tz = TimeZone.currentSystemDefault()
+    private val now = Clock.System.now()
 
     private val _isEditingProfile = MutableStateFlow(false)
     val isEditingProfile = _isEditingProfile.asStateFlow()
+
+    private val _weeklySummary = MutableStateFlow<String?>(null)
+    val weeklySummary = _weeklySummary.asStateFlow()
+
+    private val _isGeneratingSummary = MutableStateFlow(false)
+    val isGeneratingSummary = _isGeneratingSummary.asStateFlow()
 
     val userName = userPreferences.userName.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Stargazer")
     val userBio = userPreferences.userBio.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
@@ -32,18 +46,32 @@ class InsightsViewModel(
                 .mapValues { (it.value.size.toFloat() / total * 100).toInt() }
 
             // Simplified weekly trend (last 7 days)
-            val now = Clock.System.now()
-            val tz = TimeZone.currentSystemDefault()
             val last7Days = (0..6).map { i ->
                 val date = now.minus(i, DateTimeUnit.DAY, tz)
                 // Count notes for this date (simplified)
-                notes.count { it.createdAt.toString().split("T")[0] == date.toString().split("T")[0] }.toFloat()
+                notes.count { it.createdAt.toLocalDateTime(tz).date == date.toLocalDateTime(tz).date }.toFloat()
             }.reversed()
+
+            // Mood Calendar Data
+            val currentMonth = now.toLocalDateTime(tz).month
+            val calendarData = notes
+                .filter { note -> 
+                    note.createdAt.toLocalDateTime(tz).month == currentMonth 
+                }
+                .groupBy { note -> note.createdAt.toLocalDateTime(tz).dayOfMonth }
+                .mapValues { (_, dayNotes) ->
+                    // Ambil emosi yang paling sering muncul di hari itu
+                    val dominant = dayNotes.groupBy { it.emotion }.maxByOrNull { it.value.size }?.key
+                    EmotionSystem.categories.find { it.subEmotions.contains(dominant) }?.color
+                }
 
             InsightsUiState.Success(
                 totalMemories = total,
                 emotionDistribution = distribution,
-                weeklyTrend = last7Days
+                weeklyTrend = last7Days,
+                calendarData = calendarData,
+                currentMonthName = currentMonth.name,
+                currentYear = now.toLocalDateTime(tz).year
             )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsightsUiState.Loading)
@@ -58,6 +86,47 @@ class InsightsViewModel(
             _isEditingProfile.value = false
         }
     }
+
+    fun triggerWeeklySummary() {
+        viewModelScope.launch {
+            repository.getAllNotes().first().let { notes ->
+                generateWeeklySummary(notes)
+            }
+        }
+    }
+
+    private fun generateWeeklySummary(notes: List<Note>) {
+        viewModelScope.launch {
+            _isGeneratingSummary.value = true
+            val last7Notes = notes.filter { 
+                it.createdAt > Clock.System.now().minus(7, DateTimeUnit.DAY, tz) 
+            }
+            if (last7Notes.isEmpty()) { 
+                _isGeneratingSummary.value = false
+                _weeklySummary.value = "Belum ada catatan untuk dianalisis."
+                return@launch 
+            }
+            
+            val emotionSummary = last7Notes
+                .groupBy { it.emotion }
+                .map { "${it.key}: ${it.value.size} kali" }
+                .joinToString(", ")
+            
+            val prompt = """
+                Berikan analisis singkat (2-3 kalimat dalam Bahasa Indonesia) tentang 
+                kondisi emosi seseorang berdasarkan catatan jurnal 7 hari terakhir ini:
+                $emotionSummary
+                Sampaikan dengan hangat dan empatik seperti seorang teman.
+            """.trimIndent()
+            
+            geminiService.generateContent(prompt).onSuccess { summary ->
+                _weeklySummary.value = summary
+            }.onFailure {
+                _weeklySummary.value = "Gagal memproses analisis jiwa."
+            }
+            _isGeneratingSummary.value = false
+        }
+    }
 }
 
 sealed interface InsightsUiState {
@@ -66,6 +135,9 @@ sealed interface InsightsUiState {
     data class Success(
         val totalMemories: Int,
         val emotionDistribution: Map<String, Int>,
-        val weeklyTrend: List<Float>
+        val weeklyTrend: List<Float>,
+        val calendarData: Map<Int, String?>,
+        val currentMonthName: String,
+        val currentYear: Int
     ) : InsightsUiState
 }

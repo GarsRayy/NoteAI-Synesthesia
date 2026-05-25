@@ -40,6 +40,9 @@ fun InsightsScreen(
     
     var editedName by remember(userName) { mutableStateOf(userName) }
     var editedBio by remember(userBio) { mutableStateOf(userBio) }
+    
+    val weeklySummary by viewModel.weeklySummary.collectAsStateWithLifecycle()
+    val isGeneratingSummary by viewModel.isGeneratingSummary.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -108,6 +111,37 @@ fun InsightsScreen(
         Text("Emotional intelligence analytics", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))
         
         Spacer(modifier = Modifier.height(24.dp))
+
+        // AI Weekly Summary Card
+        Card(
+            modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(24.dp)),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f))
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = RoyalBlue)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("ANALISIS JIWA MINGGUAN", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                if (isGeneratingSummary) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                } else if (weeklySummary != null) {
+                    Text(weeklySummary!!, style = MaterialTheme.typography.bodyMedium, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                } else {
+                    Button(onClick = { 
+                        // Logic moved to VM for simpler access to data
+                        viewModel.triggerWeeklySummary()
+                    }) {
+                        Text("Generate Analysis")
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
         
         when (val state = uiState) {
             is InsightsUiState.Success -> {
@@ -140,6 +174,15 @@ fun InsightsScreen(
                         color = getEmotionColor(emotion)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
+                Text("MOOD CALENDAR", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                Spacer(modifier = Modifier.height(16.dp))
+                MoodCalendar(
+                    monthName = state.currentMonthName,
+                    year = state.currentYear,
+                    calendarData = state.calendarData
+                )
             }
             is InsightsUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             is InsightsUiState.Empty -> Text("No data yet. Start journaling to see insights!", modifier = Modifier.padding(24.dp))

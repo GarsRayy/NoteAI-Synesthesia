@@ -28,7 +28,8 @@ class HomeViewModel(
     private val getAllNotesUseCase: GetAllNotesUseCase,
     private val searchNotesUseCase: SearchNotesUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val repository: NoteRepository
+    private val repository: NoteRepository,
+    private val userPreferences: com.example.synesthesia.data.local.datastore.UserPreferences
 ) : ViewModel() {
     
     private val _searchQuery = MutableStateFlow("")
@@ -37,6 +38,8 @@ class HomeViewModel(
     private val _isLoading = MutableStateFlow(false)
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    val userName = userPreferences.userName.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Stargazer")
     
     private val debouncedSearchQuery = _searchQuery.debounce(300)
     

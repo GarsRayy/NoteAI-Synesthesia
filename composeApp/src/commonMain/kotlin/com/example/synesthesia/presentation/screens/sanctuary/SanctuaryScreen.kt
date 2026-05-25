@@ -42,7 +42,19 @@ import org.koin.compose.viewmodel.koinViewModel
 fun SanctuaryScreen(
     viewModel: SanctuaryViewModel = koinViewModel()
 ) {
-    val recommendation by viewModel.moodRecommendation.collectAsStateWithLifecycle()
+    val recommendation by viewModel.aiRecommendation.collectAsStateWithLifecycle()
+    val isGeneratingRec by viewModel.isGeneratingRecommendation.collectAsStateWithLifecycle()
+    
+    val groundingStep by viewModel.groundingStep.collectAsStateWithLifecycle()
+    val groundingList by viewModel.groundingList.collectAsStateWithLifecycle()
+    
+    val worryText by viewModel.worryVaultText.collectAsStateWithLifecycle()
+    val isVaultLocked by viewModel.isVaultLocked.collectAsStateWithLifecycle()
+    val vaultAiRes by viewModel.vaultAiResponse.collectAsStateWithLifecycle()
+
+    var showWorryVault by remember { mutableStateOf(false) }
+    var showGrounding by remember { mutableStateOf(false) }
+
     var activeRitual by remember { mutableStateOf<Ritual?>(null) }
     var isRitualActive by remember { mutableStateOf(false) }
     var secondsLeft by remember { mutableStateOf(0) }
@@ -115,24 +127,51 @@ fun SanctuaryScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         // AI Recommendation Card
-        recommendation?.let { rec ->
-            Card(
-                colors = CardDefaults.cardColors(containerColor = rec.accentColor.copy(alpha = 0.12f)),
-                border = BorderStroke(1.dp, rec.accentColor.copy(alpha = 0.4f)),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
-            ) {
-                Row(modifier = Modifier.padding(16.dp)) {
-                    Icon(Icons.Default.AutoAwesome, tint = rec.accentColor, modifier = Modifier.size(20.dp), contentDescription = null)
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text(rec.title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge, color = rec.accentColor)
-                        Spacer(Modifier.height(4.dp))
-                        Text(rec.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))
+        if (isGeneratingRec) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth().clip(CircleShape))
+        } else {
+            recommendation?.let { rec ->
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = rec.accentColor.copy(alpha = 0.12f)),
+                    border = BorderStroke(1.dp, rec.accentColor.copy(alpha = 0.4f)),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
+                ) {
+                    Row(modifier = Modifier.padding(16.dp)) {
+                        Icon(Icons.Default.AutoAwesome, tint = rec.accentColor, modifier = Modifier.size(20.dp), contentDescription = null)
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(rec.title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge, color = rec.accentColor)
+                            Spacer(Modifier.height(4.dp))
+                            Text(rec.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))
+                        }
                     }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- NEW: Worry Vault & Grounding Row ---
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            SmallSanctuaryTool(
+                title = "Worry Vault",
+                icon = Icons.Default.Lock,
+                color = Color(0xFFCE93D8),
+                onClick = { showWorryVault = true }
+            )
+            SmallSanctuaryTool(
+                title = "5-4-3-2-1",
+                icon = Icons.Default.Sensors,
+                color = Color(0xFF81D4FA),
+                onClick = { 
+                    viewModel.startGrounding()
+                    showGrounding = true 
+                }
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
         
         // Active Ritual Display
         Box(modifier = Modifier.fillMaxWidth().animateContentSize()) {
@@ -249,6 +288,155 @@ fun SanctuaryScreen(
                     )
                 }
             }
+        }
+
+        // --- Dialogs ---
+        if (showWorryVault) {
+            WorryVaultDialog(
+                text = worryText,
+                isLocked = isVaultLocked,
+                aiResponse = vaultAiRes,
+                onTextChange = viewModel::setWorryText,
+                onLock = viewModel::lockWorryVault,
+                onDismiss = {
+                    showWorryVault = false
+                    viewModel.resetVault()
+                }
+            )
+        }
+
+        if (showGrounding) {
+            GroundingDialog(
+                step = groundingStep,
+                aiResponse = vaultAiRes,
+                onInput = viewModel::addGroundingInput,
+                onDismiss = {
+                    showGrounding = false
+                    viewModel.resetGrounding()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun WorryVaultDialog(
+    text: String,
+    isLocked: Boolean,
+    aiResponse: String?,
+    onTextChange: (String) -> Unit,
+    onLock: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            if (!isLocked) {
+                Button(onClick = onLock) { Text("Lock Vault") }
+            } else {
+                TextButton(onClick = onDismiss) { Text("Close") }
+            }
+        },
+        title = { Text("Worry Vault 🔒") },
+        text = {
+            Column {
+                if (!isLocked) {
+                    Text("Release your worry here. It will be locked away and not part of your journal.")
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = onTextChange,
+                        modifier = Modifier.fillMaxWidth().height(100.dp),
+                        placeholder = { Text("What's on your mind?") }
+                    )
+                } else {
+                    Text("Your worry is locked in the cosmic vault.", fontWeight = FontWeight.Bold)
+                    if (aiResponse != null) {
+                        Spacer(Modifier.height(16.dp))
+                        Text("AI Counter-thought:", style = MaterialTheme.typography.labelSmall)
+                        Text(aiResponse, fontStyle = FontStyle.Italic)
+                    } else {
+                        CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                    }
+                }
+            }
+        },
+        shape = RoundedCornerShape(24.dp)
+    )
+}
+
+@Composable
+fun GroundingDialog(
+    step: Int,
+    aiResponse: String?,
+    onInput: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var text by remember { mutableStateOf("") }
+    val stepTitle = when(step) {
+        1 -> "5 things you see"
+        2 -> "4 things you can touch"
+        3 -> "3 things you hear"
+        4 -> "2 things you smell"
+        5 -> "1 thing you taste"
+        else -> "Completion"
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            if (step <= 5) {
+                Button(onClick = { 
+                    onInput(text)
+                    text = ""
+                }, enabled = text.isNotBlank()) { Text("Next") }
+            } else {
+                TextButton(onClick = onDismiss) { Text("Finish") }
+            }
+        },
+        title = { Text("5-4-3-2-1 Grounding 🌿") },
+        text = {
+            Column {
+                if (step <= 5) {
+                    Text(stepTitle, fontWeight = FontWeight.Black)
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Type here...") }
+                    )
+                } else {
+                    if (aiResponse != null) {
+                        Text(aiResponse, fontStyle = FontStyle.Italic)
+                    } else {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun RowScope.SmallSanctuaryTool(
+    title: String,
+    icon: ImageVector,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.weight(1f).height(60.dp).clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.15f)),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = color)
         }
     }
 }

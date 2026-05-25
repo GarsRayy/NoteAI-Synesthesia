@@ -1,6 +1,7 @@
 package com.example.synesthesia.presentation.screens.home
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -8,10 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -37,6 +40,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val userName by viewModel.userName.collectAsStateWithLifecycle()
     var isSearchActive by remember { mutableStateOf(false) }
     
     val query = when (val state = uiState) {
@@ -64,7 +68,7 @@ fun HomeScreen(
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 2.sp
                             ))
-                            Text("Welcome, Stargazer", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                            Text("Welcome, $userName", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
                         }
                     }
                 },
@@ -175,11 +179,21 @@ fun HomeScreen(
                     )
                     
                     // Small Insight Overlay (Top Left)
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val badgeScale by infiniteTransition.animateFloat(
+                        initialValue = 1.0f,
+                        targetValue = 1.1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse
+                        )
+                    )
+
                     Column(modifier = Modifier.padding(16.dp).align(Alignment.TopStart)) {
                         Surface(
                             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.shadow(4.dp, RoundedCornerShape(12.dp))
+                            modifier = Modifier.shadow(4.dp, RoundedCornerShape(12.dp)).scale(badgeScale)
                         ) {
                             Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = RoyalBlue)

@@ -19,12 +19,26 @@ import com.example.synesthesia.presentation.theme.StarWhite
 import kotlin.math.sin
 import kotlin.random.Random
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+
 @Composable
 fun CelestialBackground(
     isAstronomyMode: Boolean,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val bgColor = if (isAstronomyMode) SpaceBlack else Color(0xFFF0F9FF)
+    val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+    
+    val skyGradient = remember(hour) {
+        when {
+            hour in 5..8 -> listOf(Color(0xFFFF8A65), Color(0xFFFFE082)) // Sunrise
+            hour in 17..20 -> listOf(Color(0xFFFFB74D), Color(0xFFEF9A9A)) // Golden Hour
+            else -> listOf(Color(0xFF87CEEB), Color(0xFFF0F9FF)) // Daylight
+        }
+    }
+
+    val bgColor = if (isAstronomyMode) SpaceBlack else skyGradient.last()
     val contentColor = if (isAstronomyMode) StarWhite else DeepIndigo
 
     Surface(
@@ -38,6 +52,7 @@ fun CelestialBackground(
             if (isAstronomyMode) {
                 StarField()
             } else {
+                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(skyGradient)))
                 DaylightSky()
             }
             content()
@@ -119,6 +134,18 @@ private fun StarField() {
         )
     )
 
+    val particles = remember {
+        List(25) {
+            Particle(
+                x = Random.nextFloat(),
+                y = Random.nextFloat(),
+                size = Random.nextFloat() * 30f + 10f,
+                alpha = Random.nextFloat() * 0.2f + 0.1f,
+                speed = Random.nextFloat() * 0.001f + 0.0005f
+            )
+        }
+    }
+
     val stars = remember {
         List(100) {
             Star(
@@ -130,7 +157,17 @@ private fun StarField() {
         }
     }
 
+    val particleAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
     Canvas(modifier = Modifier.fillMaxSize()) {
+        // Distant Stars
         stars.forEach { star ->
             drawCircle(
                 color = StarWhite.copy(alpha = star.alpha * twinkle),
@@ -138,7 +175,19 @@ private fun StarField() {
                 center = Offset(star.x * size.width, star.y * size.height)
             )
         }
+
+        // Floating Particles (Bokeh)
+        particles.forEachIndexed { i, p ->
+            val currentY = (p.y - (particleAnim + i * 0.1f)) % 1f
+            val yPos = if (currentY < 0) currentY + 1f else currentY
+            drawCircle(
+                color = StarWhite.copy(alpha = p.alpha),
+                radius = p.size,
+                center = Offset(p.x * size.width, yPos * size.height)
+            )
+        }
     }
 }
 
 private data class Star(val x: Float, val y: Float, val size: Float, val alpha: Float)
+private data class Particle(val x: Float, val y: Float, val size: Float, val alpha: Float, val speed: Float)

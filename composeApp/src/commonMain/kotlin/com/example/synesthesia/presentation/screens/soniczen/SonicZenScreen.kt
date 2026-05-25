@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.synesthesia.core.audio.playAudio
+import com.example.synesthesia.core.audio.stopAudio
 import com.example.synesthesia.presentation.theme.RoyalBlue
 import kotlinx.coroutines.delay
 
@@ -30,14 +32,26 @@ fun SonicZenScreen() {
     var isPlaying by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(0f) }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            stopAudio()
+        }
+    }
+
     LaunchedEffect(isPlaying, playingTrack) {
         if (isPlaying && playingTrack != null) {
-            while (progress < 1f) {
+            playAudio(playingTrack!!.resName)
+            while (progress < 1f && isPlaying) {
                 delay(1000)
                 progress += 0.01f
             }
-            isPlaying = false
-            progress = 0f
+            if (progress >= 1f) {
+                isPlaying = false
+                progress = 0f
+                stopAudio()
+            }
+        } else {
+            stopAudio()
         }
     }
 
@@ -204,12 +218,14 @@ data class AudioTrack(
     val title: String,
     val description: String,
     val emoji: String,
-    val color: Color
+    val color: Color,
+    val resName: String
 )
 
 val audioTracks = listOf(
-    AudioTrack("Deep Nebula", "Pure binaural focus", "🌌", Color(0xFF7C3AED)),
-    AudioTrack("Solar Flare", "Vibrant energy boost", "☀️", Color(0xFFF97316)),
-    AudioTrack("Moonlight Sonata", "Serene sleeping aid", "🌙", Color(0xFF60A5FA)),
-    AudioTrack("Forest Echoes", "Earthly grounding", "🌿", Color(0xFF34D399))
+    AudioTrack("Deep Nebula", "Pure binaural focus", "🌌", Color(0xFF7C3AED), "lofi"),
+    AudioTrack("Solar Flare", "Vibrant energy boost", "☀️", Color(0xFFF97316), "space"),
+    AudioTrack("Moonlight Sonata", "Serene sleeping aid", "🌙", Color(0xFF60A5FA), "moolightsonata"),
+    AudioTrack("Forest Echoes", "Earthly grounding", "🌿", Color(0xFF34D399), "forest"),
+    AudioTrack("Rainy Night", "Rain and thunder", "🌧️", Color(0xFF64748B), "rain")
 )

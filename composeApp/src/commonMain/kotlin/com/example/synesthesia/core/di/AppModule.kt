@@ -5,6 +5,7 @@ import com.example.synesthesia.core.util.DatabaseDriverFactory
 import com.example.synesthesia.data.local.NoteDatabase
 import com.example.synesthesia.data.local.datastore.DataStoreFactory
 import com.example.synesthesia.data.local.datastore.UserPreferences
+import com.example.synesthesia.data.local.datastore.UserPreferencesImpl
 import com.example.synesthesia.data.local.datastore.create
 import com.example.synesthesia.data.remote.api.GeminiService
 import com.example.synesthesia.data.repository.AIRepositoryImpl
@@ -55,7 +56,7 @@ val databaseModule = module {
 
 val preferencesModule = module {
     single { get<DataStoreFactory>().create() }
-    single { UserPreferences(get()) }
+    single<UserPreferences> { UserPreferencesImpl(get()) }
 }
 
 // ==================== REPOSITORY MODULE ====================

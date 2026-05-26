@@ -1,27 +1,40 @@
 package com.example.synesthesia.presentation.screens.home
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.EmotionSystem
+import com.example.synesthesia.domain.model.EmotionCategory
 import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.RoyalBlue
 import com.example.synesthesia.presentation.theme.SpaceBlack
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -35,6 +48,7 @@ fun ConstellationCanvas(
     var offset by remember { mutableStateOf(Offset.Zero) }
     var scale by remember { mutableStateOf(1f) }
     var selectedNoteId by remember { mutableStateOf<Long?>(null) }
+    var clickedHubCategory by remember { mutableStateOf<EmotionCategory?>(null) }
 
     val infiniteTransition = rememberInfiniteTransition()
     val floatAnim by infiniteTransition.animateFloat(
@@ -60,6 +74,9 @@ fun ConstellationCanvas(
         mutableMapOf<Long, Offset>()
     }
 
+    // Positions of Hubs for click detection and popup anchoring
+    val hubPositions = remember { mutableStateMapOf<String, Offset>() }
+
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -73,16 +90,35 @@ fun ConstellationCanvas(
                 detectTapGestures { tapOffset ->
                     val adjustedTap = (tapOffset - offset) / scale
                     var found = false
-                    notePositions.forEach { (id, pos) ->
+
+                    // Check Hubs first (priority)
+                    hubPositions.forEach { (id, pos) ->
                         val dx = adjustedTap.x - pos.x
                         val dy = adjustedTap.y - pos.y
-                        if (sqrt(dx * dx + dy * dy) <= 40f) {
-                            selectedNoteId = id
-                            onNoteClick(id)
+                        if (sqrt(dx * dx + dy * dy) <= 60f) {
+                            clickedHubCategory = EmotionSystem.categories.find { it.id == id }
+                            selectedNoteId = null
                             found = true
                         }
                     }
-                    if (!found) selectedNoteId = null
+
+                    if (!found) {
+                        notePositions.forEach { (id, pos) ->
+                            val dx = adjustedTap.x - pos.x
+                            val dy = adjustedTap.y - pos.y
+                            if (sqrt(dx * dx + dy * dy) <= 40f) {
+                                selectedNoteId = id
+                                onNoteClick(id)
+                                clickedHubCategory = null
+                                found = true
+                            }
+                        }
+                    }
+
+                    if (!found) {
+                        selectedNoteId = null
+                        clickedHubCategory = null
+                    }
                 }
             }
     ) {
@@ -131,6 +167,7 @@ fun ConstellationCanvas(
                     hubBasePos.x + sin(floatAnim + hubIndex) * 15f,
                     hubBasePos.y + cos(floatAnim * 0.5f + hubIndex) * 15f
                 )
+                hubPositions[category.id] = hubCurrentPos
 
                 // 1. Draw Hub Glow
                 drawCircle(
@@ -166,7 +203,7 @@ fun ConstellationCanvas(
                         hubCurrentPos.x + cos(noteAngle) * noteRadius,
                         hubCurrentPos.y + sin(noteAngle) * noteRadius
                     )
-                    
+
                     val noteCurrentPos = Offset(
                         noteBasePos.x + sin(floatAnim * 1.2f + noteIndex) * 10f,
                         noteBasePos.y + cos(floatAnim * 0.8f + noteIndex) * 10f
@@ -202,6 +239,64 @@ fun ConstellationCanvas(
                             center = noteCurrentPos,
                             style = Stroke(width = 2.dp.toPx())
                         )
+                    }
+                }
+            }
+        }
+
+        // Anchored Emotion Hub Popup
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    translationX = offset.x
+                    translationY = offset.y
+                }
+        ) {
+            clickedHubCategory?.let { category ->
+                val hubPos = hubPositions[category.id] ?: Offset.Zero
+                val hubColor = parseHexColor(category.color)
+
+                Box(
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(
+                                (hubPos.x).roundToInt(),
+                                (hubPos.y - 60f).roundToInt()
+                            )
+                        }
+                        .wrapContentSize(Alignment.BottomCenter)
+                ) {
+                    AnimatedVisibility(
+                        visible = true, // State controlled by outer null check
+                        enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+                        exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.width(IntrinsicSize.Max)
+                        ) {
+                            // The Label Bubble
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.5f))
+                                    .border(1.dp, hubColor, RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = category.name,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.widthIn(max = 120.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -263,8 +263,8 @@ fun ConstellationCanvas(
                     modifier = Modifier
                         .offset {
                             IntOffset(
-                                (hubPos.x).roundToInt(),
-                                (hubPos.y - 60f).roundToInt()
+                                (hubPos.x - 190f).roundToInt(),
+                                (hubPos.y - 160f).roundToInt()
                             )
                         }
                         .wrapContentSize(Alignment.BottomCenter)

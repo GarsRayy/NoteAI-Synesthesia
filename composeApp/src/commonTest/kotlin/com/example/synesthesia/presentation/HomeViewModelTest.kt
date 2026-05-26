@@ -15,6 +15,7 @@ import com.example.synesthesia.presentation.screens.home.HomeViewModel
 import com.example.synesthesia.data.local.datastore.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -188,6 +189,7 @@ class HomeViewModelTest {
     fun `sort order should modify note list order`() = runTest {
         // Arrange
         repository.insertNote(createTestNote("B Note"))
+        delay(100) // Ensure different updatedAt
         repository.insertNote(createTestNote("A Note"))
         
         val vm = HomeViewModel(
@@ -202,7 +204,8 @@ class HomeViewModelTest {
             skipItems(1) // Loading
             advanceUntilIdle()
             val initial = awaitItem() as HomeUiState.Success
-            assertEquals("B Note", initial.notes.first().title) // Default UPDATED_DESC (B was last)
+            // Default UPDATED_DESC: latest (A Note) should be first
+            assertEquals("A Note", initial.notes.first().title)
 
             // Act
             vm.onSortByChanged(NoteSortBy.TITLE_ASC)

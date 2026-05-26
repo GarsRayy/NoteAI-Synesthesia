@@ -151,7 +151,7 @@ fun HomeScreen(
                                     shape = CircleShape,
                                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
                                 ) {
-                                    Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.padding(8.dp))
+                                    Icon(Icons.Default.Settings, contentDescription = "Settings", modifier = Modifier.padding(8.dp))
                                 }
                             }
                         }

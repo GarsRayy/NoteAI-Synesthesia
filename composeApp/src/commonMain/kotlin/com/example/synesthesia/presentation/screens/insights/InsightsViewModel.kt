@@ -42,18 +42,20 @@ class InsightsViewModel(
             val total = notes.size
             if (total == 0) return@map InsightsUiState.Empty
 
-            val labels = listOf("joy", "calm", "melancholy", "anger")
-            val distribution = labels.associateWith { label ->
-                val count = notes.count { it.emotion?.lowercase() == label }
-                (count.toFloat() / total * 100).toInt()
+            val distribution = EmotionSystem.categories.associate { category ->
+                val count = notes.count { note ->
+                    note.artToken == category.name || category.subEmotions.contains(note.emotion)
+                }
+                category.id to (count.toFloat() / total * 100).toInt()
             }
 
             val last7DaysData = (0..6).map { i ->
                 val date = now.minus(i, DateTimeUnit.DAY, tz)
                 val dayNotes = notes.filter { it.createdAt.toLocalDateTime(tz).date == date.toLocalDateTime(tz).date }
                 val count = dayNotes.size.toFloat()
-                val dominant = dayNotes.groupBy { it.emotion?.lowercase() ?: "calm" }.maxByOrNull { it.value.size }?.key ?: "calm"
-                count to dominant
+                val dominant = dayNotes.groupBy { it.emotion }.maxByOrNull { it.value.size }?.key
+                val dominantCategoryId = EmotionSystem.getCategoryBySubEmotion(dominant)?.id ?: "LEP"
+                count to dominantCategoryId
             }.reversed()
 
             val currentMonth = now.toLocalDateTime(tz).month

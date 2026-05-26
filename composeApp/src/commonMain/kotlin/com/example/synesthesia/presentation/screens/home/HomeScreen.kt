@@ -42,17 +42,12 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val userName by viewModel.userName.collectAsStateWithLifecycle()
     var isSearchActive by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
     
-    val query = when (val state = uiState) {
-        is HomeUiState.Success -> state.query
-        is HomeUiState.Empty -> state.query
-        else -> ""
-    }
-
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -87,7 +82,7 @@ fun HomeScreen(
                             exit = shrinkHorizontally() + fadeOut()
                         ) {
                             OutlinedTextField(
-                                value = query,
+                                value = searchQuery,
                                 onValueChange = viewModel::onSearchQueryChange,
                                 modifier = Modifier
                                     .fillMaxWidth(0.7f)
@@ -107,7 +102,7 @@ fun HomeScreen(
                                     )
                                 },
                                 trailingIcon = {
-                                    if (query.isNotEmpty()) {
+                                    if (searchQuery.isNotEmpty()) {
                                         IconButton(onClick = viewModel::clearSearch) {
                                             Icon(Icons.Default.Clear, contentDescription = "Clear")
                                         }
@@ -130,7 +125,7 @@ fun HomeScreen(
                                     contentDescription = "Search",
                                     tint = if (MaterialTheme.colorScheme.background == SpaceBlack) BrightYellow else RoyalBlue
                                 )
-                                if (!isSearchActive && query.isNotEmpty()) {
+                                if (!isSearchActive && searchQuery.isNotEmpty()) {
                                     Surface(
                                         modifier = Modifier
                                             .size(8.dp)
@@ -156,7 +151,7 @@ fun HomeScreen(
                                     shape = CircleShape,
                                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
                                 ) {
-                                    Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.padding(8.dp))
+                                    Icon(Icons.Default.Settings, contentDescription = "Settings", modifier = Modifier.padding(8.dp))
                                 }
                             }
                         }

@@ -1,11 +1,9 @@
 package com.example.synesthesia.presentation.screens.main
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoGraph
-import androidx.compose.material.icons.filled.Insights
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +24,7 @@ import com.example.synesthesia.presentation.theme.ThemeMode
 @Composable
 fun MainScreen(
     themeMode: ThemeMode,
+    isOnline: Boolean,
     onNavigateToAddNote: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToAI: () -> Unit,
@@ -39,6 +38,37 @@ fun MainScreen(
     CelestialBackground(isAstronomyMode = isAstronomy) {
         Scaffold(
             containerColor = Color.Transparent,
+            topBar = {
+                AnimatedVisibility(
+                    visible = !isOnline,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.CloudOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "You're offline. Some AI features may be limited.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                }
+            },
             bottomBar = {
                 NavigationBar(
                     containerColor = if (isAstronomy) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.02f),

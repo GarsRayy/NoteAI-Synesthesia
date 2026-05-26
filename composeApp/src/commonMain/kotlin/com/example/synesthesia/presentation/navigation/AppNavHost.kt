@@ -29,6 +29,7 @@ fun AppNavHost(
 ) {
     val navigationActions = createNavigationActions(navController)
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     
     SharedTransitionLayout {
         NavHost(
@@ -39,6 +40,7 @@ fun AppNavHost(
             composable<Route.Constellation> {
                 MainScreen(
                     themeMode = themeMode,
+                    isOnline = isOnline,
                     onNavigateToAddNote = { navigationActions.navigateToAddMemory() },
                     onNavigateToDetail = { noteId -> navigationActions.navigateToMemoryDetail(noteId) },
                     onNavigateToAI = { navigationActions.navigateToAIAssistant() },

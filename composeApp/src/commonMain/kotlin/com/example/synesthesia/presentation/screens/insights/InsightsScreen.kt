@@ -1,6 +1,7 @@
 package com.example.synesthesia.presentation.screens.insights
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -40,6 +41,9 @@ fun InsightsScreen(
     
     var editedName by remember(userName) { mutableStateOf(userName) }
     var editedBio by remember(userBio) { mutableStateOf(userBio) }
+    
+    val weeklySummary by viewModel.weeklySummary.collectAsStateWithLifecycle()
+    val isGeneratingSummary by viewModel.isGeneratingSummary.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -108,6 +112,40 @@ fun InsightsScreen(
         Text("Emotional intelligence analytics", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))
         
         Spacer(modifier = Modifier.height(24.dp))
+
+        // AI Weekly Summary Card
+        Card(
+            modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(24.dp)),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (MaterialTheme.colorScheme.background == Color.White) 0.8f else 0.25f)
+            ),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = RoyalBlue)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("ANALISIS JIWA MINGGUAN", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                if (isGeneratingSummary) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                } else if (weeklySummary != null) {
+                    Text(weeklySummary!!, style = MaterialTheme.typography.bodyMedium, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                } else {
+                    Button(onClick = { 
+                        // Logic moved to VM for simpler access to data
+                        viewModel.triggerWeeklySummary()
+                    }) {
+                        Text("Generate Analysis")
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
         
         when (val state = uiState) {
             is InsightsUiState.Success -> {
@@ -124,7 +162,11 @@ fun InsightsScreen(
                             Text("Real-time Mood Galaxy", fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        MoodChart(modifier = Modifier.fillMaxSize(), points = state.weeklyTrend)
+                        MoodChart(
+                            modifier = Modifier.fillMaxSize(),
+                            points = state.weeklyTrend,
+                            dominantEmotions = state.weeklyDominantEmotions
+                        )
                     }
                 }
                 
@@ -140,6 +182,15 @@ fun InsightsScreen(
                         color = getEmotionColor(emotion)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
+                Text("MOOD CALENDAR", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                Spacer(modifier = Modifier.height(16.dp))
+                MoodCalendar(
+                    monthName = state.currentMonthName,
+                    year = state.currentYear,
+                    calendarData = state.calendarData
+                )
             }
             is InsightsUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             is InsightsUiState.Empty -> Text("No data yet. Start journaling to see insights!", modifier = Modifier.padding(24.dp))
@@ -160,7 +211,7 @@ private fun getEmotionColor(emotion: String): Color {
 }
 
 @Composable
-fun MoodChart(modifier: Modifier = Modifier, points: List<Float>) {
+fun MoodChart(modifier: Modifier = Modifier, points: List<Float>, dominantEmotions: List<String>) {
     Canvas(modifier = modifier) {
         if (points.size < 2) return@Canvas
         val path = Path()
@@ -172,10 +223,12 @@ fun MoodChart(modifier: Modifier = Modifier, points: List<Float>) {
             val y = size.height * (1f - (valRaw / maxVal))
             if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
             
-            drawCircle(color = RoyalBlue, radius = 5.dp.toPx(), center = Offset(x, y))
+            val emotionColor = getEmotionColor(dominantEmotions.getOrElse(index) { "calm" })
+            drawCircle(color = emotionColor, radius = 6.dp.toPx(), center = Offset(x, y))
+            drawCircle(color = Color.White.copy(alpha = 0.5f), radius = 8.dp.toPx(), center = Offset(x, y), style = Stroke(width = 2f))
         }
         
-        drawPath(path = path, color = RoyalBlue, style = Stroke(width = 4.dp.toPx()))
+        drawPath(path = path, color = Color.White.copy(alpha = 0.3f), style = Stroke(width = 3.dp.toPx()))
     }
 }
 

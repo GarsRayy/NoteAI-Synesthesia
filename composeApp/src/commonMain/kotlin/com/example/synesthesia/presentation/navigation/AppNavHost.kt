@@ -1,5 +1,6 @@
 package com.example.synesthesia.presentation.navigation
 
+import androidx.compose.animation.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -19,6 +20,7 @@ import com.example.synesthesia.presentation.screens.settings.SettingsScreen
 import com.example.synesthesia.presentation.app.AppViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
@@ -27,65 +29,69 @@ fun AppNavHost(
 ) {
     val navigationActions = createNavigationActions(navController)
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     
-    NavHost(
-        navController = navController,
-        startDestination = Route.Constellation,
-        modifier = modifier
-    ) {
-        composable<Route.Constellation> {
-            MainScreen(
-                themeMode = themeMode,
-                onNavigateToAddNote = { navigationActions.navigateToAddMemory() },
-                onNavigateToDetail = { noteId -> navigationActions.navigateToMemoryDetail(noteId) },
-                onNavigateToAI = { navigationActions.navigateToAIAssistant() },
-                onNavigateToSettings = { navigationActions.navigateToSettings() }
-            )
-        }
-        
-        composable<Route.AddMemory> { backStackEntry ->
-            val route: Route.AddMemory = backStackEntry.toRoute()
-            val aiResult by backStackEntry.savedStateHandle.getStateFlow<String?>("ai_result", null).collectAsStateWithLifecycle()
+    SharedTransitionLayout {
+        NavHost(
+            navController = navController,
+            startDestination = Route.Constellation,
+            modifier = modifier
+        ) {
+            composable<Route.Constellation> {
+                MainScreen(
+                    themeMode = themeMode,
+                    isOnline = isOnline,
+                    onNavigateToAddNote = { navigationActions.navigateToAddMemory() },
+                    onNavigateToDetail = { noteId -> navigationActions.navigateToMemoryDetail(noteId) },
+                    onNavigateToAI = { navigationActions.navigateToAIAssistant() },
+                    onNavigateToSettings = { navigationActions.navigateToSettings() }
+                )
+            }
+            
+            composable<Route.AddMemory> { backStackEntry ->
+                val route: Route.AddMemory = backStackEntry.toRoute()
+                val aiResult by backStackEntry.savedStateHandle.getStateFlow<String?>("ai_result", null).collectAsStateWithLifecycle()
 
-            AddNoteScreen(
-                noteId = route.memoryId,
-                aiResult = aiResult,
-                onResultConsumed = { backStackEntry.savedStateHandle.remove<String>("ai_result") },
-                onNavigateBack = { navigationActions.navigateBack() },
-                onNavigateToAI = { text ->
-                    navigationActions.navigateToAIAssistant(
-                        noteId = route.memoryId,
-                        initialText = text
-                    )
-                }
-            )
-        }
-        
-        composable<Route.MemoryDetail> { backStackEntry ->
-            val route: Route.MemoryDetail = backStackEntry.toRoute()
-            MemoryDetailScreen(
-                noteId = route.memoryId,
-                onNavigateBack = { navigationActions.navigateBack() },
-                onNavigateToEdit = { navigationActions.navigateToAddMemory(it) }
-            )
-        }
-        
-        composable<Route.AIAssistant> { backStackEntry ->
-            val route: Route.AIAssistant = backStackEntry.toRoute()
-            AIAssistantScreen(
-                noteId = route.noteId,
-                initialText = route.initialText,
-                onNavigateBack = { navigationActions.navigateBack() },
-                onApplyResult = { text ->
-                    navController.previousBackStackEntry?.savedStateHandle?.set("ai_result", text)
-                }
-            )
-        }
+                AddNoteScreen(
+                    noteId = route.memoryId,
+                    aiResult = aiResult,
+                    onResultConsumed = { backStackEntry.savedStateHandle.remove<String>("ai_result") },
+                    onNavigateBack = { navigationActions.navigateBack() },
+                    onNavigateToAI = { text ->
+                        navigationActions.navigateToAIAssistant(
+                            noteId = route.memoryId,
+                            initialText = text
+                        )
+                    }
+                )
+            }
+            
+            composable<Route.MemoryDetail> { backStackEntry ->
+                val route: Route.MemoryDetail = backStackEntry.toRoute()
+                MemoryDetailScreen(
+                    noteId = route.memoryId,
+                    onNavigateBack = { navigationActions.navigateBack() },
+                    onNavigateToEdit = { navigationActions.navigateToAddMemory(it) }
+                )
+            }
+            
+            composable<Route.AIAssistant> { backStackEntry ->
+                val route: Route.AIAssistant = backStackEntry.toRoute()
+                AIAssistantScreen(
+                    noteId = route.noteId,
+                    initialText = route.initialText,
+                    onNavigateBack = { navigationActions.navigateBack() },
+                    onApplyResult = { text ->
+                        navController.previousBackStackEntry?.savedStateHandle?.set("ai_result", text)
+                    }
+                )
+            }
 
-        composable<Route.Settings> {
-            SettingsScreen(
-                onNavigateBack = { navigationActions.navigateBack() }
-            )
+            composable<Route.Settings> {
+                SettingsScreen(
+                    onNavigateBack = { navigationActions.navigateBack() }
+                )
+            }
         }
     }
 }

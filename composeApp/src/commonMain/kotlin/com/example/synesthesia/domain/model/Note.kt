@@ -5,7 +5,7 @@ import kotlinx.datetime.Instant
 
 data class Note(
     val id: Long = 0,
-    val title: String,
+    val title: String = "",
     val content: String,
     val category: NoteCategory = NoteCategory.GENERAL,
     val color: NoteColor = NoteColor.DEFAULT,

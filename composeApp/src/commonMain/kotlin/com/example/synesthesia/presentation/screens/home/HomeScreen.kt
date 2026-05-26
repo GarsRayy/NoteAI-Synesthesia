@@ -1,26 +1,35 @@
 package com.example.synesthesia.presentation.screens.home
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.synesthesia.domain.model.NoteCategory
+import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.RoyalBlue
+import com.example.synesthesia.presentation.theme.SpaceBlack
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +42,16 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val userName by viewModel.userName.collectAsStateWithLifecycle()
+    var isSearchActive by remember { mutableStateOf(false) }
+    var showFilterSheet by remember { mutableStateOf(false) }
+    
+    val query = when (val state = uiState) {
+        is HomeUiState.Success -> state.query
+        is HomeUiState.Empty -> state.query
+        else -> ""
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -43,22 +62,103 @@ fun HomeScreen(
                     titleContentColor = MaterialTheme.colorScheme.onBackground
                 ),
                 title = { 
-                    Column {
-                        Text("SYNESTHESIA", style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp
-                        ))
-                        Text("Welcome, Stargazer", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                    AnimatedVisibility(
+                        visible = !isSearchActive,
+                        enter = fadeIn() + expandHorizontally(),
+                        exit = fadeOut() + shrinkHorizontally()
+                    ) {
+                        Column {
+                            Text("SYNESTHESIA", style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
+                            ))
+                            Text("Welcome, $userName", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                        }
                     }
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Surface(
-                            modifier = Modifier.size(36.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.animateContentSize()
+                    ) {
+                        AnimatedVisibility(
+                            visible = isSearchActive,
+                            enter = expandHorizontally() + fadeIn(),
+                            exit = shrinkHorizontally() + fadeOut()
                         ) {
-                            Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.padding(8.dp))
+                            OutlinedTextField(
+                                value = query,
+                                onValueChange = viewModel::onSearchQueryChange,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.7f)
+                                    .padding(end = 8.dp),
+                                shape = RoundedCornerShape(50.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.15f),
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.15f),
+                                    focusedBorderColor = if (MaterialTheme.colorScheme.background == SpaceBlack) BrightYellow else RoyalBlue.copy(alpha = 0.5f),
+                                    unfocusedBorderColor = (if (MaterialTheme.colorScheme.background == SpaceBlack) BrightYellow else RoyalBlue).copy(alpha = 0.3f)
+                                ),
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = null,
+                                        tint = if (MaterialTheme.colorScheme.background == SpaceBlack) BrightYellow else RoyalBlue
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (query.isNotEmpty()) {
+                                        IconButton(onClick = viewModel::clearSearch) {
+                                            Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                        }
+                                    }
+                                },
+                                placeholder = {
+                                    Text(
+                                        "Search memories...",
+                                        style = TextStyle(fontStyle = FontStyle.Italic)
+                                    )
+                                },
+                                singleLine = true
+                            )
+                        }
+
+                        IconButton(onClick = { isSearchActive = !isSearchActive }) {
+                            Box {
+                                Icon(
+                                    if (isSearchActive) Icons.Default.Close else Icons.Default.Search,
+                                    contentDescription = "Search",
+                                    tint = if (MaterialTheme.colorScheme.background == SpaceBlack) BrightYellow else RoyalBlue
+                                )
+                                if (!isSearchActive && query.isNotEmpty()) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .align(Alignment.TopEnd),
+                                        color = BrightYellow,
+                                        shape = CircleShape
+                                    ) {}
+                                }
+                            }
+                        }
+
+                        if (!isSearchActive) {
+                            IconButton(onClick = { showFilterSheet = true }) {
+                                Icon(
+                                    Icons.Default.Tune,
+                                    contentDescription = "Filter",
+                                    tint = if (MaterialTheme.colorScheme.background == SpaceBlack) BrightYellow else RoyalBlue
+                                )
+                            }
+                            IconButton(onClick = onNavigateToSettings) {
+                                Surface(
+                                    modifier = Modifier.size(36.dp),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                                ) {
+                                    Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.padding(8.dp))
+                                }
+                            }
                         }
                     }
                 }
@@ -76,7 +176,11 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.fillMaxSize().padding(padding)
+        ) {
             when (val state = uiState) {
                 is HomeUiState.Success -> {
                     ConstellationCanvas(
@@ -86,11 +190,21 @@ fun HomeScreen(
                     )
                     
                     // Small Insight Overlay (Top Left)
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val badgeScale by infiniteTransition.animateFloat(
+                        initialValue = 1.0f,
+                        targetValue = 1.1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse
+                        )
+                    )
+
                     Column(modifier = Modifier.padding(16.dp).align(Alignment.TopStart)) {
                         Surface(
                             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.shadow(4.dp, RoundedCornerShape(12.dp))
+                            modifier = Modifier.shadow(4.dp, RoundedCornerShape(12.dp)).scale(badgeScale)
                         ) {
                             Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = RoyalBlue)
@@ -103,7 +217,32 @@ fun HomeScreen(
                 is HomeUiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                else -> { /* Handle empty/error */ }
+                is HomeUiState.Empty -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (state.query.isNotEmpty()) {
+                            Icon(
+                                Icons.Default.SearchOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                "No memories found for \"${state.query}\"",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        } else {
+                            Text("No memories yet", style = MaterialTheme.typography.titleMedium)
+                            Text("Your galaxy is empty", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+                is HomeUiState.Error -> {
+                    Text(state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.align(Alignment.Center))
+                }
             }
             
             // AI Button
@@ -117,6 +256,106 @@ fun HomeScreen(
                     .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = "AI", tint = RoyalBlue)
+            }
+        }
+        
+        if (showFilterSheet) {
+            FilterSortBottomSheet(
+                selectedCategory = when(val state = uiState) {
+                    is HomeUiState.Success -> state.category
+                    is HomeUiState.Empty -> state.category
+                    else -> null
+                },
+                selectedSort = when(val state = uiState) {
+                    is HomeUiState.Success -> state.sortBy
+                    else -> com.example.synesthesia.domain.usecase.NoteSortBy.UPDATED_DESC
+                },
+                onCategorySelected = {
+                    viewModel.onCategorySelected(it)
+                    showFilterSheet = false
+                },
+                onSortByChanged = {
+                    viewModel.onSortByChanged(it)
+                    showFilterSheet = false
+                },
+                onDismiss = { showFilterSheet = false }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterSortBottomSheet(
+    selectedCategory: NoteCategory?,
+    selectedSort: com.example.synesthesia.domain.usecase.NoteSortBy,
+    onCategorySelected: (NoteCategory?) -> Unit,
+    onSortByChanged: (com.example.synesthesia.domain.usecase.NoteSortBy) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
+        ) {
+            Text(
+                "Filter Memories",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Black
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text("By Category", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedCategory == null,
+                    onClick = { onCategorySelected(null) },
+                    label = { Text("All") }
+                )
+                NoteCategory.entries.forEach { category ->
+                    FilterChip(
+                        selected = selectedCategory == category,
+                        onClick = { onCategorySelected(category) },
+                        label = { Text(category.displayName) }
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text("Sort By", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            com.example.synesthesia.domain.usecase.NoteSortBy.entries.forEach { sort ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth().clickable { onSortByChanged(sort) },
+                    color = if (selectedSort == sort) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            sort.displayName,
+                            modifier = Modifier.weight(1f),
+                            fontWeight = if (selectedSort == sort) FontWeight.Bold else FontWeight.Normal
+                        )
+                        if (selectedSort == sort) {
+                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
             }
         }
     }

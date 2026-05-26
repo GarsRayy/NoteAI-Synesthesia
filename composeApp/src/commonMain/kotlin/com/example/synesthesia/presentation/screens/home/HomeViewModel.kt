@@ -14,25 +14,32 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val getAllNotesUseCase: GetAllNotesUseCase,
     private val searchNotesUseCase: SearchNotesUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val repository: NoteRepository
+    private val repository: NoteRepository,
+    private val userPreferences: com.example.synesthesia.data.local.datastore.UserPreferences
 ) : ViewModel() {
     
     private val _searchQuery = MutableStateFlow("")
     private val _selectedCategory = MutableStateFlow<NoteCategory?>(null)
     private val _sortBy = MutableStateFlow(NoteSortBy.UPDATED_DESC)
     private val _isLoading = MutableStateFlow(false)
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    val userName = userPreferences.userName.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Stargazer")
     
     private val debouncedSearchQuery = _searchQuery.debounce(300)
     
@@ -105,6 +112,15 @@ class HomeViewModel(
     fun deleteNotes(noteIds: List<Long>) {
         viewModelScope.launch {
             repository.deleteNotes(noteIds)
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            // Data di-refresh otomatis via Flow dari SQLDelight
+            delay(800)
+            _isRefreshing.value = false
         }
     }
 }

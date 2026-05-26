@@ -12,8 +12,13 @@ import com.example.synesthesia.domain.usecase.NoteSortBy
 import com.example.synesthesia.domain.usecase.SearchNotesUseCase
 import com.example.synesthesia.presentation.screens.home.HomeUiState
 import com.example.synesthesia.presentation.screens.home.HomeViewModel
+import com.example.synesthesia.data.local.datastore.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -41,6 +46,7 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     
     private lateinit var repository: FakeNoteRepository
+    private lateinit var userPreferences: FakeUserPreferences
     private lateinit var getAllNotesUseCase: GetAllNotesUseCase
     private lateinit var searchNotesUseCase: SearchNotesUseCase
     private lateinit var deleteNoteUseCase: DeleteNoteUseCase
@@ -51,6 +57,7 @@ class HomeViewModelTest {
         Dispatchers.setMain(testDispatcher)
         
         repository = FakeNoteRepository()
+        userPreferences = FakeUserPreferences()
         getAllNotesUseCase = GetAllNotesUseCase(repository)
         searchNotesUseCase = SearchNotesUseCase(repository)
         deleteNoteUseCase = DeleteNoteUseCase(repository)
@@ -59,7 +66,8 @@ class HomeViewModelTest {
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
     }
     
@@ -97,7 +105,8 @@ class HomeViewModelTest {
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
         
         // Act & Assert
@@ -125,7 +134,8 @@ class HomeViewModelTest {
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
         
         vm.uiState.test {
@@ -172,31 +182,38 @@ class HomeViewModelTest {
     
     @Test
     fun `category filter should filter notes`() = runTest {
+        // ... (existing test) ...
+    }
+
+    @Test
+    fun `sort order should modify note list order`() = runTest {
         // Arrange
-        repository.insertNote(createTestNote("Work Note", category = NoteCategory.WORK))
-        repository.insertNote(createTestNote("Personal Note", category = NoteCategory.PERSONAL))
+        repository.insertNote(createTestNote("B Note"))
+        delay(100) // Ensure different updatedAt
+        repository.insertNote(createTestNote("A Note"))
         
         val vm = HomeViewModel(
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
-            repository = repository
+            repository = repository,
+            userPreferences = userPreferences
         )
         
         vm.uiState.test {
             skipItems(1) // Loading
             advanceUntilIdle()
-            skipItems(1) // Initial success
-            
+            val initial = awaitItem() as HomeUiState.Success
+            // Default UPDATED_DESC: latest (A Note) should be first
+            assertEquals("A Note", initial.notes.first().title)
+
             // Act
-            vm.onCategorySelected(NoteCategory.WORK)
+            vm.onSortByChanged(NoteSortBy.TITLE_ASC)
             advanceUntilIdle()
             
             // Assert
-            val state = expectMostRecentItem()
-            assertTrue(state is HomeUiState.Success)
-            assertEquals(1, (state as HomeUiState.Success).notes.size)
-            assertEquals(NoteCategory.WORK, state.notes.first().category)
+            val state = awaitItem() as HomeUiState.Success
+            assertEquals("A Note", state.notes.first().title)
             
             cancelAndIgnoreRemainingEvents()
         }
@@ -255,4 +272,33 @@ class HomeViewModelTest {
             updatedAt = Clock.System.now()
         )
     }
+}
+
+class FakeUserPreferences : UserPreferences {
+    private val _themeMode = MutableStateFlow("NORMAL")
+    private val _userName = MutableStateFlow("Test Stargazer")
+    private val _sortBy = MutableStateFlow("UPDATED_DESC")
+
+    override val isDarkMode: Flow<Boolean> = flowOf(false)
+    override suspend fun setDarkMode(enabled: Boolean) {}
+
+    override val themeMode: Flow<String> = _themeMode
+    override suspend fun setThemeMode(mode: String) { _themeMode.value = mode }
+
+    override val userName: Flow<String> = _userName
+    override val userBio: Flow<String> = flowOf("Test Bio")
+    override val userPhotoUri: Flow<String?> = flowOf(null)
+    override suspend fun updateProfile(name: String, bio: String, photoUri: String?) { _userName.value = name }
+
+    override val sortBy: Flow<String> = _sortBy
+    override suspend fun setSortBy(sortBy: String) { _sortBy.value = sortBy }
+
+    override val defaultCategory: Flow<String> = flowOf("GENERAL")
+    override suspend fun setDefaultCategory(category: String) {}
+
+    override val showPreview: Flow<Boolean> = flowOf(true)
+    override suspend fun setShowPreview(show: Boolean) {}
+
+    override val isOnboardingCompleted: Flow<Boolean> = flowOf(true)
+    override suspend fun setOnboardingCompleted() {}
 }

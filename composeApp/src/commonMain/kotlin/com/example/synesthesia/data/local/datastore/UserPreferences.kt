@@ -9,6 +9,34 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
+ * User Preferences interface
+ */
+interface UserPreferences {
+    val isDarkMode: Flow<Boolean>
+    suspend fun setDarkMode(enabled: Boolean)
+    
+    val themeMode: Flow<String>
+    suspend fun setThemeMode(mode: String)
+    
+    val userName: Flow<String>
+    val userBio: Flow<String>
+    val userPhotoUri: Flow<String?>
+    suspend fun updateProfile(name: String, bio: String, photoUri: String?)
+    
+    val sortBy: Flow<String>
+    suspend fun setSortBy(sortBy: String)
+    
+    val defaultCategory: Flow<String>
+    suspend fun setDefaultCategory(category: String)
+    
+    val showPreview: Flow<Boolean>
+    suspend fun setShowPreview(show: Boolean)
+    
+    val isOnboardingCompleted: Flow<Boolean>
+    suspend fun setOnboardingCompleted()
+}
+
+/**
  * User Preferences menggunakan DataStore
  * 
  * DataStore adalah pengganti SharedPreferences yang lebih modern:
@@ -18,9 +46,9 @@ import kotlinx.coroutines.flow.map
  * 
  * @param dataStore Instance DataStore dari platform
  */
-class UserPreferences(
+class UserPreferencesImpl(
     private val dataStore: DataStore<Preferences>
-) {
+) : UserPreferences {
     // ==================== PREFERENCE KEYS ====================
     
     private object Keys {
@@ -37,17 +65,11 @@ class UserPreferences(
     
     // ==================== DARK MODE ====================
     
-    /**
-     * Observe dark mode setting
-     */
-    val isDarkMode: Flow<Boolean> = dataStore.data.map { prefs ->
+    override val isDarkMode: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[Keys.DARK_MODE] ?: false
     }
     
-    /**
-     * Set dark mode
-     */
-    suspend fun setDarkMode(enabled: Boolean) {
+    override suspend fun setDarkMode(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[Keys.DARK_MODE] = enabled
         }
@@ -55,29 +77,23 @@ class UserPreferences(
 
     // ==================== THEME MODE ====================
 
-    /**
-     * Observe theme mode setting
-     */
-    val themeMode: Flow<String> = dataStore.data.map { prefs ->
+    override val themeMode: Flow<String> = dataStore.data.map { prefs ->
         prefs[Keys.THEME_MODE] ?: "NORMAL"
     }
 
-    /**
-     * Set theme mode
-     */
-    suspend fun setThemeMode(mode: String) {
+    override suspend fun setThemeMode(mode: String) {
         dataStore.edit { prefs ->
             prefs[Keys.THEME_MODE] = mode
         }
     }
 
-    // ==================== PROFILE = [NEW] ====================
+    // ==================== PROFILE ====================
 
-    val userName: Flow<String> = dataStore.data.map { it[Keys.USER_NAME] ?: "Stargazer" }
-    val userBio: Flow<String> = dataStore.data.map { it[Keys.USER_BIO] ?: "Exploring the galaxy of my emotions." }
-    val userPhotoUri: Flow<String?> = dataStore.data.map { it[Keys.USER_PHOTO_URI] }
+    override val userName: Flow<String> = dataStore.data.map { it[Keys.USER_NAME] ?: "Stargazer" }
+    override val userBio: Flow<String> = dataStore.data.map { it[Keys.USER_BIO] ?: "Exploring the galaxy of my emotions." }
+    override val userPhotoUri: Flow<String?> = dataStore.data.map { it[Keys.USER_PHOTO_URI] }
 
-    suspend fun updateProfile(name: String, bio: String, photoUri: String?) {
+    override suspend fun updateProfile(name: String, bio: String, photoUri: String?) {
         dataStore.edit { prefs ->
             prefs[Keys.USER_NAME] = name
             prefs[Keys.USER_BIO] = bio
@@ -87,17 +103,11 @@ class UserPreferences(
     
     // ==================== SORT BY ====================
     
-    /**
-     * Observe sort preference
-     */
-    val sortBy: Flow<String> = dataStore.data.map { prefs ->
+    override val sortBy: Flow<String> = dataStore.data.map { prefs ->
         prefs[Keys.SORT_BY] ?: "UPDATED_DESC"
     }
     
-    /**
-     * Set sort preference
-     */
-    suspend fun setSortBy(sortBy: String) {
+    override suspend fun setSortBy(sortBy: String) {
         dataStore.edit { prefs ->
             prefs[Keys.SORT_BY] = sortBy
         }
@@ -105,17 +115,11 @@ class UserPreferences(
     
     // ==================== DEFAULT CATEGORY ====================
     
-    /**
-     * Observe default category
-     */
-    val defaultCategory: Flow<String> = dataStore.data.map { prefs ->
+    override val defaultCategory: Flow<String> = dataStore.data.map { prefs ->
         prefs[Keys.DEFAULT_CATEGORY] ?: "GENERAL"
     }
     
-    /**
-     * Set default category
-     */
-    suspend fun setDefaultCategory(category: String) {
+    override suspend fun setDefaultCategory(category: String) {
         dataStore.edit { prefs ->
             prefs[Keys.DEFAULT_CATEGORY] = category
         }
@@ -123,17 +127,11 @@ class UserPreferences(
     
     // ==================== SHOW PREVIEW ====================
     
-    /**
-     * Observe show preview setting
-     */
-    val showPreview: Flow<Boolean> = dataStore.data.map { prefs ->
+    override val showPreview: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[Keys.SHOW_PREVIEW] ?: true
     }
     
-    /**
-     * Set show preview
-     */
-    suspend fun setShowPreview(show: Boolean) {
+    override suspend fun setShowPreview(show: Boolean) {
         dataStore.edit { prefs ->
             prefs[Keys.SHOW_PREVIEW] = show
         }
@@ -141,17 +139,11 @@ class UserPreferences(
     
     // ==================== ONBOARDING ====================
     
-    /**
-     * Check if onboarding completed
-     */
-    val isOnboardingCompleted: Flow<Boolean> = dataStore.data.map { prefs ->
+    override val isOnboardingCompleted: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[Keys.ONBOARDING_COMPLETED] ?: false
     }
     
-    /**
-     * Set onboarding completed
-     */
-    suspend fun setOnboardingCompleted() {
+    override suspend fun setOnboardingCompleted() {
         dataStore.edit { prefs ->
             prefs[Keys.ONBOARDING_COMPLETED] = true
         }

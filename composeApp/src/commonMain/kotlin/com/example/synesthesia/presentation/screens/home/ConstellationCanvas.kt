@@ -5,7 +5,6 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
@@ -20,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -81,9 +81,12 @@ fun ConstellationCanvas(
         modifier = modifier
             .fillMaxSize()
             .pointerInput(Unit) {
-                detectTransformGestures { _, pan, zoom, _ ->
-                    scale *= zoom
-                    offset += pan
+                detectTransformGestures { centroid, pan, zoom, _ ->
+                    val newScale = (scale * zoom).coerceIn(0.2f, 5f)
+                    val actualZoom = newScale / scale
+                    // Adjust offset to zoom around centroid
+                    offset = (centroid - (centroid - offset) * actualZoom) + pan
+                    scale = newScale
                 }
             }
             .pointerInput(notes) {
@@ -132,7 +135,8 @@ fun ConstellationCanvas(
                     scaleX = scale,
                     scaleY = scale,
                     translationX = offset.x,
-                    translationY = offset.y
+                    translationY = offset.y,
+                    transformOrigin = TransformOrigin(0f, 0f)
                 )
         ) {
             val starColor = if (isAstronomy) Color.White else Color(0xFFB39DDB) // Pastel Purple
@@ -253,6 +257,7 @@ fun ConstellationCanvas(
                     scaleY = scale
                     translationX = offset.x
                     translationY = offset.y
+                    transformOrigin = TransformOrigin(0f, 0f)
                 }
         ) {
             clickedHubCategory?.let { category ->
@@ -308,7 +313,7 @@ private fun parseHexColor(hex: String?): Color {
     if (hex == null || !hex.startsWith("#")) return Color.Gray
     return try {
         Color(hex.removePrefix("#").toLong(16) or 0xFF000000)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         Color.Gray
     }
 }

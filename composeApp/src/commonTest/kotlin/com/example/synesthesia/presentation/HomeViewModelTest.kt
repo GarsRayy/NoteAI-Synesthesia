@@ -148,7 +148,7 @@ class HomeViewModelTest {
             advanceUntilIdle()
             
             // Assert - wait for debounce
-            testScheduler.advanceTimeBy(400)
+            testDispatcher.scheduler.advanceTimeBy(400)
             advanceUntilIdle()
             
             val state = expectMostRecentItem()

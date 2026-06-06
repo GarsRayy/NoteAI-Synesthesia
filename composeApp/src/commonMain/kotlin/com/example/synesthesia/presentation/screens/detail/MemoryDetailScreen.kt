@@ -96,7 +96,9 @@ fun MemoryDetailScreen(
                                         state.note.title,
                                         style = MaterialTheme.typography.headlineMedium,
                                         fontWeight = FontWeight.Black,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 2,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }

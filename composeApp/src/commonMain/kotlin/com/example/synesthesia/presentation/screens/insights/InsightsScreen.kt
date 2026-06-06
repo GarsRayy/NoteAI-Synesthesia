@@ -82,7 +82,7 @@ fun InsightsScreen(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         } else {
-                            Text(userName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                            Text(userName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                             Text("Stargazer Level 12", style = MaterialTheme.typography.labelSmall, color = RoyalBlue)
                         }
                     }
@@ -104,7 +104,7 @@ fun InsightsScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 } else {
-                    Text(userBio, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                    Text(userBio, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
         }

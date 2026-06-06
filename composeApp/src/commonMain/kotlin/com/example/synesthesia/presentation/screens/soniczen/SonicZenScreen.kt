@@ -113,7 +113,7 @@ fun SonicZenScreen() {
                                 Text(track.emoji, fontSize = 40.sp)
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(track.title, color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge)
+                                    Text(track.title, color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                                     Text("Now Resonating...", color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
                                 }
                                 IconButton(onClick = { isPlaying = !isPlaying }) {
@@ -218,8 +218,8 @@ fun ModernAudioCard(track: AudioTrack, isActive: Boolean, onClick: () -> Unit) {
                 Spacer(modifier = Modifier.width(16.dp))
                 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(track.title, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleMedium)
-                    Text(track.description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                    Text(track.title, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    Text(track.description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
                 
                 Icon(

@@ -159,7 +159,16 @@ fun JournalingStep(
                     colors = OutlinedTextFieldDefaults.colors(
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                         focusedBorderColor = MaterialTheme.colorScheme.primary
-                    )
+                    ),
+                    supportingText = {
+                        Text(
+                            text = "${content.length} characters",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.End,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (content.length < 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
                 )
             }
         }

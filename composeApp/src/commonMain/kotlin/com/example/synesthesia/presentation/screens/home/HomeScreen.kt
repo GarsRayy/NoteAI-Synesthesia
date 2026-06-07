@@ -32,6 +32,7 @@ import com.example.synesthesia.presentation.components.EmptyStateView
 import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.RoyalBlue
 import com.example.synesthesia.presentation.theme.SpaceBlack
+import com.example.synesthesia.presentation.theme.Spacing
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -90,7 +91,7 @@ fun HomeScreen(
                                 onValueChange = viewModel::onSearchQueryChange,
                                 modifier = Modifier
                                     .fillMaxWidth(0.7f)
-                                    .padding(end = 8.dp),
+                                    .padding(end = Spacing.sm),
                                 shape = RoundedCornerShape(50.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.15f),
@@ -201,7 +202,7 @@ fun HomeScreen(
                         )
                     )
 
-                    Column(modifier = Modifier.padding(16.dp).align(Alignment.TopStart)) {
+                    Column(modifier = Modifier.padding(Spacing.md).align(Alignment.TopStart)) {
                         Surface(
                             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                             shape = RoundedCornerShape(12.dp),
@@ -243,7 +244,7 @@ fun HomeScreen(
                 onClick = onNavigateToAI,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(24.dp)
+                    .padding(Spacing.lg)
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
@@ -294,7 +295,7 @@ fun FilterSortBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
+                .padding(bottom = Spacing.xl, start = Spacing.lg, end = Spacing.lg)
         ) {
             Text(
                 "Filter Memories",

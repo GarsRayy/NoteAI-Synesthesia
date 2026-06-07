@@ -85,7 +85,10 @@ fun MoodCalendar(
                     Spacer(modifier = Modifier.padding(2.dp).aspectRatio(1f))
                 }
 
-                items(daysInMonth) { index ->
+                items(
+                    count = daysInMonth,
+                    key = { index -> "day-${index + 1}-$monthName" }
+                ) { index ->
                     val day = index + 1
                     val emotionColorHex = calendarData[day]
                     val backgroundColor = if (emotionColorHex != null) {

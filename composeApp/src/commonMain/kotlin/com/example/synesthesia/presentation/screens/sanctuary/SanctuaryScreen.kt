@@ -275,7 +275,10 @@ fun SanctuaryScreen(
                 )
             }
 
-            items(rituals.chunked(2)) { pair ->
+            items(
+                items = rituals.chunked(2),
+                key = { it.joinToString("-") { ritual -> ritual.id } }
+            ) { pair ->
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     pair.forEach { ritual ->
                         RitualCard(

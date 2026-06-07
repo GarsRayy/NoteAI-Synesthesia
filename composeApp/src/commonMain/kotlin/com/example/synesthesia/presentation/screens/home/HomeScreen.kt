@@ -183,6 +183,8 @@ fun HomeScreen(
         ) {
             when (val state = uiState) {
                 is HomeUiState.Success -> {
+                    val memoryCount = remember(state.notes) { state.notes.size }
+                    
                     ConstellationCanvas(
                         notes = state.notes,
                         onNoteClick = onNavigateToDetail,
@@ -192,14 +194,15 @@ fun HomeScreen(
                     )
                     
                     // Small Insight Overlay (Top Left)
-                    val infiniteTransition = rememberInfiniteTransition()
+                    val infiniteTransition = rememberInfiniteTransition(label = "badge")
                     val badgeScale by infiniteTransition.animateFloat(
                         initialValue = 1.0f,
                         targetValue = 1.1f,
                         animationSpec = infiniteRepeatable(
                             animation = tween(2000, easing = FastOutSlowInEasing),
                             repeatMode = RepeatMode.Reverse
-                        )
+                        ),
+                        label = "scale"
                     )
 
                     Column(modifier = Modifier.padding(Spacing.md).align(Alignment.TopStart)) {
@@ -211,7 +214,7 @@ fun HomeScreen(
                             Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = RoyalBlue)
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("${state.notes.size} Memories in Galaxy", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                Text("$memoryCount Memories in Galaxy", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                             }
                         }
                     }

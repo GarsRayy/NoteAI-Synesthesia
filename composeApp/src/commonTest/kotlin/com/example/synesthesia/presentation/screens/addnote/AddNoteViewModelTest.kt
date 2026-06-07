@@ -186,19 +186,6 @@ class AddNoteViewModelTest {
     }
 
     @Test
-    fun `saveNote without main category selected should emit error event`() = runTest {
-        viewModel.events.test {
-            viewModel.onContentChange("This is valid content with more than 5 chars")
-            viewModel.saveNote()
-            
-            val event = awaitItem()
-            assertTrue(event is AddNoteEvent.Error)
-            assertEquals("Pilih kuadran emosi terlebih dahulu", event.message)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
     fun `saveNote with valid content and category should set isAnalyzing true`() = runTest {
         viewModel.onContentChange("This is a valid journal entry for testing")
         viewModel.onMainCategorySelected(EmotionSystem.categories.first())

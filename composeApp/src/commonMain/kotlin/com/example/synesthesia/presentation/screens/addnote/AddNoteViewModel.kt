@@ -99,13 +99,6 @@ class AddNoteViewModel(
             return
         }
 
-        if (state.selectedMainCategory == null) {
-            viewModelScope.launch {
-                _events.emit(AddNoteEvent.Error("Pilih kuadran emosi terlebih dahulu"))
-            }
-            return
-        }
-
         _uiState.update { it.copy(isAnalyzing = true) }
         
         viewModelScope.launch {

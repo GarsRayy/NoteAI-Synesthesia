@@ -20,6 +20,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +45,7 @@ fun AddNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val haptic = LocalHapticFeedback.current
     
     // We assume the theme mode is handled by the parent, but for background we check if it's dark
     val isAstronomy = MaterialTheme.colorScheme.background == SpaceBlack
@@ -84,7 +87,10 @@ fun AddNoteScreen(
                         }
                     },
                     actions = {
-                        TextButton(onClick = { viewModel.saveNote() }) {
+                        TextButton(onClick = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.saveNote() 
+                        }) {
                             Text("FINISH", fontWeight = FontWeight.Bold)
                         }
                     }

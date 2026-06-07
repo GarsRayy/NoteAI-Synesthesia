@@ -1,6 +1,7 @@
 package com.example.synesthesia.data.repository
 
 import app.cash.turbine.test
+import com.example.synesthesia.fakes.FakeNoteRepository
 import com.example.synesthesia.domain.model.Note
 import com.example.synesthesia.domain.model.NoteCategory
 import com.example.synesthesia.domain.model.NoteColor
@@ -23,7 +24,7 @@ import kotlin.test.assertTrue
  * Testing Guidelines:
  * 1. Gunakan FakeRepository untuk isolasi
  * 2. Test satu behavior per test
- * 3. Gunakan Turbine untuk test Flow
+ * 3. Gunakan Turbine untuk test Flow*-
  * 4. Follow AAA pattern (Arrange, Act, Assert)
  */
 class NoteRepositoryTest {
@@ -243,69 +244,5 @@ class NoteRepositoryTest {
             createdAt = Clock.System.now(),
             updatedAt = Clock.System.now()
         )
-    }
-}
-
-/**
- * Fake Repository untuk Testing
- * 
- * In-memory implementation yang tidak bergantung pada database.
- * Digunakan untuk unit testing tanpa side effects.
- */
-class FakeNoteRepository : NoteRepository {
-    
-    private val notes = MutableStateFlow<List<Note>>(emptyList())
-    private var nextId = 1L
-    
-    override fun getAllNotes(): Flow<List<Note>> = notes
-    
-    override fun getPinnedNotes(): Flow<List<Note>> {
-        return notes.map { list -> list.filter { it.isPinned } }
-    }
-    
-    override fun getNotesByCategory(category: NoteCategory): Flow<List<Note>> {
-        return notes.map { list -> list.filter { it.category == category } }
-    }
-    
-    override fun searchNotes(query: String): Flow<List<Note>> {
-        return notes.map { list ->
-            list.filter {
-                it.title.contains(query, ignoreCase = true) ||
-                it.content.contains(query, ignoreCase = true)
-            }
-        }
-    }
-    
-    override fun getNoteById(id: Long): Flow<Note?> {
-        return notes.map { list -> list.find { it.id == id } }
-    }
-    
-    override suspend fun insertNote(note: Note): Long {
-        val id = nextId++
-        val newNote = note.copy(id = id)
-        notes.update { it + newNote }
-        return id
-    }
-    
-    override suspend fun updateNote(note: Note) {
-        notes.update { list ->
-            list.map { if (it.id == note.id) note else it }
-        }
-    }
-    
-    override suspend fun deleteNote(id: Long) {
-        notes.update { list -> list.filter { it.id != id } }
-    }
-    
-    override suspend fun togglePinNote(id: Long) {
-        notes.update { list ->
-            list.map { 
-                if (it.id == id) it.copy(isPinned = !it.isPinned) else it 
-            }
-        }
-    }
-    
-    override suspend fun deleteNotes(ids: List<Long>) {
-        notes.update { list -> list.filter { it.id !in ids } }
     }
 }

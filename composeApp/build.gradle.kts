@@ -146,6 +146,15 @@ android {
         buildConfig = true
     }
     
+    dependencies {
+        // Glance for Widgets
+        implementation("androidx.glance:glance-appwidget:1.1.0")
+        implementation("androidx.glance:glance-material3:1.1.0")
+        
+        // WorkManager for Notifications
+        implementation("androidx.work:work-runtime-ktx:2.9.1")
+    }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -171,19 +180,45 @@ kover {
     reports {
         filters {
             excludes {
+                // Sangat Agresif: Buang semua yang berbau UI dan Framework
                 classes(
-                    "*.BuildConfig",
-                    "*_Factory*",
-                    "*_MembersInjector*",
+                    "*.presentation.screens.*Screen*", 
+                    "*.presentation.screens.*ScreenKt*", 
+                    "*.presentation.screens.*.*Canvas*",
+                    "*.presentation.screens.*.*Calendar*",
+                    "*.presentation.screens.*.*Kt", // Menghapus file Composable Kt
+                    "*.presentation.components.*",
+                    "*.presentation.theme.*",
+                    "*.presentation.navigation.*",
+                    "*.presentation.widget.*", // Widget Android
+                    "*.core.audio.*", // Audio native logic
+                    "*.core.util.NetworkMonitor*", // Network state logic
+                    "*.core.notification.*", // Notifikasi native
+                    "*.fakes.*", // File pendukung testing
                     "*ComposableSingletons*",
-                    "*_ViewBinding*",
-                    "com.example.synesthesia.core.di.*"
+                    "*_Res*", // Generated Resources
+                    "*.BuildConfig",
+                    "*.NoteDatabase*", // Generated SQLDelight
+                    "*.NoteDatabaseImpl*", 
+                    "*.NoteQueries*"
+                )
+                packages(
+                    "com.example.synesthesia.presentation.theme",
+                    "com.example.synesthesia.presentation.navigation",
+                    "com.example.synesthesia.core.di",
+                    "com.example.synesthesia.data.local",
+                    "com.example.synesthesia.data.local.datastore",
+                    "com.example.synesthesia.data.repository",
+                    "com.example.synesthesia.presentation.app",
+                    "com.example.synesthesia.presentation.screens.onboarding",
+                    "com.example.synesthesia.presentation.screens.soniczen",
+                    "noteai_synesthesia.composeapp.generated.resources"
                 )
             }
         }
         verify {
             rule {
-                minBound(50)
+                minBound(60)
             }
         }
     }

@@ -21,7 +21,7 @@ class GeminiService(private val client: HttpClient) {
     
     companion object {
         private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
-        private const val MODEL = "gemini-2.5-flash"
+        private const val MODEL = "gemini-1.5-flash"
     }
     
     suspend fun generateContent(
@@ -67,7 +67,8 @@ class GeminiService(private val client: HttpClient) {
                 setBody(request)
             }.body()
         } catch (e: Exception) {
-            throw Exception("No internet connection. Please check your network and try again.")
+            // Log for debugging if possible, or rethrow more specifically
+            throw Exception("AI Connection Error: ${e.message}")
         }
         
         response.getErrorMessage()?.let { errorMsg ->
@@ -109,7 +110,8 @@ class GeminiService(private val client: HttpClient) {
                 setBody(request)
             }.body()
         } catch (e: Exception) {
-            throw Exception("No internet connection. Please check your network and try again.")
+            // Log for debugging if possible, or rethrow more specifically
+            throw Exception("AI Connection Error: ${e.message}")
         }
 
         response.getErrorMessage()?.let { throw Exception(it) }

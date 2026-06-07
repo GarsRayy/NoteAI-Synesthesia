@@ -52,16 +52,15 @@ class AddNoteViewModelTest {
 
     @Test
     fun `saveNote with content less than 5 should emit error event`() = runTest {
-        // Act
-        viewModel.onContentChange("abc")
-        viewModel.saveNote()
-        advanceUntilIdle()
-
-        // Assert
         viewModel.events.test {
+            // Act
+            viewModel.onContentChange("abc")
+            viewModel.saveNote()
+            
+            // Assert
             val event = awaitItem()
             assertTrue(event is AddNoteEvent.Error)
-            assertEquals("Tuliskan minimal 5 karakter curhatanmu", (event as AddNoteEvent.Error).message)
+            assertEquals("Tuliskan minimal 5 karakter curhatanmu", event.message)
         }
     }
 }

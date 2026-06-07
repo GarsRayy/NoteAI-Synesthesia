@@ -45,8 +45,8 @@
 - [x] **Search & Filter**: High-performance pill-shaped search with category filtering and multi-sort.
 
 ### 🚀 Sprint 4: Stability & Testing (100% Complete)
-- [x] **Comprehensive Testing Suite**: Expanded Unit, UseCase, and UI testing (25+ Unit Tests, 3+ UI Tests).
-- [x] **Automated Coverage**: Kover integration with a 50% minimum coverage target.
+- [x] **Comprehensive Testing Suite**: Expanded Unit, UseCase, and UI testing (300+ Unit Tests, 3+ UI Tests).
+- [x] **Automated Coverage**: Kover integration achieving **79.5% Line Coverage** (Exceeding the 70% bonus target).
 - [x] **Visual Polish & Edge Cases**: Minimalist error/loading/empty states across all screens with Skeleton support.
 - [x] **Critical Bug Fixes**: Resolved nested coroutine, calendar offset, stale data, and text overflow issues.
 
@@ -74,7 +74,9 @@ We use **Kover** to measure test coverage. To generate the HTML report:
 ```bash
 ./gradlew koverHtmlReport
 ```
-The report will be available at `composeApp/build/reports/kover/html/index.html`.
+The report will be available at `composeApp/build/reports/kover/htmlDebug/index.html`.
+
+![Kover Coverage Report](screenshots/SS%20Test.png)
 
 ### 3. Running UI Tests
 To run instrumentation tests on an Android device/emulator:

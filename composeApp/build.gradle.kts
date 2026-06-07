@@ -164,6 +164,7 @@ dependencies {
     debugImplementation(compose.uiTooling)
     debugImplementation(libs.ui.test.manifest)
     androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.junit)
 }
 
 kover {

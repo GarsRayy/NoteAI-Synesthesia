@@ -158,7 +158,10 @@ fun SonicZenScreen() {
             verticalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            items(audioTracks) { track ->
+            items(
+                items = audioTracks,
+                key = { it.resName }
+            ) { track ->
                 ModernAudioCard(
                     track = track,
                     isActive = playingTrack == track,

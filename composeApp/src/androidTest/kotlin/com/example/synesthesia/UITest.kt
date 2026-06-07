@@ -91,4 +91,31 @@ class UITest {
         // Assert action fired
         assertTrue(categorySelected == NoteCategory.PERSONAL)
     }
+
+    @Test
+    fun e2e_simulateMemoryCreationFlow() {
+        // This is a partial E2E test as we are testing the component interaction logic
+        // in a real scenario you would set up the whole screen with a fake repository.
+        var content = ""
+        var finishClicked = false
+
+        composeTestRule.setContent {
+            NoteAITheme {
+                JournalingStep(
+                    content = content,
+                    onContentChange = { content = it },
+                    isParaphraseEnabled = true,
+                    onParaphraseToggle = {},
+                    isAnalyzing = false,
+                    isSaving = false
+                )
+            }
+        }
+
+        // 1. Input text
+        composeTestRule.onNodeWithText("Write your soul here...").performTextInput("Memories of a shooting star")
+        
+        // 2. Validate input state
+        assertTrue(content == "Memories of a shooting star")
+    }
 }

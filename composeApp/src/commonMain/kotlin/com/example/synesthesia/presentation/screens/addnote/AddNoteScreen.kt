@@ -130,7 +130,8 @@ fun JournalingStep(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     if (isAnalyzing) "AI is sensing your emotions..." else "Saving to your galaxy...",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         } else {

@@ -178,7 +178,9 @@ fun InsightsScreen(
                 Text("EMOTION DISTRIBUTION", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                state.emotionDistribution.forEach { (emotionId, percentage) ->
+                val distribution = remember(state.emotionDistribution) { state.emotionDistribution }
+                
+                distribution.forEach { (emotionId, percentage) ->
                     EmotionStatRow(
                         label = getEmotionLabel(emotionId),
                         percentage = percentage,

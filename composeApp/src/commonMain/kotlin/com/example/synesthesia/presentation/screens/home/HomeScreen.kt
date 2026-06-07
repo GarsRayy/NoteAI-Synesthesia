@@ -34,13 +34,15 @@ import com.example.synesthesia.presentation.theme.RoyalBlue
 import com.example.synesthesia.presentation.theme.SpaceBlack
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeScreen(
     onNavigateToAddNote: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToAI: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -183,6 +185,8 @@ fun HomeScreen(
                     ConstellationCanvas(
                         notes = state.notes,
                         onNoteClick = onNavigateToDetail,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
                         modifier = Modifier.fillMaxSize()
                     )
                     

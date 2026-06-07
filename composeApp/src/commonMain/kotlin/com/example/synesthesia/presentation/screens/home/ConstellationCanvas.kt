@@ -21,7 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -37,11 +39,15 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.random.Random
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ConstellationCanvas(
     notes: List<Note>,
     onNoteClick: (Long) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
     val isAstronomy = MaterialTheme.colorScheme.background == SpaceBlack
@@ -49,6 +55,15 @@ fun ConstellationCanvas(
     var scale by remember { mutableStateOf(1f) }
     var selectedNoteId by remember { mutableStateOf<Long?>(null) }
     var clickedHubCategory by remember { mutableStateOf<EmotionCategory?>(null) }
+    val haptic = LocalHapticFeedback.current
+
+    // Positions of individual note nodes
+    val notePositions = remember(notes) {
+        mutableMapOf<Long, Offset>()
+    }
+
+    // Positions of Hubs for click detection and popup anchoring
+    val hubPositions = remember(notes) { mutableStateMapOf<String, Offset>() }
 
     val infiniteTransition = rememberInfiniteTransition()
     val floatAnim by infiniteTransition.animateFloat(
@@ -69,14 +84,6 @@ fun ConstellationCanvas(
         )
     )
 
-    // Positions of individual note nodes
-    val notePositions = remember(notes) {
-        mutableMapOf<Long, Offset>()
-    }
-
-    // Positions of Hubs for click detection and popup anchoring
-    val hubPositions = remember(notes) { mutableStateMapOf<String, Offset>() }
-
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -95,10 +102,13 @@ fun ConstellationCanvas(
                     var found = false
 
                     // Check Hubs first (priority)
-                    hubPositions.forEach { (id, pos) ->
+                    hubPositions.forEach { entry ->
+                        val id = entry.key
+                        val pos = entry.value
                         val dx = adjustedTap.x - pos.x
                         val dy = adjustedTap.y - pos.y
                         if (sqrt(dx * dx + dy * dy) <= 60f) {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             clickedHubCategory = EmotionSystem.categories.find { it.id == id }
                             selectedNoteId = null
                             found = true
@@ -106,10 +116,13 @@ fun ConstellationCanvas(
                     }
 
                     if (!found) {
-                        notePositions.forEach { (id, pos) ->
+                        notePositions.forEach { entry ->
+                            val id = entry.key
+                            val pos = entry.value
                             val dx = adjustedTap.x - pos.x
                             val dy = adjustedTap.y - pos.y
                             if (sqrt(dx * dx + dy * dy) <= 40f) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 selectedNoteId = id
                                 onNoteClick(id)
                                 clickedHubCategory = null
@@ -127,6 +140,34 @@ fun ConstellationCanvas(
     ) {
         val centerX = constraints.maxWidth / 2f
         val centerY = constraints.maxHeight / 2f
+
+        // Shooting Star Animation State
+        var lastNoteCount by remember { mutableStateOf(notes.size) }
+        val shootingStarAnim = remember { Animatable(0f) }
+        var shootingStarStart by remember { mutableStateOf(Offset.Zero) }
+        var shootingStarTarget by remember { mutableStateOf(Offset.Zero) }
+
+        LaunchedEffect(notes.size) {
+            if (notes.size > lastNoteCount) {
+                // Pick a random edge for start
+                val side = (0..3).random()
+                shootingStarStart = when(side) {
+                    0 -> Offset(Random.nextFloat() * constraints.maxWidth.toFloat(), -100f)
+                    1 -> Offset(constraints.maxWidth.toFloat() + 100f, Random.nextFloat() * constraints.maxHeight.toFloat())
+                    2 -> Offset(Random.nextFloat() * constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat() + 100f)
+                    else -> Offset(-100f, Random.nextFloat() * constraints.maxHeight.toFloat())
+                }
+                // Target is approximately the center or a random hub
+                shootingStarTarget = Offset(centerX, centerY)
+                
+                shootingStarAnim.snapTo(0f)
+                shootingStarAnim.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(1200, easing = LinearOutSlowInEasing)
+                )
+            }
+            lastNoteCount = notes.size
+        }
 
         Canvas(
             modifier = Modifier
@@ -150,6 +191,32 @@ fun ConstellationCanvas(
                         x = (i * 777f % size.width),
                         y = (i * 333f % size.height)
                     )
+                )
+            }
+
+            // Shooting Star Effect
+            if (shootingStarAnim.value > 0f && shootingStarAnim.value < 1f) {
+                val progress = shootingStarAnim.value
+                val currentX = shootingStarStart.x + (shootingStarTarget.x - shootingStarStart.x) * progress
+                val currentY = shootingStarStart.y + (shootingStarTarget.y - shootingStarStart.y) * progress
+                val currentPos = Offset(currentX, currentY)
+                
+                drawCircle(
+                    color = Color.White,
+                    radius = 3.dp.toPx(),
+                    center = currentPos
+                )
+                
+                // Simple Trail
+                val trailProgress = (progress - 0.2f).coerceAtLeast(0f)
+                val trailX = shootingStarStart.x + (shootingStarTarget.x - shootingStarStart.x) * trailProgress
+                val trailY = shootingStarStart.y + (shootingStarTarget.y - shootingStarStart.y) * trailProgress
+                
+                drawLine(
+                    color = Color.White.copy(alpha = 0.4f * (1f - progress)),
+                    start = Offset(trailX, trailY),
+                    end = currentPos,
+                    strokeWidth = 2.dp.toPx()
                 )
             }
 
@@ -260,6 +327,22 @@ fun ConstellationCanvas(
                     transformOrigin = TransformOrigin(0f, 0f)
                 }
         ) {
+            // Shared Element Placeholders (for transition)
+            notes.forEach { note ->
+                val pos = notePositions[note.id] ?: Offset.Zero
+                with(sharedTransitionScope) {
+                    Box(
+                        modifier = Modifier
+                            .offset { IntOffset(pos.x.roundToInt() - 20, pos.y.roundToInt() - 20) }
+                            .size(40.dp)
+                            .sharedElement(
+                                rememberSharedContentState(key = "note-${note.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            )
+                    )
+                }
+            }
+
             clickedHubCategory?.let { category ->
                 val hubPos = hubPositions[category.id] ?: Offset.Zero
                 val hubColor = parseHexColor(category.color)

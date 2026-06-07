@@ -23,7 +23,7 @@ import kotlin.test.assertTrue
  * Testing Guidelines:
  * 1. Gunakan FakeRepository untuk isolasi
  * 2. Test satu behavior per test
- * 3. Gunakan Turbine untuk test Flow
+ * 3. Gunakan Turbine untuk test Flow*-
  * 4. Follow AAA pattern (Arrange, Act, Assert)
  */
 class NoteRepositoryTest {

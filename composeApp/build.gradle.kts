@@ -146,6 +146,15 @@ android {
         buildConfig = true
     }
     
+    dependencies {
+        // Glance for Widgets
+        implementation("androidx.glance:glance-appwidget:1.1.0")
+        implementation("androidx.glance:glance-material3:1.1.0")
+        
+        // WorkManager for Notifications
+        implementation("androidx.work:work-runtime-ktx:2.9.1")
+    }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

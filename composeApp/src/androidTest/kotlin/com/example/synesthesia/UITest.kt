@@ -16,7 +16,7 @@ import com.example.synesthesia.presentation.theme.NoteAITheme
 import com.example.synesthesia.presentation.theme.ThemeMode
 import org.junit.Rule
 import org.junit.Test
-import kotlin.test.assertTrue
+import org.junit.Assert.assertTrue
 
 class UITest {
 
@@ -86,9 +86,9 @@ class UITest {
         composeTestRule.onNodeWithText("By Category").assertIsDisplayed()
         
         // Find category chips and click one
-        composeTestRule.onNodeWithText(NoteCategory.JOY.displayName).assertIsDisplayed().performClick()
+        composeTestRule.onNodeWithText(NoteCategory.PERSONAL.displayName).assertIsDisplayed().performClick()
         
         // Assert action fired
-        assertTrue(categorySelected == NoteCategory.JOY)
+        assertTrue(categorySelected == NoteCategory.PERSONAL)
     }
 }

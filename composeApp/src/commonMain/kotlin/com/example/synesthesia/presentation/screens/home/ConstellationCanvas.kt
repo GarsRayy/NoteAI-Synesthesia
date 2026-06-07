@@ -75,7 +75,7 @@ fun ConstellationCanvas(
     }
 
     // Positions of Hubs for click detection and popup anchoring
-    val hubPositions = remember { mutableStateMapOf<String, Offset>() }
+    val hubPositions = remember(notes) { mutableStateMapOf<String, Offset>() }
 
     BoxWithConstraints(
         modifier = modifier

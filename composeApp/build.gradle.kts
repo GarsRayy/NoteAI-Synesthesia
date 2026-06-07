@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kover)
 }
 
 // Load local.properties for API keys
@@ -161,4 +162,29 @@ sqldelight {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    debugImplementation(libs.ui.test.manifest)
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.junit)
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "*.BuildConfig",
+                    "*_Factory*",
+                    "*_MembersInjector*",
+                    "*ComposableSingletons*",
+                    "*_ViewBinding*",
+                    "com.example.synesthesia.core.di.*"
+                )
+            }
+        }
+        verify {
+            rule {
+                minBound(50)
+            }
+        }
+    }
 }

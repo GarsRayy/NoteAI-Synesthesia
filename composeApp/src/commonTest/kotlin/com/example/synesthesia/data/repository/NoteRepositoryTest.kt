@@ -174,6 +174,55 @@ class NoteRepositoryTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `togglePin should toggle isPinned status`() = runTest {
+        // Arrange
+        val id = repository.insertNote(createTestNote(title = "Pin Test"))
+
+        // Act & Assert
+        repository.togglePinNote(id)
+        repository.getNoteById(id).test {
+            assertTrue(awaitItem()?.isPinned == true)
+        }
+
+        repository.togglePinNote(id)
+        repository.getNoteById(id).test {
+            assertTrue(awaitItem()?.isPinned == false)
+        }
+    }
+
+    @Test
+    fun `deleteNotes bulk should remove multiple notes`() = runTest {
+        // Arrange
+        val id1 = repository.insertNote(createTestNote(title = "N1"))
+        val id2 = repository.insertNote(createTestNote(title = "N2"))
+        val id3 = repository.insertNote(createTestNote(title = "N3"))
+
+        // Act
+        repository.deleteNotes(listOf(id1, id2))
+
+        // Assert
+        repository.getAllNotes().test {
+            val notes = awaitItem()
+            assertEquals(1, notes.size)
+            assertEquals("N3", notes.first().title)
+        }
+    }
+
+    @Test
+    fun `getPinnedNotes should return only pinned notes`() = runTest {
+        // Arrange
+        repository.insertNote(createTestNote(title = "N1", isPinned = true))
+        repository.insertNote(createTestNote(title = "N2", isPinned = false))
+
+        // Act & Assert
+        repository.getPinnedNotes().test {
+            val notes = awaitItem()
+            assertEquals(1, notes.size)
+            assertTrue(notes.first().isPinned)
+        }
+    }
     
     // ==================== HELPER FUNCTIONS ====================
     
@@ -181,7 +230,8 @@ class NoteRepositoryTest {
         id: Long = 0,
         title: String = "Test",
         content: String = "Content",
-        category: NoteCategory = NoteCategory.GENERAL
+        category: NoteCategory = NoteCategory.GENERAL,
+        isPinned: Boolean = false
     ): Note {
         return Note(
             id = id,
@@ -189,7 +239,7 @@ class NoteRepositoryTest {
             content = content,
             category = category,
             color = NoteColor.DEFAULT,
-            isPinned = false,
+            isPinned = isPinned,
             createdAt = Clock.System.now(),
             updatedAt = Clock.System.now()
         )

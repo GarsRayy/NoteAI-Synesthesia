@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.presentation.components.CelestialBackground
+import com.example.synesthesia.presentation.components.EmptyStateView
+import com.example.synesthesia.presentation.components.FullScreenLoading
 import com.example.synesthesia.presentation.theme.SpaceBlack
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -96,7 +99,9 @@ fun MemoryDetailScreen(
                                         state.note.title,
                                         style = MaterialTheme.typography.headlineMedium,
                                         fontWeight = FontWeight.Black,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 2,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }
@@ -144,14 +149,14 @@ fun MemoryDetailScreen(
                     }
                 }
                 is NoteDetailUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
+                    FullScreenLoading(message = "Retrieving memory...")
                 }
                 is NoteDetailUiState.NotFound -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Text("Memory not found", modifier = Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.onBackground)
-                    }
+                    EmptyStateView(
+                        title = "Memory Lost",
+                        description = "This memory has faded away or was never engraved in the stars.",
+                        icon = Icons.Default.SearchOff
+                    )
                 }
             }
         }

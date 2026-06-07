@@ -148,7 +148,7 @@ class HomeViewModelTest {
             advanceUntilIdle()
             
             // Assert - wait for debounce
-            testScheduler.advanceTimeBy(400)
+            testDispatcher.scheduler.advanceTimeBy(400)
             advanceUntilIdle()
             
             val state = expectMostRecentItem()
@@ -182,7 +182,35 @@ class HomeViewModelTest {
     
     @Test
     fun `category filter should filter notes`() = runTest {
-        // ... (existing test) ...
+        // Arrange
+        repository.insertNote(createTestNote("Work Note", category = NoteCategory.WORK))
+        repository.insertNote(createTestNote("Personal Note", category = NoteCategory.PERSONAL))
+        
+        val vm = HomeViewModel(
+            getAllNotesUseCase = getAllNotesUseCase,
+            searchNotesUseCase = searchNotesUseCase,
+            deleteNoteUseCase = deleteNoteUseCase,
+            repository = repository,
+            userPreferences = userPreferences
+        )
+        
+        vm.uiState.test {
+            skipItems(1) // Loading
+            advanceUntilIdle()
+            skipItems(1) // Initial success
+            
+            // Act
+            vm.onCategorySelected(NoteCategory.WORK)
+            advanceUntilIdle()
+            
+            // Assert
+            val state = expectMostRecentItem()
+            assertTrue(state is HomeUiState.Success)
+            assertEquals(1, (state as HomeUiState.Success).notes.size)
+            assertEquals(NoteCategory.WORK, state.notes.first().category)
+            
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test

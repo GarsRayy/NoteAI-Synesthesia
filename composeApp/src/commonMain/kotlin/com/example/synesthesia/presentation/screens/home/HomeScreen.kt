@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.synesthesia.domain.model.NoteCategory
+import com.example.synesthesia.presentation.components.CelestialBackground
+import com.example.synesthesia.presentation.components.EmptyStateView
 import com.example.synesthesia.presentation.theme.BrightYellow
 import com.example.synesthesia.presentation.theme.RoyalBlue
 import com.example.synesthesia.presentation.theme.SpaceBlack
@@ -213,26 +215,18 @@ fun HomeScreen(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is HomeUiState.Empty -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (state.query.isNotEmpty()) {
-                            Icon(
-                                Icons.Default.SearchOff,
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            Text(
-                                "No memories found for \"${state.query}\"",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        } else {
-                            Text("No memories yet", style = MaterialTheme.typography.titleMedium)
-                            Text("Your galaxy is empty", style = MaterialTheme.typography.bodyMedium)
-                        }
+                    if (state.query.isNotEmpty()) {
+                        EmptyStateView(
+                            title = "No matches found",
+                            description = "Your galaxy doesn't contain memories matching \"${state.query}\"",
+                            icon = Icons.Default.SearchOff
+                        )
+                    } else {
+                        EmptyStateView(
+                            title = "Quiet Galaxy",
+                            description = "Begin your journey by engraving your first memory.",
+                            icon = Icons.Default.AutoAwesome
+                        )
                     }
                 }
                 is HomeUiState.Error -> {

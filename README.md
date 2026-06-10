@@ -95,6 +95,8 @@ To run instrumentation tests on an Android device/emulator:
 
 ## 🏗️ Architecture & Technology Stack
 
+### Architecture Diagram
+
 ### Technical Overview
 Synesthesia is built following **Clean Architecture** principles to ensure a scalable and maintainable codebase:
 -   **Presentation**: Compose Multiplatform with MVVM (StateFlow/SharedFlow).

@@ -130,5 +130,8 @@ Synesthesia is built following **Clean Architecture** principles to ensure a sca
 4.  **Run Application**
     Execute the Gradle task `:composeApp:installDebug` for Android or the corresponding iOS target.
 
+## Video Demo Aplikasi
+
+
 ---
 *Developed with ❤️ as a major project for Mobile Application Development - ITERA.*

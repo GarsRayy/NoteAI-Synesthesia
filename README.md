@@ -25,6 +25,10 @@
 | [![Testing Demo](https://img.shields.io/badge/Testing-Watch%20Now-blue?style=for-the-badge&logo=youtube)](https://youtu.be/oN2sHhMo2hg) | [![UI Demo](https://img.shields.io/badge/UI/UX-Watch%20Now-purple?style=for-the-badge&logo=youtube)](https://youtube.com/shorts/FZ3bgCcHjKI) |
 | *Automated test execution & validation* | *Cinematic transitions & AI resonance* |
 
+### 🎬 Final Presentation Video
+
+Link: https://youtu.be/iNteER9tvJU
+
 ---
 
 ## ✅ Sprint Deliverables & Progress
@@ -129,9 +133,6 @@ Synesthesia is built following **Clean Architecture** principles to ensure a sca
     Recommended IDE: **Android Studio Ladybug (2024.2.1) or newer**.
 4.  **Run Application**
     Execute the Gradle task `:composeApp:installDebug` for Android or the corresponding iOS target.
-
-## Video Demo Aplikasi
-
 
 ---
 *Developed with ❤️ as a major project for Mobile Application Development - ITERA.*
